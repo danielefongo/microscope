@@ -1,4 +1,5 @@
 local actions = require("yaff.actions")
+local finders = require("yaff.finders")
 
 function _G.bind_action(win, fun)
   return function()
@@ -17,9 +18,9 @@ local bindings = {
 }
 
 function _G.n_menu()
-  local rows = { "test1", "test2", "test3" }
-  local width = 5
-  local height = 3
+  local rows = finders.ls()
+  local width = 20
+  local height = math.min(#rows, 10)
 
   local buf = vim.api.nvim_create_buf(false, true)
   local ui = vim.api.nvim_list_uis()[1]
