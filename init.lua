@@ -1,5 +1,6 @@
 local actions = require("yaff.actions")
-local finders = require("yaff.finders")
+local lists = require("yaff.lists")
+local consumers = require("yaff.consumers")
 
 function _G.bind_action(win, fun)
   return function()
@@ -18,7 +19,8 @@ local bindings = {
 }
 
 function _G.n_menu()
-  local rows = finders.ls()
+  local rows = consumers.fzf(lists.ls(), "d")
+
   local width = 20
   local height = math.min(#rows, 10)
 
