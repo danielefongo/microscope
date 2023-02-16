@@ -22,9 +22,8 @@ end
 
 function M.select(opts)
   local cursor = vim.api.nvim_win_get_cursor(opts.win)[1]
-  vim.pretty_print(cursor)
   local line = vim.api.nvim_buf_get_lines(opts.buf, cursor - 1, cursor, false)[1]
-  vim.api.nvim_buf_delete(opts.buf, {})
+  -- vim.api.nvim_buf_delete(opts.buf, {})
   vim.pretty_print(line)
 end
 
