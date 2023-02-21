@@ -54,7 +54,11 @@ function view:bind_action(fun)
   end
 end
 
-function view:show()
+function view:show(chain)
+  local layout = generate_layout(self.size)
+  self.results = results.new(layout.results)
+  self.input = input.new(layout.input)
+
   local find
   local function cb()
     if find then
@@ -62,7 +66,7 @@ function view:show()
       find:stop()
     end
     local search_text = self.input:text()
-    find = self.chain(search_text, function(v)
+    find = chain(search_text, function(v)
       self.results:on_data(v)
     end)
     find:start()
@@ -80,11 +84,6 @@ function view.new(opts)
 
   v.size = opts.size
   v.bindings = opts.bindings
-  v.chain = opts.chain
-  v.layout = generate_layout(v.size)
-
-  v.results = results.new(v.layout.results)
-  v.input = input.new(v.layout.input)
 
   return v
 end
