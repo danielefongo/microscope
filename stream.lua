@@ -2,109 +2,74 @@ local stream = {}
 local uv = vim.loop
 stream.__index = stream
 
-local function on_chunk(callback)
-  return function(_, chunk)
-    if chunk then
-      local vals = vim.split(chunk, "\n", { trimempty = true })
-      for _, d in pairs(vals) do
-        callback(d)
-      end
-    end
-  end
-end
-
-local function shutdown(handle)
-  if handle then
-    handle:shutdown()
-  end
-end
-
 local function close(handle)
-  if handle then
-    handle:read_stop()
+  if handle and not handle:is_closing() then
     handle:close()
   end
-end
-
-local function read(handle, fn)
-  if handle then
-    handle:read_start(fn)
-  end
-end
-
-local function write(handle, line)
-  if handle then
-    handle:write(line)
-  end
-end
-
-local function generate(input, opts)
-  local s = setmetatable({ keys = {} }, stream)
-
-  local input_stream = input and input.output_stream
-  local transform_stream = uv.new_pipe(false)
-  local output_stream = uv.new_pipe(false)
-
-  local command = opts.command
-  local args = opts.args or {}
-  local cb = opts.cb or function(_) end
-  local on_end = opts.on_end or function(_) end
-
-  local handle
-  handle = uv.spawn(command, {
-    args = args,
-    stdio = { input_stream, transform_stream },
-  }, function()
-    shutdown(output_stream)
-    close(transform_stream)
-    close(input_stream)
-    handle:close()
-    on_end(s)
-  end)
-
-  local function callback(d)
-    write(output_stream, d .. "\n")
-    cb(d)
-  end
-
-  s.handle = handle
-  s.output_stream = output_stream
-  s.transform_stream = transform_stream
-  s.callback = callback
-  s.input = input
-
-  return s
-end
-
-function stream:start()
-  if self.input then
-    self.input:start()
-  end
-  read(self.transform_stream, on_chunk(self.callback))
 end
 
 function stream:stop()
   if self.handle then
+    close(self.input_stream)
+    close(self.output_stream)
     self.handle:kill("SIGTERM")
   end
+end
+
+function stream:start()
+  local output = ""
+
+  self.handle = uv.spawn(self.command, {
+    args = self.args,
+    stdio = { self.input_stream, self.output_stream, nil },
+  }, function()
+    local lines = vim.split(output, "\n", { trimempty = true })
+    if self.cb then
+      self.cb(lines)
+    end
+
+    close(self.input_stream)
+    close(self.output_stream)
+    close(self.handle)
+  end)
+
+  if self.last then
+    uv.read_start(self.output_stream, function(_, data)
+      if data then
+        output = output .. data
+      end
+    end)
+  end
+
+  if self.input_stream then
+    uv.read_start(self.input_stream, function() end)
+  end
+
   if self.input then
-    self.input:stop()
+    self.input:start(false)
   end
 end
 
-function stream:next(opts)
-  generate(self, opts)
+function stream.new(input, opts)
+  local s = setmetatable({ keys = {} }, stream)
+
+  s.input = input
+  s.input_stream = input and input.output_stream
+  s.output_stream = uv.new_pipe(false)
+
+  s.command = opts.command
+  s.args = opts.args or {}
+
+  return s
 end
 
-function stream.new(opts)
-  return generate(nil, opts)
-end
-
-function stream.chain(list_of_opts)
+function stream.chain(list_of_opts, cb)
   local s = nil
   for _, opts in ipairs(list_of_opts) do
-    s = generate(s, opts)
+    s = stream.new(s, opts)
   end
+  s.last = true
+  s.cb = cb
   return s
 end
 

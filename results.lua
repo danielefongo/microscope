@@ -12,13 +12,9 @@ function results:on_new()
   end)
 end
 
-function results:on_data(value)
+function results:on_data(list)
   vim.schedule(function()
-    if vim.api.nvim_buf_get_lines(self.buf, 0, 1, true)[1] == "" then
-      vim.api.nvim_buf_set_lines(self.buf, 0, -1, true, { value })
-    else
-      vim.api.nvim_buf_set_lines(self.buf, -1, -1, true, { value })
-    end
+    vim.api.nvim_buf_set_lines(self.buf, 0, -1, true, list)
   end)
 end
 

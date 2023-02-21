@@ -18,8 +18,8 @@ function _G.n_menu()
       return stream.chain({
         lists.rg(),
         lists.fzf(text),
-        lists.head(10, cb),
-      })
+        lists.head(10),
+      }, cb)
     end,
   })
   viewz:show()

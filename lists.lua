@@ -1,26 +1,23 @@
 local M = {}
 
-function M.rg(cb)
+function M.rg()
   return {
     command = "rg",
     args = { "--line-buffered", "--files" },
-    cb = cb,
   }
 end
 
-function M.fzf(text, cb)
+function M.fzf(text)
   return {
     command = "fzf",
     args = { "--filter", text },
-    cb = cb,
   }
 end
 
-function M.head(lines, cb)
+function M.head(lines)
   return {
     command = "head",
-    args = { "--lines", lines },
-    cb = cb,
+    args = { "-n", lines },
   }
 end
 
