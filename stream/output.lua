@@ -4,9 +4,9 @@ local uv = vim.loop
 output.__index = output
 
 function output:stop()
+  close(self.input_stream)
+  close(self.output_stream)
   if self.handle then
-    close(self.input_stream)
-    close(self.output_stream)
     self.handle:kill("SIGTERM")
   end
 end

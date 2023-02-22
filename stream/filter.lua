@@ -4,14 +4,30 @@ local uv = vim.loop
 filter.__index = filter
 
 function filter:stop()
+  close(self.input_stream)
+  close(self.output_stream)
   if self.handle then
-    close(self.input_stream)
-    close(self.output_stream)
     self.handle:kill("SIGTERM")
   end
 end
 
-function filter:start()
+function filter:start_fun()
+  self.input:start()
+
+  uv.read_start(self.input_stream, function(_, data)
+    if data then
+      for line in vim.gsplit(data, "\n", true) do
+        if line ~= "" then
+          self.output_stream:write(self.filter(line) .. "\n")
+        end
+      end
+    else
+      close(self.output_stream)
+    end
+  end)
+end
+
+function filter:start_cmd()
   self.handle = uv.spawn(self.command, {
     args = self.args,
     stdio = { self.input_stream, self.output_stream, nil },
@@ -21,10 +37,16 @@ function filter:start()
     close(self.handle)
   end)
 
-  uv.read_start(self.input_stream, function() end)
+  self.input:start()
 
-  if self.input then
-    self.input:start(false)
+  uv.read_start(self.input_stream, function() end)
+end
+
+function filter:start()
+  if self.command then
+    self:start_cmd()
+  elseif self.filter then
+    self:start_fun()
   end
 end
 
@@ -36,6 +58,7 @@ function filter.new(input, opts)
   s.output_stream = uv.new_pipe(false)
 
   s.command = opts.command
+  s.filter = opts.filter
   s.args = opts.args or {}
 
   return s

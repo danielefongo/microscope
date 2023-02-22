@@ -4,20 +4,33 @@ local uv = vim.loop
 generator.__index = generator
 
 function generator:stop()
+  close(self.output_stream)
   if self.handle then
-    close(self.output_stream)
     self.handle:kill("SIGTERM")
   end
 end
 
-function generator:start()
+function generator:start_fun()
+  self.output_stream:write(table.concat(self.fun(), "\n"))
+  close(self.output_stream)
+end
+
+function generator:start_cmd()
   self.handle = uv.spawn(self.command, {
     args = self.args,
-    stdio = { self.input_stream, self.output_stream, nil },
+    stdio = { nil, self.output_stream, nil },
   }, function()
     close(self.output_stream)
     close(self.handle)
   end)
+end
+
+function generator:start()
+  if self.command then
+    self:start_cmd()
+  elseif self.fun then
+    self:start_fun()
+  end
 end
 
 function generator.new(opts)
@@ -26,6 +39,7 @@ function generator.new(opts)
   s.output_stream = uv.new_pipe(false)
 
   s.command = opts.command
+  s.fun = opts.fun
   s.args = opts.args or {}
 
   return s

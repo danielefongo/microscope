@@ -19,7 +19,16 @@ function _G.yaff_files()
     return stream.chain({
       lists.rg(),
       lists.fzf(text),
-      lists.head(2),
+      lists.head(10),
+    }, cb)
+  end)
+end
+
+function _G.yaff_buffers()
+  view:show(function(text, cb)
+    return stream.chain({
+      lists.buffers(),
+      lists.fzf(text),
     }, cb)
   end)
 end
