@@ -19,6 +19,7 @@ function _G.yaff_files()
     return stream.chain({
       lists.rg(),
       lists.fzf(text),
+      lists.head(2),
     }, cb)
   end)
 end
