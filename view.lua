@@ -56,7 +56,13 @@ end
 
 function view:show(chain, open)
   local layout = generate_layout(self.size)
-  self.results = results.new(layout.results, open)
+
+  local old_win = vim.api.nvim_get_current_win()
+  local old_buf = vim.api.nvim_get_current_buf()
+
+  self.results = results.new(layout.results, function(data)
+    open(data, old_win, old_buf)
+  end)
   self.input = input.new(layout.input)
 
   local find

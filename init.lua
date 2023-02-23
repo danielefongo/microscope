@@ -14,17 +14,15 @@ local view = require("yaff.view").new({
   },
 })
 
-local function open_file(data)
+local function open_file(data, win, _)
   vim.cmd("e " .. data.text)
   if data.row and data.col then
-    local win = vim.api.nvim_get_current_win()
     local cursor = { data.row, data.col }
     vim.api.nvim_win_set_cursor(win, cursor)
   end
 end
 
-local function open_buffer(data)
-  local win = vim.api.nvim_get_current_win()
+local function open_buffer(data, win, _)
   vim.api.nvim_win_set_buf(win, data.buffer)
 end
 
