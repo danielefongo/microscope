@@ -1,4 +1,5 @@
 local close = require("yaff.stream.common").close
+local identity = require("yaff.stream.common").identity
 local filter = {}
 local uv = vim.loop
 filter.__index = filter
@@ -60,6 +61,11 @@ function filter.new(input, opts)
   s.command = opts.command
   s.filter = opts.filter
   s.args = opts.args or {}
+
+  s.parser = function(x)
+    local parser = opts.parser or identity
+    return parser(s.input.parser(x))
+  end
 
   return s
 end

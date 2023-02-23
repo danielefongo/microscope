@@ -54,9 +54,9 @@ function view:bind_action(fun)
   end
 end
 
-function view:show(chain)
+function view:show(chain, open)
   local layout = generate_layout(self.size)
-  self.results = results.new(layout.results)
+  self.results = results.new(layout.results, open)
   self.input = input.new(layout.input)
 
   local find
@@ -66,8 +66,8 @@ function view:show(chain)
       find:stop()
     end
     local search_text = self.input:text()
-    find = chain(search_text, function(v)
-      self.results:on_data(v)
+    find = chain(search_text, function(v, parser)
+      self.results:on_data(v, parser)
     end)
     find:start()
   end

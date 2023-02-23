@@ -7,4 +7,8 @@ function common.close(handle)
   end
 end
 
+function common.identity(x)
+  return x
+end
+
 return common

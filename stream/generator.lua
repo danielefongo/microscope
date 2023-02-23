@@ -1,4 +1,5 @@
 local close = require("yaff.stream.common").close
+local identity = require("yaff.stream.common").identity
 local generator = {}
 local uv = vim.loop
 generator.__index = generator
@@ -41,6 +42,11 @@ function generator.new(opts)
   s.command = opts.command
   s.fun = opts.fun
   s.args = opts.args or {}
+
+  s.parser = function(x)
+    local parser = opts.parser or identity
+    return parser({ text = x })
+  end
 
   return s
 end

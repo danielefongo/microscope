@@ -18,7 +18,7 @@ function output:start()
     args = self.args,
     stdio = { self.input_stream, self.output_stream, nil },
   }, function()
-    self.cb(vim.split(output_data, "\n", { trimempty = true }))
+    self.cb(vim.split(output_data, "\n", { trimempty = true }), self.parser)
 
     close(self.input_stream)
     close(self.output_stream)
@@ -46,6 +46,9 @@ function output.new(input, cb)
   s.command = "cat"
   s.args = {}
   s.cb = cb
+  s.parser = function(x)
+    return s.input.parser(x)
+  end
 
   return s
 end

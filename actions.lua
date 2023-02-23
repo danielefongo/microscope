@@ -26,7 +26,7 @@ function M.open(view)
   local file = results:selected()
   vim.api.nvim_buf_delete(results.buf, { force = true })
   vim.api.nvim_buf_delete(input.buf, { force = true })
-  vim.cmd("e " .. file)
+  results:open(file)
 end
 
 return M

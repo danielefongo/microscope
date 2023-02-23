@@ -2,7 +2,7 @@ local input = {}
 input.__index = input
 
 function input:text()
-  return vim.api.nvim_buf_get_lines(self.buf, 0, 1, false)[1]
+  return string.sub(vim.api.nvim_buf_get_lines(self.buf, 0, 1, false)[1], 3)
 end
 
 function input:on_edit(cb)
