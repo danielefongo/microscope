@@ -24,6 +24,7 @@ function results.new(opts)
   v.buf = vim.api.nvim_create_buf(false, true)
   v.win = vim.api.nvim_open_win(v.buf, true, opts)
 
+  vim.api.nvim_buf_set_option(v.buf, "buftype", "prompt")
   vim.api.nvim_win_set_option(v.win, "cursorline", true)
 
   return v
