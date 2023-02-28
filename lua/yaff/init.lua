@@ -1,5 +1,6 @@
 local results = require("yaff.results")
 local input = require("yaff.input")
+local stream = require("yaff.stream")
 local yaff = {}
 yaff.__index = yaff
 
@@ -54,34 +55,39 @@ function yaff:bind_action(fun)
   end
 end
 
-function yaff:show(chain, open)
-  local layout = generate_layout(self.size)
+function yaff:finder(opts)
+  local chain = opts.chain
+  local open = opts.open
 
-  local old_win = vim.api.nvim_get_current_win()
-  local old_buf = vim.api.nvim_get_current_buf()
+  return function()
+    local layout = generate_layout(self.size)
 
-  self.results = results.new(layout.results, function(data)
-    open(data, old_win, old_buf)
-  end)
-  self.input = input.new(layout.input)
+    local old_win = vim.api.nvim_get_current_win()
+    local old_buf = vim.api.nvim_get_current_buf()
 
-  local find
-  local function cb()
-    if find then
-      self.results:on_new()
-      find:stop()
-    end
-    local search_text = self.input:text()
-    find = chain(search_text, function(v, parser)
-      self.results:on_data(v, parser)
+    self.results = results.new(layout.results, function(data)
+      open(data, old_win, old_buf)
     end)
-    find:start()
-  end
+    self.input = input.new(layout.input)
 
-  self.input:on_edit(cb)
+    local find
+    local function cb()
+      if find then
+        self.results:on_new()
+        find:stop()
+      end
+      local search_text = self.input:text()
+      find = stream.chain(chain(search_text), function(v, parser)
+        self.results:on_data(v, parser)
+      end)
+      find:start()
+    end
 
-  for lhs, action in pairs(self.bindings) do
-    vim.keymap.set("i", lhs, self:bind_action(action), { buffer = self.input.buf })
+    self.input:on_edit(cb)
+
+    for lhs, action in pairs(self.bindings) do
+      vim.keymap.set("i", lhs, self:bind_action(action), { buffer = self.input.buf })
+    end
   end
 end
 
