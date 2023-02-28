@@ -55,6 +55,11 @@ function yaff:bind_action(fun)
   end
 end
 
+function yaff:focus_previous()
+  vim.api.nvim_set_current_win(self.old_win)
+  vim.api.nvim_set_current_buf(self.old_buf)
+end
+
 function yaff:close()
   vim.api.nvim_buf_delete(self.results.buf, { force = true })
   vim.api.nvim_buf_delete(self.input.buf, { force = true })
@@ -67,13 +72,13 @@ function yaff:finder(opts)
   return function()
     local layout = generate_layout(self.size)
 
-    local old_win = vim.api.nvim_get_current_win()
-    local old_buf = vim.api.nvim_get_current_buf()
+    self.old_win = vim.api.nvim_get_current_win()
+    self.old_buf = vim.api.nvim_get_current_buf()
 
     self.results = results.new(layout.results, function(data)
-      vim.api.nvim_set_current_win(old_win)
-      vim.api.nvim_set_current_buf(old_buf)
-      open(data, old_win, old_buf)
+      self:close()
+      self:focus_previous()
+      open(data, self.old_win, self.old_buf)
     end)
     self.input = input.new(layout.input)
 
