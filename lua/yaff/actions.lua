@@ -12,17 +12,17 @@ local function rotate(results, dir)
   end
 end
 
-function M.previous(view)
-  rotate(view.results, UP)
+function M.previous(yaff)
+  rotate(yaff.results, UP)
 end
 
-function M.next(view)
-  rotate(view.results, DOWN)
+function M.next(yaff)
+  rotate(yaff.results, DOWN)
 end
 
-function M.open(view)
-  local results = view.results
-  local input = view.input
+function M.open(yaff)
+  local results = yaff.results
+  local input = yaff.input
   local file = results:selected()
   vim.api.nvim_buf_delete(results.buf, { force = true })
   vim.api.nvim_buf_delete(input.buf, { force = true })
