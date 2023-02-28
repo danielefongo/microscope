@@ -22,11 +22,13 @@ end
 
 function M.open(yaff)
   local results = yaff.results
-  local input = yaff.input
   local file = results:selected()
-  vim.api.nvim_buf_delete(results.buf, { force = true })
-  vim.api.nvim_buf_delete(input.buf, { force = true })
   results:open(file)
+  M.close(yaff)
+end
+
+function M.close(yaff)
+  yaff:close()
 end
 
 return M
