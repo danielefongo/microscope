@@ -17,12 +17,7 @@ function filter:start_fun()
 
   uv.read_start(self.input_stream, function(_, data)
     if data then
-      for line in vim.gsplit(data, "\n", true) do
-        if line ~= "" then
-          self.output_stream:write(self.filter(line) .. "\n")
-        end
-      end
-    else
+      self.output_stream:write(self.filter(data))
       close(self.output_stream)
     end
   end)

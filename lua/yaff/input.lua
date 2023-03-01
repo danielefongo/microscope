@@ -11,6 +11,10 @@ function input:on_edit(cb)
   })
 end
 
+function input:close()
+  vim.api.nvim_buf_delete(self.buf, { force = true })
+end
+
 function input.new(opts)
   local v = setmetatable({ keys = {} }, input)
 

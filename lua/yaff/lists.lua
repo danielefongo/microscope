@@ -7,6 +7,13 @@ function M.rg()
   }
 end
 
+function M.cat(text)
+  return {
+    command = "cat",
+    args = { text },
+  }
+end
+
 function M.vimgrep(text)
   return {
     command = "rg",

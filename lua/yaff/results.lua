@@ -7,6 +7,10 @@ function results:selected()
   return self.parser(line)
 end
 
+function results:close()
+  vim.api.nvim_buf_delete(self.buf, { force = true })
+end
+
 function results:open(file)
   self.on_open(file)
 end
@@ -21,6 +25,7 @@ function results:on_data(list, parser)
   self.parser = parser
 
   vim.schedule(function()
+    vim.api.nvim_win_set_cursor(self.win, { 1, 0 })
     vim.api.nvim_buf_set_lines(self.buf, 0, -1, true, list)
   end)
 end

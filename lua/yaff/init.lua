@@ -1,4 +1,5 @@
 local results = require("yaff.results")
+local previewer = require("yaff.previewer")
 local input = require("yaff.input")
 local stream = require("yaff.stream")
 local yaff = {}
@@ -34,18 +35,25 @@ local function generate_layout(size)
   local input_opts = relative(size, {
     x = 0,
     y = 0,
-    width = size.width,
+    width = size.width / 2 - 2,
     height = input_height,
   })
   local results_opts = relative(size, {
     x = 0,
     y = results_offset,
-    width = size.width,
+    width = size.width / 2 - 2,
     height = results_height,
+  })
+  local preview_opts = relative(size, {
+    x = size.width / 2,
+    y = 0,
+    width = size.width / 2,
+    height = size.height,
   })
   return {
     input = input_opts,
     results = results_opts,
+    previewer = preview_opts,
   }
 end
 
@@ -61,15 +69,21 @@ function yaff:focus_previous()
 end
 
 function yaff:close()
-  vim.api.nvim_buf_delete(self.results.buf, { force = true })
-  vim.api.nvim_buf_delete(self.input.buf, { force = true })
+  self.input:close()
+  self.results:close()
+  self.previewer:close()
+end
+
+function yaff:show_preview()
+  self.previewer:show(self.results:selected())
 end
 
 function yaff:finder(opts)
-  local chain = opts.chain
-  local open = opts.open
-
   return function()
+    local chain = opts.chain
+    local open = opts.open
+    local preview = opts.preview
+
     local layout = generate_layout(self.size)
 
     self.old_win = vim.api.nvim_get_current_win()
@@ -80,6 +94,7 @@ function yaff:finder(opts)
       self:focus_previous()
       open(data, self.old_win, self.old_buf)
     end)
+    self.previewer = previewer.new(layout.previewer, preview)
     self.input = input.new(layout.input)
 
     local find
@@ -91,6 +106,9 @@ function yaff:finder(opts)
       local search_text = self.input:text()
       find = stream.chain(chain(search_text), function(v, parser)
         self.results:on_data(v, parser)
+        vim.schedule(function()
+          self:show_preview()
+        end)
       end)
       find:start()
     end
