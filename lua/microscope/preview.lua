@@ -10,6 +10,13 @@ function preview:show(data)
   self.preview_fun(data, self.win, self.buf)
 end
 
+function preview:update(opts)
+  vim.api.nvim_win_set_config(self.win, opts)
+
+  vim.api.nvim_buf_set_option(self.buf, "buftype", "prompt")
+  vim.api.nvim_win_set_option(self.win, "cursorline", true)
+end
+
 function preview.new(opts, preview_fun)
   local v = setmetatable({ keys = {} }, preview)
 
@@ -17,8 +24,7 @@ function preview.new(opts, preview_fun)
   v.buf = vim.api.nvim_create_buf(false, true)
   v.win = vim.api.nvim_open_win(v.buf, true, opts)
 
-  vim.api.nvim_buf_set_option(v.buf, "buftype", "prompt")
-  vim.api.nvim_win_set_option(v.win, "cursorline", true)
+  v:update(opts)
 
   return v
 end

@@ -72,10 +72,18 @@ function microscope:close()
   self.input:close()
   self.results:close()
   self.preview:close()
+  vim.api.nvim_del_autocmd(self.autocmd)
 end
 
 function microscope:show_preview()
   self.preview:show(self.results:selected())
+end
+
+function microscope:update()
+  local layout = generate_layout(self.size)
+  self.results:update(layout.results)
+  self.preview:update(layout.preview)
+  self.input:update(layout.input)
 end
 
 function microscope:finder(opts)
@@ -114,6 +122,13 @@ function microscope:finder(opts)
     end
 
     self.input:on_edit(cb)
+
+    self.autocmd = vim.api.nvim_create_autocmd("VimResized", {
+      nested = true,
+      callback = function()
+        self:update()
+      end,
+    })
 
     for lhs, action in pairs(self.bindings) do
       vim.keymap.set("i", lhs, self:bind_action(action), { buffer = self.input.buf })

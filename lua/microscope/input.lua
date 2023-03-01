@@ -15,16 +15,21 @@ function input:close()
   vim.api.nvim_buf_delete(self.buf, { force = true })
 end
 
+function input:update(opts)
+  vim.api.nvim_win_set_config(self.win, opts)
+
+  vim.api.nvim_buf_set_option(self.buf, "buftype", "prompt")
+  vim.fn.prompt_setprompt(self.buf, "> ")
+  vim.api.nvim_command("startinsert")
+end
+
 function input.new(opts)
   local v = setmetatable({ keys = {} }, input)
 
   v.buf = vim.api.nvim_create_buf(false, true)
   v.win = vim.api.nvim_open_win(v.buf, true, opts)
-  vim.api.nvim_buf_set_option(v.buf, "buftype", "prompt")
-  vim.fn.prompt_setprompt(v.buf, "> ")
 
-  vim.api.nvim_command("startinsert")
-
+  v:update(opts)
   return v
 end
 
