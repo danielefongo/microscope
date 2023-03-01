@@ -22,29 +22,31 @@ local function relative(size, opts)
   return config
 end
 
-local function horizontal(size)
+local function horizontal(size, has_preview)
   local input_height = 1
-  local results_offset = 3
-  local results_height = size.height - results_offset
+  local input_offset = input_height + 2
+  local results_height = size.height - input_offset
+  local left_width = (has_preview and size.width / 2 - 2) or size.width
 
   local input_opts = relative(size, {
     x = 0,
     y = 0,
-    width = size.width / 2 - 2,
+    width = left_width,
     height = input_height,
   })
   local results_opts = relative(size, {
     x = 0,
-    y = results_offset,
-    width = size.width / 2 - 2,
+    y = input_offset,
+    width = left_width,
     height = results_height,
   })
-  local preview_opts = relative(size, {
-    x = size.width / 2,
-    y = 0,
-    width = size.width / 2,
-    height = size.height,
-  })
+  local preview_opts = has_preview
+    and relative(size, {
+      x = size.width / 2,
+      y = 0,
+      width = size.width / 2,
+      height = size.height,
+    })
   return {
     input = input_opts,
     results = results_opts,
@@ -52,15 +54,13 @@ local function horizontal(size)
   }
 end
 
-local function vertical(size)
+local function vertical(size, has_preview)
   local width = vim.api.nvim_list_uis()[1].width
 
   local input_height = 1
   local input_offset = input_height + 2
   local rest_height = size.height - input_offset
-  local results_height = math.floor(rest_height / 2) + 1
-  local results_offset = input_offset + results_height + 2
-  local preview_height = size.height - input_height - results_height
+  local results_height = (has_preview and math.floor(rest_height / 2) + 1) or rest_height
 
   local input_opts = relative(size, {
     x = 0,
@@ -74,12 +74,13 @@ local function vertical(size)
     width = width,
     height = results_height,
   })
-  local preview_opts = relative(size, {
-    x = 0,
-    y = results_offset,
-    width = width,
-    height = preview_height,
-  })
+  local preview_opts = has_preview
+    and relative(size, {
+      x = 0,
+      y = input_offset + results_height + 2,
+      width = width,
+      height = size.height - input_height - results_height,
+    })
   return {
     input = input_opts,
     results = results_opts,
@@ -87,12 +88,12 @@ local function vertical(size)
   }
 end
 
-function shape.generate(size)
+function shape.generate(size, has_preview)
   local ui = vim.api.nvim_list_uis()[1]
   if ui.width < size.width then
-    return vertical(size)
+    return vertical(size, has_preview)
   else
-    return horizontal(size)
+    return horizontal(size, has_preview)
   end
 end
 

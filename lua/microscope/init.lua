@@ -20,7 +20,9 @@ end
 function microscope:close()
   self.input:close()
   self.results:close()
-  self.preview:close()
+  if self.has_preview then
+    self.preview:close()
+  end
   vim.api.nvim_del_autocmd(self.vim_resize)
   vim.api.nvim_del_autocmd(self.input_leave)
 end
@@ -30,9 +32,11 @@ function microscope:show_preview()
 end
 
 function microscope:update()
-  local layout = shape.generate(self.size)
+  local layout = shape.generate(self.size, self.has_preview)
   self.results:update(layout.results)
-  self.preview:update(layout.preview)
+  if self.has_preview then
+    self.preview:update(layout.preview)
+  end
   self.input:update(layout.input)
 end
 
@@ -42,7 +46,9 @@ function microscope:finder(opts)
     local open_fn = opts.open
     local preview_fn = opts.preview
 
-    local layout = shape.generate(self.size)
+    self.has_preview = preview_fn ~= nil
+
+    local layout = shape.generate(self.size, self.has_preview)
 
     self.old_win = vim.api.nvim_get_current_win()
     self.old_buf = vim.api.nvim_get_current_buf()
@@ -51,7 +57,9 @@ function microscope:finder(opts)
       self:focus_previous()
       open_fn(data, self.old_win, self.old_buf)
     end)
-    self.preview = preview.new(layout.preview, preview_fn)
+    if self.has_preview then
+      self.preview = preview.new(layout.preview, preview_fn)
+    end
     self.input = input.new(layout.input)
 
     local find
@@ -63,9 +71,12 @@ function microscope:finder(opts)
       local search_text = self.input:text()
       find = stream.chain(chain_fn(search_text), function(v, parser)
         self.results:on_data(v, parser)
-        vim.schedule(function()
-          self:show_preview()
-        end)
+
+        if self.has_preview then
+          vim.schedule(function()
+            self:show_preview()
+          end)
+        end
       end)
       find:start()
     end
