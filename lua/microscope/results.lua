@@ -4,7 +4,9 @@ results.__index = results
 function results:selected()
   local cursor = vim.api.nvim_win_get_cursor(self.win)[1]
   local line = vim.api.nvim_buf_get_lines(self.buf, cursor - 1, cursor, false)[1]
-  return self.parser(line)
+  if line and line ~= "" then
+    return self.parser(line)
+  end
 end
 
 function results:close()

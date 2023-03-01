@@ -28,7 +28,10 @@ function microscope:close()
 end
 
 function microscope:show_preview()
-  self.preview:show(self.results:selected())
+  local selected = self.results:selected()
+  if selected then
+    self.preview:show(selected)
+  end
 end
 
 function microscope:update()
