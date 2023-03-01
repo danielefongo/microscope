@@ -19,9 +19,9 @@ local function scroll(microscope, dir, amount)
   local counts = vim.api.nvim_buf_line_count(preview.buf)
   local cursor = vim.api.nvim_win_get_cursor(preview.win)[1]
   if dir == DOWN then
-    vim.api.nvim_win_set_cursor(preview.win, { math.min(cursor - 1 + amount, counts), 0 })
+    vim.api.nvim_win_set_cursor(preview.win, { math.min(cursor + amount, counts), 0 })
   elseif dir == UP then
-    vim.api.nvim_win_set_cursor(preview.win, { math.max(cursor - 1 - amount, 1), 0 })
+    vim.api.nvim_win_set_cursor(preview.win, { math.max(cursor - amount, 1), 0 })
   end
 end
 
