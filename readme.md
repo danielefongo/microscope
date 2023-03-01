@@ -39,7 +39,7 @@ On lazy.vim
       "<leader>of",
       view:finder({
         chain = function(text)
-          return { files.lists.rg(), files.lists.fzf(text), lists.head(10) }
+          return { files.lists.rg(), lists.fzf(text), lists.head(10) }
         end,
         open = files.open,
         preview = files.preview,
