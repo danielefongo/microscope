@@ -21,7 +21,8 @@ function microscope:close()
   self.input:close()
   self.results:close()
   self.preview:close()
-  vim.api.nvim_del_autocmd(self.autocmd)
+  vim.api.nvim_del_autocmd(self.vim_resize)
+  vim.api.nvim_del_autocmd(self.input_leave)
 end
 
 function microscope:show_preview()
@@ -47,7 +48,6 @@ function microscope:finder(opts)
     self.old_buf = vim.api.nvim_get_current_buf()
 
     self.results = results.new(layout.results, function(data)
-      self:close()
       self:focus_previous()
       open_fn(data, self.old_win, self.old_buf)
     end)
@@ -72,10 +72,15 @@ function microscope:finder(opts)
 
     self.input:on_edit(cb)
 
-    self.autocmd = vim.api.nvim_create_autocmd("VimResized", {
-      nested = true,
+    self.vim_resize = vim.api.nvim_create_autocmd("VimResized", {
       callback = function()
         self:update()
+      end,
+    })
+    self.input_leave = vim.api.nvim_create_autocmd("BufLeave", {
+      buffer = self.input.buf,
+      callback = function()
+        self:close()
       end,
     })
 
