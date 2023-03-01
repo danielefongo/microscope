@@ -27,6 +27,8 @@ On lazy.vim
       bindings = {
         ["<c-j>"] = actions.next,
         ["<c-k>"] = actions.previous,
+        ["<a-j>"] = actions.scroll_down,
+        ["<a-k>"] = actions.scroll_up,
         ["<tab>"] = actions.open,
         ["<esc>"] = actions.close,
       },
