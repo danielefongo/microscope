@@ -10,6 +10,10 @@ function preview:show(data)
   self.preview_fun(data, self.win, self.buf)
 end
 
+function preview:clear()
+  vim.api.nvim_buf_set_lines(self.buf, 0, -1, true, {})
+end
+
 function preview:update(opts)
   vim.api.nvim_win_set_config(self.win, opts)
 

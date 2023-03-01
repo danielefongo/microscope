@@ -31,6 +31,8 @@ function microscope:show_preview()
   local selected = self.results:selected()
   if selected then
     self.preview:show(selected)
+  else
+    self.preview:clear()
   end
 end
 
