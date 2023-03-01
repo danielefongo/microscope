@@ -1,5 +1,5 @@
 local results = require("yaff.results")
-local previewer = require("yaff.previewer")
+local preview = require("yaff.preview")
 local input = require("yaff.input")
 local stream = require("yaff.stream")
 local yaff = {}
@@ -53,7 +53,7 @@ local function generate_layout(size)
   return {
     input = input_opts,
     results = results_opts,
-    previewer = preview_opts,
+    preview = preview_opts,
   }
 end
 
@@ -71,18 +71,18 @@ end
 function yaff:close()
   self.input:close()
   self.results:close()
-  self.previewer:close()
+  self.preview:close()
 end
 
 function yaff:show_preview()
-  self.previewer:show(self.results:selected())
+  self.preview:show(self.results:selected())
 end
 
 function yaff:finder(opts)
   return function()
-    local chain = opts.chain
-    local open = opts.open
-    local preview = opts.preview
+    local chain_fn = opts.chain
+    local open_fn = opts.open
+    local preview_fn = opts.preview
 
     local layout = generate_layout(self.size)
 
@@ -92,9 +92,9 @@ function yaff:finder(opts)
     self.results = results.new(layout.results, function(data)
       self:close()
       self:focus_previous()
-      open(data, self.old_win, self.old_buf)
+      open_fn(data, self.old_win, self.old_buf)
     end)
-    self.previewer = previewer.new(layout.previewer, preview)
+    self.preview = preview.new(layout.preview, preview_fn)
     self.input = input.new(layout.input)
 
     local find
@@ -104,7 +104,7 @@ function yaff:finder(opts)
         find:stop()
       end
       local search_text = self.input:text()
-      find = stream.chain(chain(search_text), function(v, parser)
+      find = stream.chain(chain_fn(search_text), function(v, parser)
         self.results:on_data(v, parser)
         vim.schedule(function()
           self:show_preview()

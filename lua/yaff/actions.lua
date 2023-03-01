@@ -24,8 +24,8 @@ end
 
 function M.open(yaff)
   local results = yaff.results
-  local file = results:selected()
-  results:open(file)
+  local data = results:selected()
+  results:open(data)
   M.close(yaff)
 end
 
