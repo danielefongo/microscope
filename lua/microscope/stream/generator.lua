@@ -1,5 +1,5 @@
-local close = require("yaff.stream.common").close
-local identity = require("yaff.stream.common").identity
+local close = require("microscope.stream.common").close
+local identity = require("microscope.stream.common").identity
 local generator = {}
 local uv = vim.loop
 generator.__index = generator

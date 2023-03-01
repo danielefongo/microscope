@@ -1,9 +1,9 @@
-local results = require("yaff.results")
-local preview = require("yaff.preview")
-local input = require("yaff.input")
-local stream = require("yaff.stream")
-local yaff = {}
-yaff.__index = yaff
+local results = require("microscope.results")
+local preview = require("microscope.preview")
+local input = require("microscope.input")
+local stream = require("microscope.stream")
+local microscope = {}
+microscope.__index = microscope
 
 local function absolute(size)
   local ui = vim.api.nvim_list_uis()[1]
@@ -57,28 +57,28 @@ local function generate_layout(size)
   }
 end
 
-function yaff:bind_action(fun)
+function microscope:bind_action(fun)
   return function()
     pcall(fun, self)
   end
 end
 
-function yaff:focus_previous()
+function microscope:focus_previous()
   vim.api.nvim_set_current_win(self.old_win)
   vim.api.nvim_set_current_buf(self.old_buf)
 end
 
-function yaff:close()
+function microscope:close()
   self.input:close()
   self.results:close()
   self.preview:close()
 end
 
-function yaff:show_preview()
+function microscope:show_preview()
   self.preview:show(self.results:selected())
 end
 
-function yaff:finder(opts)
+function microscope:finder(opts)
   return function()
     local chain_fn = opts.chain
     local open_fn = opts.open
@@ -121,8 +121,8 @@ function yaff:finder(opts)
   end
 end
 
-function yaff.setup(opts)
-  local v = setmetatable({ keys = {} }, yaff)
+function microscope.setup(opts)
+  local v = setmetatable({ keys = {} }, microscope)
 
   v.size = opts.size
   v.bindings = opts.bindings
@@ -130,4 +130,4 @@ function yaff.setup(opts)
   return v
 end
 
-return yaff
+return microscope

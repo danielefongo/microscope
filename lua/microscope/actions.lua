@@ -2,8 +2,8 @@ local DOWN = 1
 local UP = 2
 local M = {}
 
-local function rotate(yaff, dir)
-  local results = yaff.results
+local function rotate(microscope, dir)
+  local results = microscope.results
   local counts = vim.api.nvim_buf_line_count(results.buf)
   local cursor = vim.api.nvim_win_get_cursor(results.win)[1]
   if dir == DOWN then
@@ -11,26 +11,26 @@ local function rotate(yaff, dir)
   elseif dir == UP then
     vim.api.nvim_win_set_cursor(results.win, { (cursor - 1 - 1) % counts + 1, 0 })
   end
-  yaff:show_preview()
+  microscope:show_preview()
 end
 
-function M.previous(yaff)
-  rotate(yaff, UP)
+function M.previous(microscope)
+  rotate(microscope, UP)
 end
 
-function M.next(yaff)
-  rotate(yaff, DOWN)
+function M.next(microscope)
+  rotate(microscope, DOWN)
 end
 
-function M.open(yaff)
-  local results = yaff.results
+function M.open(microscope)
+  local results = microscope.results
   local data = results:selected()
   results:open(data)
-  M.close(yaff)
+  M.close(microscope)
 end
 
-function M.close(yaff)
-  yaff:close()
+function M.close(microscope)
+  microscope:close()
 end
 
 return M

@@ -1,9 +1,9 @@
 local stream = {}
 stream.__index = stream
 
-local generator = require("yaff.stream.generator")
-local filter = require("yaff.stream.filter")
-local output = require("yaff.stream.output")
+local generator = require("microscope.stream.generator")
+local filter = require("microscope.stream.filter")
+local output = require("microscope.stream.output")
 
 function stream.chain(list_of_opts, cb)
   local s = nil

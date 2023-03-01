@@ -10,6 +10,6 @@ function buffers.preview(data, win, _)
   end)
 end
 
-buffers.lists = require("yaff.buffers.lists")
+buffers.lists = require("microscope.buffers.lists")
 
 return buffers

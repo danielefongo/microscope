@@ -1,6 +1,6 @@
-# YAFF
+# Microscope
 
-Yet Another Fuzzy Finder for neovim
+Micro fuzzy finder for neovim
 
 ## Disclaimer
 
@@ -12,13 +12,14 @@ On lazy.vim
 
 ```lua
 {
-  "danielefongo/yaff",
+  "danielefongo/microscope",
   config = function()
-    local actions = require("yaff.actions")
-    local lists = require("yaff.lists")
-    local open = require("yaff.open")
+    local actions = require("microscope.actions")
 
-    local view = require("yaff").setup({
+    local lists = require("microscope.lists")
+    local files = require("microscope.files")
+
+    local view = require("microscope").setup({
       size = {
         width = 50,
         height = 10,
@@ -27,7 +28,7 @@ On lazy.vim
         ["<c-j>"] = actions.next,
         ["<c-k>"] = actions.previous,
         ["<tab>"] = actions.open,
-        ["<esc"] = actions.close,
+        ["<esc>"] = actions.close,
       },
     })
 
@@ -36,9 +37,10 @@ On lazy.vim
       "<leader>of",
       view:finder({
         chain = function(text)
-          return { lists.rg(), lists.fzf(text), lists.head(10) }
+          return { files.lists.rg(), files.lists.fzf(text), lists.head(10) }
         end,
-        open = open.file,
+        open = files.open,
+        preview = files.preview,
       })
     )
   end,

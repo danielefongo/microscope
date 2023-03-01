@@ -1,4 +1,4 @@
-local close = require("yaff.stream.common").close
+local close = require("microscope.stream.common").close
 local output = {}
 local uv = vim.loop
 output.__index = output

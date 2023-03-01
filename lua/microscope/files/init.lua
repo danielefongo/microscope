@@ -1,7 +1,7 @@
-local stream = require("yaff.stream")
-local files_lists = require("yaff.files.lists")
-local lists = require("yaff.lists")
-local highlight = require("yaff.files.highlight")
+local stream = require("microscope.stream")
+local files_lists = require("microscope.files.lists")
+local lists = require("microscope.lists")
+local highlight = require("microscope.files.highlight")
 
 local files = {}
 
@@ -34,6 +34,6 @@ function files.preview(data, win, buf)
     :start()
 end
 
-files.lists = require("yaff.files.lists")
+files.lists = require("microscope.files.lists")
 
 return files
