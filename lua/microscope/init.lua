@@ -2,60 +2,9 @@ local results = require("microscope.results")
 local preview = require("microscope.preview")
 local input = require("microscope.input")
 local stream = require("microscope.stream")
+local shape = require("microscope.shape")
 local microscope = {}
 microscope.__index = microscope
-
-local function absolute(size)
-  local ui = vim.api.nvim_list_uis()[1]
-  return {
-    relative = "editor",
-    width = size.width,
-    height = size.height,
-    col = (ui.width / 2) - (size.width / 2),
-    row = (ui.height / 2) - (size.height / 2),
-    style = "minimal",
-    border = "rounded",
-  }
-end
-
-local function relative(size, opts)
-  local config = absolute(size)
-  config.col = config.col + opts.x
-  config.row = config.row + opts.y
-  config.width = opts.width
-  config.height = opts.height
-  return config
-end
-
-local function generate_layout(size)
-  local input_height = 1
-  local results_offset = 3
-  local results_height = size.height - results_offset
-
-  local input_opts = relative(size, {
-    x = 0,
-    y = 0,
-    width = size.width / 2 - 2,
-    height = input_height,
-  })
-  local results_opts = relative(size, {
-    x = 0,
-    y = results_offset,
-    width = size.width / 2 - 2,
-    height = results_height,
-  })
-  local preview_opts = relative(size, {
-    x = size.width / 2,
-    y = 0,
-    width = size.width / 2,
-    height = size.height,
-  })
-  return {
-    input = input_opts,
-    results = results_opts,
-    preview = preview_opts,
-  }
-end
 
 function microscope:bind_action(fun)
   return function()
@@ -80,7 +29,7 @@ function microscope:show_preview()
 end
 
 function microscope:update()
-  local layout = generate_layout(self.size)
+  local layout = shape.generate(self.size)
   self.results:update(layout.results)
   self.preview:update(layout.preview)
   self.input:update(layout.input)
@@ -92,7 +41,7 @@ function microscope:finder(opts)
     local open_fn = opts.open
     local preview_fn = opts.preview
 
-    local layout = generate_layout(self.size)
+    local layout = shape.generate(self.size)
 
     self.old_win = vim.api.nvim_get_current_win()
     self.old_buf = vim.api.nvim_get_current_buf()
