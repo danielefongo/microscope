@@ -1,6 +1,6 @@
 local DOWN = 1
 local UP = 2
-local M = {}
+local actions = {}
 
 local function rotate(microscope, dir)
   local results = microscope.results
@@ -14,23 +14,23 @@ local function rotate(microscope, dir)
   microscope:show_preview()
 end
 
-function M.previous(microscope)
+function actions.previous(microscope)
   rotate(microscope, UP)
 end
 
-function M.next(microscope)
+function actions.next(microscope)
   rotate(microscope, DOWN)
 end
 
-function M.open(microscope)
+function actions.open(microscope)
   local results = microscope.results
   local data = results:selected()
   results:open(data)
-  M.close(microscope)
+  actions.close(microscope)
 end
 
-function M.close(microscope)
+function actions.close(microscope)
   microscope:close()
 end
 
-return M
+return actions

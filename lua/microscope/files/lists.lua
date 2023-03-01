@@ -1,20 +1,20 @@
-local M = {}
+local files = {}
 
-function M.rg()
+function files.rg()
   return {
     command = "rg",
     args = { "--line-buffered", "--files" },
   }
 end
 
-function M.cat(text)
+function files.cat(text)
   return {
     command = "cat",
     args = { text },
   }
 end
 
-function M.vimgrep(text)
+function files.vimgrep(text)
   return {
     command = "rg",
     args = { "--line-buffered", "--vimgrep", "-M", 200, text },
@@ -30,11 +30,11 @@ function M.vimgrep(text)
   }
 end
 
-function M.fzf(text)
+function files.fzf(text)
   return {
     command = "fzf",
     args = { "--filter", text },
   }
 end
 
-return M
+return files
