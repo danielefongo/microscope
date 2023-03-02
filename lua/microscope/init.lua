@@ -1,4 +1,6 @@
+local constants = require("microscope.constants")
 local results = require("microscope.results")
+local events = require("microscope.events")
 local preview = require("microscope.preview")
 local input = require("microscope.input")
 local stream = require("microscope.stream")
@@ -23,8 +25,8 @@ function microscope:close()
   if self.has_preview then
     self.preview:close()
   end
-  vim.api.nvim_del_autocmd(self.vim_resize)
-  vim.api.nvim_del_autocmd(self.input_leave)
+
+  events.clear_all()
 end
 
 function microscope:show_preview()
@@ -102,17 +104,13 @@ function microscope:finder(opts)
 
     self.input:on_edit(cb)
 
-    self.vim_resize = vim.api.nvim_create_autocmd("VimResized", {
-      callback = function()
-        self:update()
-      end,
-    })
-    self.input_leave = vim.api.nvim_create_autocmd("BufLeave", {
-      buffer = self.input.buf,
-      callback = function()
-        self:close()
-      end,
-    })
+    events.native(constants.module.microscope, constants.event.resize, function()
+      self:update()
+    end)
+
+    events.native(constants.module.microscope, constants.event.buf_leave, function()
+      self:close()
+    end, { buffer = self.input.buf })
 
     for lhs, action in pairs(self.bindings) do
       vim.keymap.set("i", lhs, self:bind_action(action), { buffer = self.input.buf })
