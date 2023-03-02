@@ -1,7 +1,8 @@
+local constants = require("microscope.constants")
 local results = {}
 results.__index = results
 
-function results:selected()
+function results:focused()
   local cursor = vim.api.nvim_win_get_cursor(self.win)[1]
   local line = vim.api.nvim_buf_get_lines(self.buf, cursor - 1, cursor, false)[1]
   if line and line ~= "" then
@@ -9,12 +10,23 @@ function results:selected()
   end
 end
 
+function results:focus(dir)
+  local counts = vim.api.nvim_buf_line_count(self.buf)
+  local cursor = vim.api.nvim_win_get_cursor(self.win)[1]
+  if dir == constants.DOWN then
+    vim.api.nvim_win_set_cursor(self.win, { (cursor - 1 + 1) % counts + 1, 0 })
+  elseif dir == constants.UP then
+    vim.api.nvim_win_set_cursor(self.win, { (cursor - 1 - 1) % counts + 1, 0 })
+  end
+end
+
 function results:close()
   vim.api.nvim_buf_delete(self.buf, { force = true })
 end
 
-function results:open(file)
-  self.on_open(file)
+function results:open()
+  local data = self:focused()
+  self.on_open(data)
 end
 
 function results:on_new()

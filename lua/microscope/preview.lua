@@ -1,3 +1,4 @@
+local constants = require("microscope.constants")
 local preview = {}
 preview.__index = preview
 
@@ -12,6 +13,16 @@ end
 
 function preview:clear()
   vim.api.nvim_buf_set_lines(self.buf, 0, -1, true, {})
+end
+
+function preview:scroll(dir, amount)
+  local counts = vim.api.nvim_buf_line_count(self.buf)
+  local cursor = vim.api.nvim_win_get_cursor(self.win)[1]
+  if dir == constants.DOWN then
+    vim.api.nvim_win_set_cursor(self.win, { math.min(cursor + amount, counts), 0 })
+  elseif dir == constants.UP then
+    vim.api.nvim_win_set_cursor(self.win, { math.max(cursor - amount, 1), 0 })
+  end
 end
 
 function preview:update(opts)

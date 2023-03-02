@@ -1,51 +1,27 @@
-local DOWN = 1
-local UP = 2
+local constants = require("microscope.constants")
 local actions = {}
 
-local function rotate(microscope, dir)
-  local results = microscope.results
-  local counts = vim.api.nvim_buf_line_count(results.buf)
-  local cursor = vim.api.nvim_win_get_cursor(results.win)[1]
-  if dir == DOWN then
-    vim.api.nvim_win_set_cursor(results.win, { (cursor - 1 + 1) % counts + 1, 0 })
-  elseif dir == UP then
-    vim.api.nvim_win_set_cursor(results.win, { (cursor - 1 - 1) % counts + 1, 0 })
-  end
+function actions.previous(microscope)
+  microscope.results:focus(constants.UP)
   microscope:show_preview()
 end
 
-local function scroll(microscope, dir, amount)
-  local preview = microscope.preview
-  local counts = vim.api.nvim_buf_line_count(preview.buf)
-  local cursor = vim.api.nvim_win_get_cursor(preview.win)[1]
-  if dir == DOWN then
-    vim.api.nvim_win_set_cursor(preview.win, { math.min(cursor + amount, counts), 0 })
-  elseif dir == UP then
-    vim.api.nvim_win_set_cursor(preview.win, { math.max(cursor - amount, 1), 0 })
-  end
-end
-
-function actions.previous(microscope)
-  rotate(microscope, UP)
-end
-
 function actions.next(microscope)
-  rotate(microscope, DOWN)
+  microscope.results:focus(constants.DOWN)
+  microscope:show_preview()
 end
 
 function actions.scroll_down(microscope)
-  scroll(microscope, DOWN, 10)
+  microscope.preview:scroll(constants.DOWN, 10)
 end
 
 function actions.scroll_up(microscope)
-  scroll(microscope, UP, 10)
+  microscope.preview:scroll(constants.UP, 10)
 end
 
 function actions.open(microscope)
-  local results = microscope.results
-  local data = results:selected()
-  results:open(data)
-  actions.close(microscope)
+  microscope.results:open()
+  microscope:close()
 end
 
 function actions.close(microscope)

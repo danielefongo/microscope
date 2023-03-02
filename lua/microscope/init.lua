@@ -28,9 +28,9 @@ function microscope:close()
 end
 
 function microscope:show_preview()
-  local selected = self.results:selected()
-  if selected then
-    self.preview:show(selected)
+  local focused = self.results:focused()
+  if focused then
+    self.preview:show(focused)
   else
     self.preview:clear()
   end
