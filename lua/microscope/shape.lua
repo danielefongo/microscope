@@ -108,6 +108,10 @@ function shape.generate(size, has_preview)
     height = math.min(size.height, ui.height - 4),
   }
 
+  if real_size.width <= 16 or real_size.height <= 8 then
+    return
+  end
+
   if ui.width < size.width then
     return vertical(real_size, has_preview)
   else

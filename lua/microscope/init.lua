@@ -38,6 +38,15 @@ end
 
 function microscope:update()
   local layout = shape.generate(self.size, self.has_preview)
+
+  if not layout then
+    self:close()
+    vim.schedule(function()
+      vim.api.nvim_err_writeln("microscope: window too small to display")
+    end)
+    return
+  end
+
   self.results:update(layout.results)
   if self.has_preview then
     self.preview:update(layout.preview)
@@ -54,6 +63,11 @@ function microscope:finder(opts)
     self.has_preview = preview_fn ~= nil
 
     local layout = shape.generate(self.size, self.has_preview)
+
+    if not layout then
+      vim.api.nvim_err_writeln("microscope: window too small to display")
+      return
+    end
 
     self.old_win = vim.api.nvim_get_current_win()
     self.old_buf = vim.api.nvim_get_current_buf()
