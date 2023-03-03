@@ -3,7 +3,7 @@ local files = {}
 function files.rg()
   return {
     command = "rg",
-    args = { "--line-buffered", "--files" },
+    args = { "--files", "--color", "never" },
   }
 end
 
@@ -17,7 +17,7 @@ end
 function files.vimgrep(text)
   return {
     command = "rg",
-    args = { "--line-buffered", "--vimgrep", "-M", 200, text },
+    args = { "--vimgrep", "-M", 200, text },
     parser = function(data)
       local elements = vim.split(data.text, ":", {})
 
