@@ -1,20 +1,20 @@
 local close = require("microscope.stream.common").close
 local identity = require("microscope.stream.common").identity
-local generator = {}
+local input = {}
 local uv = vim.loop
-generator.__index = generator
+input.__index = input
 
-function generator:stop()
+function input:stop()
   close(self.output_stream)
   close(self.handle)
 end
 
-function generator:start_fun()
+function input:start_fun()
   self.output_stream:write(table.concat(self.fun(), "\n"))
   close(self.output_stream)
 end
 
-function generator:start_cmd()
+function input:start_cmd()
   self.handle = uv.spawn(self.command, {
     args = self.args,
     stdio = { nil, self.output_stream, nil },
@@ -23,7 +23,7 @@ function generator:start_cmd()
   end)
 end
 
-function generator:start()
+function input:start()
   if self.command then
     self:start_cmd()
   elseif self.fun then
@@ -31,8 +31,8 @@ function generator:start()
   end
 end
 
-function generator.new(opts)
-  local s = setmetatable({ keys = {} }, generator)
+function input.new(opts)
+  local s = setmetatable({ keys = {} }, input)
 
   s.output_stream = uv.new_pipe(false)
 
@@ -48,4 +48,4 @@ function generator.new(opts)
   return s
 end
 
-return generator
+return input
