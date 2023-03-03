@@ -55,11 +55,16 @@ function events.clear(module, evt)
   events.handlers[module][evt] = nil
 end
 
+function events.clear_module(module)
+  for evt, _ in pairs(events.handlers[module]) do
+    events.clear(module, evt)
+  end
+  events.handlers[module] = nil
+end
+
 function events.clear_all()
-  for module, module_evts in pairs(events.handlers) do
-    for evt, _ in pairs(module_evts) do
-      events.clear(module, evt)
-    end
+  for module, _ in pairs(events.handlers) do
+    events.clear_module(module)
   end
   events.handlers = {}
 end

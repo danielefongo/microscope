@@ -3,12 +3,10 @@ local actions = {}
 
 function actions.previous(microscope)
   microscope.results:focus(constants.UP)
-  microscope:show_preview()
 end
 
 function actions.next(microscope)
   microscope.results:focus(constants.DOWN)
-  microscope:show_preview()
 end
 
 function actions.scroll_down(microscope)
@@ -21,7 +19,6 @@ end
 
 function actions.open(microscope)
   microscope.results:open()
-  microscope:close()
 end
 
 function actions.close(microscope)
