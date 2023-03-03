@@ -4,11 +4,9 @@ local uv = vim.loop
 output.__index = output
 
 function output:stop()
-  close(self.input_stream)
+  self.input:stop()
   close(self.output_stream)
-  if self.handle then
-    self.handle:kill("SIGTERM")
-  end
+  close(self.handle)
 end
 
 function output:start()
@@ -20,9 +18,7 @@ function output:start()
   }, function()
     self.cb(vim.split(output_data, "\n", { trimempty = true }), self.parser)
 
-    close(self.input_stream)
-    close(self.output_stream)
-    close(self.handle)
+    self:stop()
   end)
 
   uv.read_start(self.output_stream, function(_, data)

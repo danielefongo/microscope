@@ -6,9 +6,7 @@ generator.__index = generator
 
 function generator:stop()
   close(self.output_stream)
-  if self.handle then
-    self.handle:kill("SIGTERM")
-  end
+  close(self.handle)
 end
 
 function generator:start_fun()
@@ -21,8 +19,7 @@ function generator:start_cmd()
     args = self.args,
     stdio = { nil, self.output_stream, nil },
   }, function()
-    close(self.output_stream)
-    close(self.handle)
+    self:stop()
   end)
 end
 

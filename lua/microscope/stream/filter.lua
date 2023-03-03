@@ -5,11 +5,9 @@ local uv = vim.loop
 filter.__index = filter
 
 function filter:stop()
-  close(self.input_stream)
+  self.input:stop()
   close(self.output_stream)
-  if self.handle then
-    self.handle:kill("SIGTERM")
-  end
+  close(self.handle)
 end
 
 function filter:start_fun()
@@ -28,9 +26,7 @@ function filter:start_cmd()
     args = self.args,
     stdio = { self.input_stream, self.output_stream, nil },
   }, function()
-    close(self.input_stream)
-    close(self.output_stream)
-    close(self.handle)
+    self:stop()
   end)
 
   self.input:start()
