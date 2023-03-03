@@ -16,7 +16,9 @@ function output:start()
     args = self.args,
     stdio = { self.input_stream, self.output_stream, nil },
   }, function()
-    self.cb(vim.split(output_data, "\n", { trimempty = true }), self.parser)
+    vim.schedule(function()
+      self.cb(vim.split(output_data, "\n", { trimempty = true }), self.parser)
+    end)
 
     self:stop()
   end)

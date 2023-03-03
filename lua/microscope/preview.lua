@@ -1,8 +1,10 @@
+local events = require("microscope.events")
 local constants = require("microscope.constants")
 local preview = {}
 preview.__index = preview
 
 function preview:close()
+  events.clear_module(self)
   vim.api.nvim_win_set_buf(self.win, self.buf)
   vim.api.nvim_buf_delete(self.buf, { force = true })
 end
@@ -26,20 +28,28 @@ function preview:scroll(dir, amount)
 end
 
 function preview:update(opts)
-  vim.api.nvim_win_set_config(self.win, opts)
+  local layout = opts.preview
+
+  if not self.win then
+    self.win = vim.api.nvim_open_win(self.buf, false, layout)
+  else
+    vim.api.nvim_win_set_config(self.win, layout)
+  end
 
   vim.api.nvim_buf_set_option(self.buf, "buftype", "prompt")
   vim.api.nvim_win_set_option(self.win, "cursorline", true)
 end
 
-function preview.new(opts, preview_fun)
+function preview.new(preview_fun)
   local v = setmetatable({ keys = {} }, preview)
 
   v.preview_fun = preview_fun
   v.buf = vim.api.nvim_create_buf(false, true)
-  v.win = vim.api.nvim_open_win(v.buf, true, opts)
 
-  v:update(opts)
+  events.on(v, constants.event.result_focused, preview.show)
+  events.on(v, constants.event.empty_results_retrieved, preview.clear)
+  events.on(v, constants.event.layout_updated, preview.update)
+  events.on(v, constants.event.microscope_closed, preview.close)
 
   return v
 end

@@ -1,4 +1,6 @@
+local constants = require("microscope.constants")
 local results = require("microscope.results")
+local events = require("microscope.events")
 local preview = require("microscope.preview")
 local input = require("microscope.input")
 local stream = require("microscope.stream")
@@ -12,111 +14,68 @@ function microscope:bind_action(fun)
   end
 end
 
-function microscope:focus_previous()
+function microscope:close()
+  events.clear_module(self)
+  events.fire(constants.event.microscope_closed)
+end
+
+function microscope:open(data)
+  self:close()
   vim.api.nvim_set_current_win(self.old_win)
   vim.api.nvim_set_current_buf(self.old_buf)
+  self.open_fn(data, self.old_win, self.old_buf)
 end
 
-function microscope:close()
-  self.input:close()
-  self.results:close()
-  if self.has_preview then
-    self.preview:close()
+function microscope:search(text)
+  if self.find then
+    self.find:stop()
   end
-  vim.api.nvim_del_autocmd(self.vim_resize)
-  vim.api.nvim_del_autocmd(self.input_leave)
-end
-
-function microscope:show_preview()
-  local focused = self.results:focused()
-  if focused then
-    self.preview:show(focused)
-  else
-    self.preview:clear()
-  end
+  self.find = stream.chain(self.chain_fn(text), function(list, parser)
+    if #list > 0 then
+      events.fire(constants.event.results_retrieved, { list = list, parser = parser })
+    else
+      events.fire(constants.event.empty_results_retrieved)
+    end
+  end)
+  self.find:start()
 end
 
 function microscope:update()
-  local layout = shape.generate(self.size, self.has_preview)
+  local layout = shape.generate(self.size, self.preview_fn ~= nil)
 
-  if not layout then
+  if layout then
+    return events.fire(constants.event.layout_updated, layout)
+  else
     self:close()
-    vim.schedule(function()
-      vim.api.nvim_err_writeln("microscope: window too small to display")
-    end)
-    return
+    vim.api.nvim_err_writeln("microscope: window too small to display")
   end
-
-  self.results:update(layout.results)
-  if self.has_preview then
-    self.preview:update(layout.preview)
-  end
-  self.input:update(layout.input)
 end
 
 function microscope:finder(opts)
   return function()
-    local chain_fn = opts.chain
-    local open_fn = opts.open
-    local preview_fn = opts.preview
-
-    self.has_preview = preview_fn ~= nil
-
-    local layout = shape.generate(self.size, self.has_preview)
-
-    if not layout then
-      vim.api.nvim_err_writeln("microscope: window too small to display")
-      return
-    end
-
     self.old_win = vim.api.nvim_get_current_win()
     self.old_buf = vim.api.nvim_get_current_buf()
 
-    self.results = results.new(layout.results, function(data)
-      self:focus_previous()
-      open_fn(data, self.old_win, self.old_buf)
-    end)
-    if self.has_preview then
-      self.preview = preview.new(layout.preview, preview_fn)
+    self.chain_fn = opts.chain
+    self.open_fn = opts.open
+    self.preview_fn = opts.preview
+
+    if self.preview_fn then
+      self.preview = preview.new(self.preview_fn)
     end
-    self.input = input.new(layout.input)
+    self.results = results.new()
+    self.input = input.new()
 
-    local find
-    local function cb()
-      if find then
-        self.results:on_new()
-        find:stop()
-      end
-      local search_text = self.input:text()
-      find = stream.chain(chain_fn(search_text), function(v, parser)
-        self.results:on_data(v, parser)
-
-        if self.has_preview then
-          vim.schedule(function()
-            self:show_preview()
-          end)
-        end
-      end)
-      find:start()
-    end
-
-    self.input:on_edit(cb)
-
-    self.vim_resize = vim.api.nvim_create_autocmd("VimResized", {
-      callback = function()
-        self:update()
-      end,
-    })
-    self.input_leave = vim.api.nvim_create_autocmd("BufLeave", {
-      buffer = self.input.buf,
-      callback = function()
-        self:close()
-      end,
-    })
+    events.on(self, constants.event.result_opened, microscope.open)
+    events.on(self, constants.event.input_changed, microscope.search)
+    events.native(self, constants.event.resize, microscope.update)
+    events.native(self, constants.event.buf_leave, microscope.close, { buffer = self.input.buf })
 
     for lhs, action in pairs(self.bindings) do
       vim.keymap.set("i", lhs, self:bind_action(action), { buffer = self.input.buf })
     end
+
+    self:update()
   end
 end
 
