@@ -20,18 +20,19 @@ function files.preview(data, win, buf)
   else
     cursor = { 1, 0 }
   end
-  stream
-    .chain({
-      files_lists.cat(data.text),
-      lists.head(5000),
-    }, function(lines)
-      vim.schedule(function()
-        vim.api.nvim_buf_set_lines(buf, 0, -1, true, lines)
-        highlight(data.text, buf)
-        vim.api.nvim_win_set_cursor(win, cursor)
-      end)
-    end)
-    :start()
+  if files.stream then
+    files.stream:stop()
+  end
+  files.stream = stream.chain({
+    files_lists.cat(data.text),
+    lists.head(5000),
+  }, function(lines)
+    vim.api.nvim_buf_set_lines(buf, 0, -1, true, lines)
+    highlight(data.text, buf)
+    vim.api.nvim_win_set_cursor(win, cursor)
+  end)
+
+  files.stream:start()
 end
 
 files.lists = require("microscope.files.lists")
