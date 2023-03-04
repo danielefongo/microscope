@@ -57,7 +57,7 @@ function results:open()
     table.insert(to_be_open, self:focused())
   end
 
-  for _, value in ipairs(self.selected_lines) do
+  for _, value in pairs(self.selected_lines) do
     table.insert(to_be_open, self.parser(value))
   end
 
