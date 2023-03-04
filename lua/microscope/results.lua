@@ -19,6 +19,21 @@ function results:focus_line(line)
   end
 end
 
+function results:select()
+  local cursor = vim.api.nvim_win_get_cursor(self.win)[1]
+  local line = vim.api.nvim_buf_get_lines(self.buf, cursor - 1, cursor, false)[1]
+
+  if line then
+    if not self.selected_lines[cursor] then
+      vim.api.nvim_buf_set_lines(self.buf, cursor - 1, cursor, true, { "> " .. line })
+      self.selected_lines[cursor] = line
+    else
+      vim.api.nvim_buf_set_lines(self.buf, cursor - 1, cursor, true, { self.selected_lines[cursor] })
+      self.selected_lines[cursor] = nil
+    end
+  end
+end
+
 function results:focus(dir)
   local counts = vim.api.nvim_buf_line_count(self.buf)
   local cursor = vim.api.nvim_win_get_cursor(self.win)[1]
@@ -36,13 +51,23 @@ function results:close()
 end
 
 function results:open()
-  local focused = self:focused()
-  if focused then
-    events.fire(constants.event.result_opened, focused)
+  local to_be_open = {}
+
+  if #self.selected_lines == 0 then
+    table.insert(to_be_open, self:focused())
   end
+
+  for _, value in ipairs(self.selected_lines) do
+    table.insert(to_be_open, self.parser(value))
+  end
+
+  events.fire(constants.event.results_opened, to_be_open)
+
+  self.selected_lines = {}
 end
 
 function results:reset()
+  self.selected_lines = {}
   vim.api.nvim_buf_set_lines(self.buf, 0, -1, true, {})
 end
 
@@ -70,6 +95,7 @@ function results.new()
   local v = setmetatable({ keys = {} }, results)
 
   v.buf = vim.api.nvim_create_buf(false, true)
+  v.selected_lines = {}
 
   events.on(v, constants.event.layout_updated, results.update)
   events.on(v, constants.event.input_changed, results.reset)

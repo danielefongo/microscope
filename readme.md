@@ -31,6 +31,7 @@ On lazy.vim
         ["<a-k>"] = actions.scroll_up,
         ["<tab>"] = actions.open,
         ["<esc>"] = actions.close,
+        ["<tab>"] = actions.select,
       },
     })
 

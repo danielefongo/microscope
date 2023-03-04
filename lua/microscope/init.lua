@@ -23,7 +23,9 @@ function microscope:open(data)
   self:close()
   vim.api.nvim_set_current_win(self.old_win)
   vim.api.nvim_set_current_buf(self.old_buf)
-  self.open_fn(data, self.old_win, self.old_buf)
+  for _, value in ipairs(data) do
+    self.open_fn(value, self.old_win, self.old_buf)
+  end
 end
 
 function microscope:search(text)
@@ -66,7 +68,7 @@ function microscope:finder(opts)
     self.results = results.new()
     self.input = input.new()
 
-    events.on(self, constants.event.result_opened, microscope.open)
+    events.on(self, constants.event.results_opened, microscope.open)
     events.on(self, constants.event.input_changed, microscope.search)
     events.native(self, constants.event.resize, microscope.update)
     events.native(self, constants.event.buf_leave, microscope.close, { buffer = self.input.buf })

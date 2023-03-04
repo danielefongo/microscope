@@ -21,6 +21,11 @@ function actions.open(microscope)
   microscope.results:open()
 end
 
+function actions.select(microscope)
+  microscope.results:select()
+  microscope.results:focus(constants.DOWN)
+end
+
 function actions.close(microscope)
   microscope:close()
 end
