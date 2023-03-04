@@ -36,7 +36,10 @@ function results:close()
 end
 
 function results:open()
-  events.fire(constants.event.result_opened, self:focused())
+  local focused = self:focused()
+  if focused then
+    events.fire(constants.event.result_opened, focused)
+  end
 end
 
 function results:reset()
