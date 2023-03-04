@@ -87,6 +87,7 @@ function results:update(opts)
     vim.api.nvim_win_set_config(self.win, layout)
   end
 
+  self:focus_line(1)
   vim.api.nvim_buf_set_option(self.buf, "buftype", "prompt")
   vim.api.nvim_win_set_option(self.win, "cursorline", true)
 end
