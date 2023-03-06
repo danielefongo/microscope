@@ -17,6 +17,7 @@ end
 function microscope:close()
   events.clear_module(self)
   events.fire(constants.event.microscope_closed)
+  self:stop_search()
 end
 
 function microscope:open(data)
@@ -28,10 +29,14 @@ function microscope:open(data)
   end
 end
 
-function microscope:search(text)
+function microscope:stop_search()
   if self.find then
     self.find:stop()
   end
+end
+
+function microscope:search(text)
+  self:stop_search()
   self.find = stream.chain(self.chain_fn(text), function(list, parser)
     if #list > 0 then
       events.fire(constants.event.results_retrieved, { list = list, parser = parser })
