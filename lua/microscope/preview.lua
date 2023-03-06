@@ -10,6 +10,7 @@ function preview:close()
 end
 
 function preview:show(data)
+  vim.api.nvim_buf_set_option(self.buf, "syntax", "off")
   self.preview_fun(data, self.win, self.buf)
 end
 
