@@ -1,20 +1,27 @@
-local constants = require("microscope.constants")
 local actions = {}
 
 function actions.previous(microscope)
-  microscope.results:focus(constants.UP)
+  local actual_cursor = microscope.results:get_cursor()
+  local cursor = { actual_cursor[1] - 1, actual_cursor[2] }
+  microscope.results:set_cursor(cursor)
 end
 
 function actions.next(microscope)
-  microscope.results:focus(constants.DOWN)
+  local actual_cursor = microscope.results:get_cursor()
+  local cursor = { actual_cursor[1] + 1, actual_cursor[2] }
+  microscope.results:set_cursor(cursor)
 end
 
 function actions.scroll_down(microscope)
-  microscope.preview:scroll(constants.DOWN, 10)
+  local actual_cursor = microscope.preview:get_cursor()
+  local cursor = { actual_cursor[1] + 10, actual_cursor[2] }
+  microscope.preview:set_cursor(cursor)
 end
 
 function actions.scroll_up(microscope)
-  microscope.preview:scroll(constants.UP, 10)
+  local actual_cursor = microscope.preview:get_cursor()
+  local cursor = { actual_cursor[1] - 10, actual_cursor[2] }
+  microscope.preview:set_cursor(cursor)
 end
 
 function actions.open(microscope)
@@ -23,7 +30,7 @@ end
 
 function actions.select(microscope)
   microscope.results:select()
-  microscope.results:focus(constants.DOWN)
+  actions.next(microscope)
 end
 
 function actions.close(microscope)

@@ -1,6 +1,5 @@
 local stream = require("microscope.stream")
 local files_lists = require("microscope.files.lists")
-local lists = require("microscope.lists")
 local highlight = require("microscope.files.highlight")
 
 local files = {}
@@ -42,7 +41,7 @@ function files.open(data, win, _)
   end
 end
 
-function files.preview(data, win, buf)
+function files.preview(data, window)
   local cursor
   if data.col and data.row then
     cursor = { data.row, data.col }
@@ -51,17 +50,17 @@ function files.preview(data, win, buf)
   end
 
   if not exists(data.text) then
-    vim.api.nvim_buf_set_lines(buf, 0, -1, true, { "Not existing" })
+    window:write({ "Not existing" })
     return
   end
 
   if is_binary(data.text) then
-    vim.api.nvim_buf_set_lines(buf, 0, -1, true, { "Binary" })
+    window:write({ "Binary" })
     return
   end
 
   if too_big(data.text) then
-    vim.api.nvim_buf_set_lines(buf, 0, -1, true, { "Too big" })
+    window:write({ "Too big" })
     return
   end
 
@@ -70,9 +69,9 @@ function files.preview(data, win, buf)
   end
 
   files.stream = stream.chain({ files_lists.cat(data.text) }, function(lines)
-    vim.api.nvim_buf_set_lines(buf, 0, -1, true, lines)
-    highlight(data.text, buf)
-    vim.api.nvim_win_set_cursor(win, cursor)
+    window:write(lines)
+    highlight(data.text, window.buf)
+    window:set_cursor(cursor)
   end)
 
   files.stream:start()

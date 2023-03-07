@@ -1,6 +1,4 @@
 return {
-  UP = 1,
-  DOWN = 2,
   event = {
     resize = "VimResized",
     buf_leave = "BufLeave",
