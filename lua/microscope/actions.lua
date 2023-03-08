@@ -24,6 +24,10 @@ function actions.scroll_up(microscope)
   microscope.preview:set_cursor(cursor)
 end
 
+function actions.toggle_full_screen(microscope)
+  microscope:toggle_full_screen()
+end
+
 function actions.open(microscope)
   microscope.results:open()
 end

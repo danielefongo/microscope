@@ -8,7 +8,7 @@ The project is full of bugs and still in development (until I abandon the projec
 
 ## Configuration
 
-On lazy.vim
+On [lazy.nvim](https://github.com/folke/lazy.nvim)
 
 ```lua
 {
@@ -29,9 +29,10 @@ On lazy.vim
         ["<c-k>"] = actions.previous,
         ["<a-j>"] = actions.scroll_down,
         ["<a-k>"] = actions.scroll_up,
-        ["<tab>"] = actions.open,
+        ["<cr>"] = actions.open,
         ["<esc>"] = actions.close,
         ["<tab>"] = actions.select,
+        ["<c-f>"] = actions.toggle_full_screen,
       },
     })
 

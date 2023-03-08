@@ -48,7 +48,12 @@ function microscope:search(text)
 end
 
 function microscope:update()
-  local layout = shape.generate(self.size, self.preview_fn ~= nil)
+  local layout
+  if self.full_screen then
+    layout = shape.generate(vim.api.nvim_list_uis()[1], self.preview_fn ~= nil)
+  else
+    layout = shape.generate(self.size, self.preview_fn ~= nil)
+  end
 
   if layout then
     return events.fire(constants.event.layout_updated, layout)
@@ -56,6 +61,11 @@ function microscope:update()
     self:close()
     vim.api.nvim_err_writeln("microscope: window too small to display")
   end
+end
+
+function microscope:toggle_full_screen()
+  self.full_screen = not self.full_screen
+  self:update()
 end
 
 function microscope:finder(opts)
@@ -72,6 +82,8 @@ function microscope:finder(opts)
     end
     self.results = results.new()
     self.input = input.new()
+
+    self.full_screen = false
 
     events.on(self, constants.event.results_opened, microscope.open)
     events.on(self, constants.event.input_changed, microscope.search)

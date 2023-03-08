@@ -5,28 +5,39 @@ local constants = require("microscope.constants")
 local preview = {}
 setmetatable(preview, window)
 
-local function on_layout_updated(self, layout)
-  self.layout = layout.preview
-  self:show(self.layout)
-
-  self:set_win_opt("cursorline", true)
-end
-
 local function on_close(self)
   events.clear_module(self)
+  self.data = nil
   self:close()
 end
 
 local function on_result_focused(self, data)
+  self.data = data
   self:set_buf_opt("syntax", "off")
   self.preview_fun(data, self)
 end
 
 local function on_empty_results_retrieved(self)
+  self.data = nil
+  if self.term then
+    vim.fn.chanclose(self.term)
+  end
   self:clear()
 end
 
+local function on_layout_updated(self, layout)
+  self.layout = layout.preview
+  self:show(self.layout)
+
+  if self.data then
+    on_result_focused(self, self.data)
+  end
+
+  self:set_win_opt("cursorline", true)
+end
+
 function preview:write_term(lines)
+  self:clear()
   self.term = vim.api.nvim_open_term(self:get_buf(), {})
   self:set_buf_opt("modifiable", true)
 
