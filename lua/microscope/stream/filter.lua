@@ -16,6 +16,7 @@ function filter:start_fun()
   uv.read_start(self.input_stream, function(_, data)
     if data then
       self.output_stream:write(self.filter(data))
+    else
       close(self.output_stream)
     end
   end)
