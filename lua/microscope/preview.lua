@@ -1,3 +1,4 @@
+local ansiline = require("microscope.utils.ansiline")
 local window = require("microscope.window")
 local events = require("microscope.events")
 local constants = require("microscope.constants")
@@ -5,9 +6,9 @@ local preview = {}
 setmetatable(preview, window)
 
 local function on_layout_updated(self, layout)
-  self:show(layout.preview)
+  self.layout = layout.preview
+  self:show(self.layout)
 
-  self:set_buf_opt("buftype", "prompt")
   self:set_win_opt("cursorline", true)
 end
 
@@ -23,6 +24,19 @@ end
 
 local function on_empty_results_retrieved(self)
   self:clear()
+end
+
+function preview:write_term(lines)
+  self.term = vim.api.nvim_open_term(self:get_buf(), {})
+  self:set_buf_opt("modifiable", true)
+
+  for _, i in pairs(lines) do
+    vim.api.nvim_chan_send(self.term, ansiline(i, self.layout.width))
+  end
+
+  vim.defer_fn(function()
+    vim.api.nvim_win_set_cursor(self.win, { 1, 0 })
+  end, 10)
 end
 
 function preview.new(preview_fun)
