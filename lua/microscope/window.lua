@@ -42,7 +42,6 @@ end
 function window:write(lines, from, to)
   from = from or 0
   to = to or -1
-  vim.pretty_print(from, to)
   vim.api.nvim_buf_set_lines(self.buf, from, to, true, lines)
 end
 

@@ -1,6 +1,6 @@
 local stream = require("microscope.stream")
 local files_lists = require("microscope.files.lists")
-local highlight = require("microscope.files.highlight")
+local highlight = require("microscope.utils.highlight")
 
 local files = {}
 
