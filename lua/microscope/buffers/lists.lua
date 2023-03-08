@@ -2,7 +2,7 @@ local lists = {}
 
 function lists.buffers()
   return {
-    fun = function()
+    fun = function(on_data)
       local bufs = {}
       local buf_ids = vim.api.nvim_list_bufs()
       for _, id in ipairs(buf_ids) do
@@ -10,7 +10,7 @@ function lists.buffers()
           table.insert(bufs, id .. ": " .. vim.api.nvim_buf_get_name(id))
         end
       end
-      return bufs
+      on_data(bufs)
     end,
     parser = function(data)
       local elements = vim.split(data.text, ":", {})

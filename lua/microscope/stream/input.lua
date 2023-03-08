@@ -10,8 +10,10 @@ function input:stop()
 end
 
 function input:start_fun()
-  self.output_stream:write(table.concat(self.fun(), "\n"))
-  close(self.output_stream)
+  self.fun(function(data)
+    self.output_stream:write(table.concat(data, "\n"))
+    close(self.output_stream)
+  end)
 end
 
 function input:start_cmd()
