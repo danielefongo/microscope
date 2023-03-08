@@ -64,7 +64,7 @@ function microscope:finder(opts)
     self.old_buf = vim.api.nvim_get_current_buf()
 
     self.chain_fn = opts.chain
-    self.open_fn = opts.open
+    self.open_fn = opts.open or function() end
     self.preview_fn = opts.preview
 
     if self.preview_fn then
