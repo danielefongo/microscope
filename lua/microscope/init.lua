@@ -37,7 +37,7 @@ end
 
 function microscope:search(text)
   self:stop_search()
-  self.find = stream.chain(self.chain_fn(text), function(list, parser)
+  self.find = stream.chain(self.chain_fn(text, self.old_win, self.old_buf), function(list, parser)
     if #list > 0 then
       events.fire(constants.event.results_retrieved, { list = list, parser = parser })
     else
