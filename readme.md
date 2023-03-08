@@ -14,12 +14,13 @@ On [lazy.nvim](https://github.com/folke/lazy.nvim)
 {
   "danielefongo/microscope",
   config = function()
+    local microscope = require("microscope")
     local actions = require("microscope.actions")
 
     local lists = require("microscope.lists")
     local files = require("microscope.files")
 
-    local view = require("microscope").setup({
+    microscope.setup({
       size = {
         width = 50,
         height = 10,
@@ -39,7 +40,7 @@ On [lazy.nvim](https://github.com/folke/lazy.nvim)
     vim.keymap.set(
       "n",
       "<leader>of",
-      view:finder({
+      microscope.finder({
         chain = function(text)
           return { files.lists.rg(), lists.fzf(text), lists.head(10) }
         end,

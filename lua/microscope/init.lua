@@ -68,8 +68,13 @@ function microscope:toggle_full_screen()
   self:update()
 end
 
-function microscope:finder(opts)
+function microscope.finder(opts)
   return function()
+    local self = setmetatable({ keys = {} }, microscope)
+
+    self.size = microscope.size
+    self.bindings = microscope.bindings
+
     self.old_win = vim.api.nvim_get_current_win()
     self.old_buf = vim.api.nvim_get_current_buf()
 
@@ -99,12 +104,10 @@ function microscope:finder(opts)
 end
 
 function microscope.setup(opts)
-  local v = setmetatable({ keys = {} }, microscope)
+  microscope.size = opts.size
+  microscope.bindings = opts.bindings
 
-  v.size = opts.size
-  v.bindings = opts.bindings
-
-  return v
+  return microscope
 end
 
 return microscope
