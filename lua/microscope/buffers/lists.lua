@@ -16,7 +16,7 @@ function lists.buffers()
       local elements = vim.split(data.text, ":", {})
 
       return {
-        text = elements[2],
+        text = data.text,
         buffer = tonumber(elements[1]) + 0,
       }
     end,

@@ -6,9 +6,8 @@ setmetatable(results, window)
 
 local function get_focused(self)
   local cursor = self:get_cursor()[1]
-  local line = self:read(cursor - 1, cursor)[1]
-  if line and line ~= "" then
-    return self.parser(line)
+  if self.data and self.data[cursor] then
+    return self.data[cursor]
   end
 end
 
@@ -20,33 +19,43 @@ local function on_layout_updated(self, layout)
 end
 
 local function on_input_changed(self)
-  self.selected_lines = {}
+  self.data = {}
+  self.selected_data = {}
+
   self:clear()
 end
 
 local function on_results_retrieved(self, data)
-  self.parser = data.parser
+  self.data = data
 
-  self:write(data.list)
+  local list = {}
+  for _, el in pairs(self.data) do
+    table.insert(list, el.text)
+  end
+
+  self:write(list)
   self:set_cursor({ 1, 0 })
 end
 
 local function on_close(self)
+  self.data = {}
+  self.selected_data = {}
+
   events.clear_module(self)
   self:close()
 end
 
 function results:select()
   local row = self:get_cursor()[1]
-  local line = self:read(row - 1, row)[1]
+  local element = self.data[row]
 
-  if line then
-    if not self.selected_lines[row] then
-      self:write({ "> " .. line }, row - 1, row)
-      self.selected_lines[row] = line
+  if element then
+    if not self.selected_data[row] then
+      self:write({ "> " .. element.text }, row - 1, row)
+      self.selected_data[row] = element
     else
-      self:write({ self.selected_lines[row] }, row - 1, row)
-      self.selected_lines[row] = nil
+      self:write({ self.selected_data[row].text }, row - 1, row)
+      self.selected_data[row] = nil
     end
   end
 end
@@ -54,17 +63,17 @@ end
 function results:open()
   local to_be_open = {}
 
-  if #self.selected_lines == 0 then
+  if #self.selected_data == 0 then
     table.insert(to_be_open, get_focused(self))
   end
 
-  for _, value in pairs(self.selected_lines) do
-    table.insert(to_be_open, self.parser(value))
+  for _, value in pairs(self.selected_data) do
+    table.insert(to_be_open, value)
   end
 
   events.fire(constants.event.results_opened, to_be_open)
 
-  self.selected_lines = {}
+  self.selected_data = {}
 end
 
 function results:set_cursor(cursor)

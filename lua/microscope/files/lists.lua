@@ -28,7 +28,7 @@ function files.vimgrep(text)
       local elements = vim.split(data.text, ":", {})
 
       return {
-        text = elements[1],
+        text = data.text,
         file = elements[1],
         row = tonumber(elements[2]),
         col = tonumber(elements[3]),
