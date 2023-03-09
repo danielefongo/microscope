@@ -37,17 +37,33 @@ On [lazy.nvim](https://github.com/folke/lazy.nvim)
       },
     })
 
-    vim.keymap.set(
-      "n",
-      "<leader>of",
-      microscope.finder({
+    -- binding mode 1
+    local files_finder = microscope.finder({
+      chain = function(text)
+        return { files.lists.rg(), lists.fzf(text), lists.head(10) }
+      end,
+      open = files.open,
+      preview = files.preview,
+    })
+    vim.keymap.set("n", "<leader>of", files_finder)
+
+    -- binding mode 2
+    microscope.register({
+      files = {
         chain = function(text)
           return { files.lists.rg(), lists.fzf(text), lists.head(10) }
         end,
         open = files.open,
         preview = files.preview,
-      })
-    )
+      },
+      second_finder = { ... }
+    })
+    microscope.register({
+      third_finder = { ... }
+    })
+    vim.keymap.set("n", "<leader>of", microscope.finders.files)
+    vim.keymap.set("n", "<leader>o2", microscope.finders.second_finder)
+    vim.keymap.set("n", "<leader>o3", microscope.finders.third_finder)
   end,
 }
 ```

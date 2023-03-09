@@ -7,6 +7,7 @@ local stream = require("microscope.stream")
 local shape = require("microscope.shape")
 local microscope = {}
 microscope.__index = microscope
+microscope.finders = {}
 
 function microscope:bind_action(fun)
   return function()
@@ -112,6 +113,16 @@ function microscope.setup(opts)
   microscope.bindings = opts.bindings
 
   return microscope
+end
+
+function microscope.register(finders_opts)
+  for name, opts in pairs(finders_opts) do
+    if microscope.finders[name] then
+      vim.api.nvim_err_writeln(string.format("microscope: %s already registered", name))
+      return
+    end
+    microscope.finders[name] = microscope.finder(opts)
+  end
 end
 
 return microscope
