@@ -4,6 +4,12 @@ function files.rg()
   return {
     command = "rg",
     args = { "--files", "--color", "never" },
+    parser = function(data)
+      return {
+        text = data.text,
+        file = data.text,
+      }
+    end,
   }
 end
 
@@ -23,6 +29,7 @@ function files.vimgrep(text)
 
       return {
         text = elements[1],
+        file = elements[1],
         row = tonumber(elements[2]),
         col = tonumber(elements[3]),
       }

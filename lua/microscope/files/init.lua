@@ -34,7 +34,7 @@ local function is_binary(path)
 end
 
 function files.open(data, win, _)
-  vim.cmd("e " .. data.text)
+  vim.cmd("e " .. data.file)
   if data.row and data.col then
     local cursor = { data.row, data.col }
     vim.api.nvim_win_set_cursor(win, cursor)
@@ -49,17 +49,17 @@ function files.preview(data, window)
     cursor = { 1, 0 }
   end
 
-  if not exists(data.text) then
+  if not exists(data.file) then
     window:write({ "Not existing" })
     return
   end
 
-  if is_binary(data.text) then
+  if is_binary(data.file) then
     window:write({ "Binary" })
     return
   end
 
-  if too_big(data.text) then
+  if too_big(data.file) then
     window:write({ "Too big" })
     return
   end
@@ -68,9 +68,9 @@ function files.preview(data, window)
     files.stream:stop()
   end
 
-  files.stream = stream.chain({ files_lists.cat(data.text) }, function(lines)
+  files.stream = stream.chain({ files_lists.cat(data.file) }, function(lines)
     window:write(lines)
-    highlight(data.text, window.buf)
+    highlight(data.file, window.buf)
     window:set_cursor(cursor)
   end)
 
