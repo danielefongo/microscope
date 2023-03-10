@@ -118,8 +118,7 @@ end
 function microscope.register(finders_opts)
   for name, opts in pairs(finders_opts) do
     if microscope.finders[name] then
-      vim.api.nvim_err_writeln(string.format("microscope: %s already registered", name))
-      return
+      vim.api.nvim_out_write(string.format("microscope: %s overwritten\n", name))
     end
     microscope.finders[name] = microscope.finder(opts)
   end
