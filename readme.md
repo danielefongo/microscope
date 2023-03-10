@@ -13,17 +13,21 @@ On [lazy.nvim](https://github.com/folke/lazy.nvim)
 ```lua
 {
   "danielefongo/microscope",
+  dependencies = {
+    "danielefongo/microscope-files",
+    "danielefongo/microscope-buffers",
+  },
   config = function()
     local microscope = require("microscope")
     local actions = require("microscope.actions")
 
-    local lists = require("microscope.lists")
-    local files = require("microscope.files")
+    local files = require("microscope-files")
+    local buffers = require("microscope-buffers")
 
     microscope.setup({
       size = {
-        width = 50,
-        height = 10,
+        width = 80,
+        height = 30,
       },
       bindings = {
         ["<c-j>"] = actions.next,
@@ -37,33 +41,29 @@ On [lazy.nvim](https://github.com/folke/lazy.nvim)
       },
     })
 
-    -- binding mode 1
-    local files_finder = microscope.finder({
-      chain = function(text)
-        return { files.lists.rg(), lists.fzf(text), lists.head(10) }
-      end,
-      open = files.open,
-      preview = files.preview,
-    })
-    vim.keymap.set("n", "<leader>of", files_finder)
-
-    -- binding mode 2
-    microscope.register({
-      files = {
-        chain = function(text)
-          return { files.lists.rg(), lists.fzf(text), lists.head(10) }
-        end,
-        open = files.open,
-        preview = files.preview,
-      },
-      second_finder = { ... }
-    })
-    microscope.register({
-      third_finder = { ... }
-    })
-    vim.keymap.set("n", "<leader>of", microscope.finders.files)
-    vim.keymap.set("n", "<leader>o2", microscope.finders.second_finder)
-    vim.keymap.set("n", "<leader>o3", microscope.finders.third_finder)
+    microscope.register(files.finders)
+    microscope.register(buffers.finders)
+    vim.keymap.set("n", "<leader>of", microscope.finders.file)
+    vim.keymap.set("n", "<leader>oo", microscope.finders.old_file)
   end,
 }
+```
+
+You can create your own finder
+
+```lua
+local files = require("microscope-files")
+local buffers = require("microscope-buffers")
+local lists = require("microscope.lists")
+
+microscope.register({
+  files = {
+    chain = function(text)
+      return { files.lists.rg(), lists.fzf(text), lists.head(10) }
+    end,
+    open = files.open,
+    preview = files.preview.cat,
+  },
+  second_finder = { ... }
+})
 ```
