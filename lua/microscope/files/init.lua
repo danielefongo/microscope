@@ -1,5 +1,4 @@
 local stream = require("microscope.stream")
-local files_lists = require("microscope.files.lists")
 local highlight = require("microscope.utils.highlight")
 
 local files = {}
@@ -68,7 +67,9 @@ function files.preview(data, window)
     files.stream:stop()
   end
 
-  files.stream = stream.chain({ files_lists.cat(data.file) }, function(lines)
+  files.stream = stream.chain({
+    { command = "cat", args = { data.file } },
+  }, function(lines)
     window:write(lines)
     highlight(data.file, window.buf)
     window:set_cursor(cursor)
