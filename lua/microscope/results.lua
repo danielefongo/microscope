@@ -39,7 +39,7 @@ local function on_results_retrieved(self, data)
 
   for row = 1, vim.api.nvim_buf_line_count(self.buf), 1 do
     for _, hl in pairs(data[row].highlights or {}) do
-      highlight.set_buf_hl(self.buf, hl.color, row, hl.from, hl.to)
+      self:set_buf_hl(hl.color, row, hl.from, hl.to)
     end
   end
 end
@@ -61,13 +61,13 @@ function results:select()
       self:write({ "> " .. element.text }, row - 1, row)
       self.selected_data[row] = element
       for _, hl in pairs(self.data[row].highlights or {}) do
-        highlight.set_buf_hl(self.buf, hl.color, row, hl.from + 2, hl.to + 2)
+        self:set_buf_hl(hl.color, row, hl.from + 2, hl.to + 2)
       end
     else
       self:write({ element.text }, row - 1, row)
       self.selected_data[row] = nil
       for _, hl in pairs(self.data[row].highlights or {}) do
-        highlight.set_buf_hl(self.buf, hl.color, row, hl.from, hl.to)
+        self:set_buf_hl(hl.color, row, hl.from, hl.to)
       end
     end
   end

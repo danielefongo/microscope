@@ -1,9 +1,5 @@
 local highlight = {}
 
-function highlight.set_buf_hl(buf, color, line, from, to)
-  vim.api.nvim_buf_add_highlight(buf, 0, color, line - 1, from - 1, to)
-end
-
 function highlight:hl(color, from, to)
   to = to or from + 1
   table.insert(self.highlights, {

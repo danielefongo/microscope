@@ -44,7 +44,7 @@ function input.new(opts)
 
   s.parser = function(x)
     local parser = opts.parser or identity
-    return parser({ text = x:gsub("^%s*(.-)%s*$", "%1") })
+    return parser({ text = x:gsub("^(%s*.-)%s*$", "%1") })
   end
 
   return s

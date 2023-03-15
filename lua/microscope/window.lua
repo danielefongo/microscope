@@ -1,5 +1,9 @@
 local window = {}
 
+function window:set_buf_hl(color, line, from, to)
+  vim.api.nvim_buf_add_highlight(self.buf, 0, color, line - 1, from - 1, to)
+end
+
 function window:set_win_opt(key, value)
   vim.api.nvim_win_set_option(self.win, key, value)
 end
