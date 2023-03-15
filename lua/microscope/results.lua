@@ -1,6 +1,7 @@
 local window = require("microscope.window")
 local events = require("microscope.events")
 local constants = require("microscope.constants")
+local highlight = require("microscope.highlight")
 local results = {}
 setmetatable(results, window)
 
@@ -35,6 +36,12 @@ local function on_results_retrieved(self, data)
 
   self:write(list)
   self:set_cursor({ 1, 0 })
+
+  for row = 1, vim.api.nvim_buf_line_count(self.buf), 1 do
+    for _, hl in pairs(data[row].highlights or {}) do
+      highlight.set_buf_hl(self.buf, hl.color, row, hl.from, hl.to)
+    end
+  end
 end
 
 local function on_close(self)
@@ -53,9 +60,15 @@ function results:select()
     if not self.selected_data[row] then
       self:write({ "> " .. element.text }, row - 1, row)
       self.selected_data[row] = element
+      for _, hl in pairs(self.data[row].highlights or {}) do
+        highlight.set_buf_hl(self.buf, hl.color, row, hl.from + 2, hl.to + 2)
+      end
     else
-      self:write({ self.selected_data[row].text }, row - 1, row)
+      self:write({ element.text }, row - 1, row)
       self.selected_data[row] = nil
+      for _, hl in pairs(self.data[row].highlights or {}) do
+        highlight.set_buf_hl(self.buf, hl.color, row, hl.from, hl.to)
+      end
     end
   end
 end
