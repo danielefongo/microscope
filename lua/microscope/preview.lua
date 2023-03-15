@@ -13,15 +13,15 @@ end
 
 local function on_result_focused(self, data)
   self.data = data
+
   self:set_buf_opt("syntax", "off")
+  self:set_win_opt("scrolloff", 10000)
   self.preview_fun(data, self)
 end
 
 local function on_empty_results_retrieved(self)
   self.data = nil
-  if self.term then
-    vim.fn.chanclose(self.term)
-  end
+
   self:clear()
 end
 
