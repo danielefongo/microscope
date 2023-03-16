@@ -54,7 +54,9 @@ function events.clear_module(module)
 end
 
 function events.fire(evt, data)
-  vim.api.nvim_exec_autocmds("User", { group = events.group, pattern = evt, data = data })
+  vim.schedule(function()
+    vim.api.nvim_exec_autocmds("User", { group = events.group, pattern = evt, data = data })
+  end)
 end
 
 return events

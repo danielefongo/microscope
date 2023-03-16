@@ -1,4 +1,5 @@
 local constants = require("microscope.constants")
+local error = require("microscope.error")
 local preview = require("microscope.preview")
 local results = require("microscope.results")
 local events = require("microscope.events")
@@ -19,6 +20,11 @@ function microscope:close()
   events.clear_module(self)
   events.fire(constants.event.microscope_closed)
   self:stop_search()
+end
+
+function microscope:close_with_err(error_data)
+  self:close()
+  error.show(error_data)
 end
 
 function microscope:open(data)
@@ -63,8 +69,7 @@ function microscope:update()
   if layout then
     return events.fire(constants.event.layout_updated, layout)
   else
-    self:close()
-    vim.api.nvim_err_writeln("microscope: window too small to display")
+    error.generic("microscope: window too small to display")
   end
 end
 
@@ -97,6 +102,7 @@ function microscope.finder(opts)
 
     events.on(self, constants.event.results_opened, microscope.open)
     events.on(self, constants.event.input_changed, microscope.search)
+    events.on(self, constants.event.error, microscope.close_with_err)
     events.native(self, constants.event.resize, microscope.update)
     events.native(self, constants.event.buf_leave, microscope.close, { buffer = self.input.buf })
 

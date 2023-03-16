@@ -54,6 +54,7 @@ function window:read(from, to)
 end
 
 function window:show(opts, enter)
+  self.opened = true
   self.layout = opts
 
   if not self.win then
@@ -64,6 +65,9 @@ function window:show(opts, enter)
 end
 
 function window:close()
+  if not self.opened then
+    return
+  end
   vim.api.nvim_win_set_buf(self.win, self.buf)
   vim.api.nvim_buf_delete(self.buf, { force = true })
   self.win = nil
@@ -72,6 +76,8 @@ end
 
 function window.new()
   local w = setmetatable({ keys = {} }, window)
+
+  w.opened = false
 
   return w
 end

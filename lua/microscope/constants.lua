@@ -9,6 +9,7 @@ return {
     results_opened = "ResultsOpened",
     layout_updated = "LayoutUpdated",
     input_changed = "InputChanged",
+    error = "Error",
   },
   color = {
     match = "MicroscopeMatch",
