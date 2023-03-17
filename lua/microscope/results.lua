@@ -71,12 +71,16 @@ function results:select()
   end
 end
 
-function results:open()
+function results:selected()
   if #self.selected_data == 0 then
-    events.fire(constants.event.results_opened, { get_focused(self) })
+    return { get_focused(self) }
   else
-    events.fire(constants.event.results_opened, self.selected_data)
+    return self.selected_data
   end
+end
+
+function results:open()
+  events.fire(constants.event.results_opened, self:selected())
 
   self.selected_data = {}
 end
