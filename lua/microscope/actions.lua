@@ -41,4 +41,6 @@ function actions.close(microscope)
   microscope:close()
 end
 
+function actions.nothing(_) end
+
 return actions
