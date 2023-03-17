@@ -23,7 +23,9 @@ function microscope:close()
 end
 
 function microscope:close_with_err(error_data)
-  self:close()
+  if error_data.critical then
+    self:close()
+  end
   error.show(error_data)
 end
 
@@ -65,7 +67,7 @@ function microscope:update()
   if layout then
     return events.fire(constants.event.layout_updated, layout)
   else
-    error.generic("microscope: window too small to display")
+    error.critical("microscope: window too small to display")
   end
 end
 
