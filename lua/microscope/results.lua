@@ -1,7 +1,6 @@
 local window = require("microscope.window")
 local events = require("microscope.events")
 local constants = require("microscope.constants")
-local highlight = require("microscope.highlight")
 local results = {}
 setmetatable(results, window)
 
@@ -29,10 +28,9 @@ end
 local function on_results_retrieved(self, data)
   self.data = data
 
-  local list = {}
-  for _, el in pairs(self.data) do
-    table.insert(list, el.text)
-  end
+  local list = vim.tbl_map(function(el)
+    return el.text
+  end, self.data)
 
   self:write(list)
   self:set_cursor({ 1, 0 })
@@ -74,17 +72,11 @@ function results:select()
 end
 
 function results:open()
-  local to_be_open = {}
-
   if #self.selected_data == 0 then
-    table.insert(to_be_open, get_focused(self))
+    events.fire(constants.event.results_opened, { get_focused(self) })
+  else
+    events.fire(constants.event.results_opened, self.selected_data)
   end
-
-  for _, value in pairs(self.selected_data) do
-    table.insert(to_be_open, value)
-  end
-
-  events.fire(constants.event.results_opened, to_be_open)
 
   self.selected_data = {}
 end

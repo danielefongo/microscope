@@ -46,11 +46,7 @@ function microscope:search(text)
   self:stop_search()
   self.find = stream.chain(self.chain_fn(text, self.old_win, self.old_buf), function(list, parser)
     if #list > 0 then
-      local parsed = {}
-      for _, el in pairs(list) do
-        table.insert(parsed, parser(el))
-      end
-      events.fire(constants.event.results_retrieved, parsed)
+      events.fire(constants.event.results_retrieved, vim.tbl_map(parser, list))
     else
       events.fire(constants.event.empty_results_retrieved)
     end
