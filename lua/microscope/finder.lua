@@ -20,6 +20,7 @@ function finder:close()
   events.clear_module(self)
   events.fire(constants.event.microscope_closed)
   self:stop_search()
+  finder.instance = nil
 end
 
 function finder:close_with_err(error_data)
@@ -78,6 +79,11 @@ end
 
 function finder.new(global_opts, opts)
   local self = setmetatable({ keys = {} }, finder)
+
+  if finder.instance then
+    return
+  end
+  finder.instance = self
 
   self.size = global_opts.size
   self.bindings = global_opts.bindings
