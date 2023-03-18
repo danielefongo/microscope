@@ -54,16 +54,16 @@ You can create your own finder
 ```lua
 local files = require("microscope-files")
 local buffers = require("microscope-buffers")
-local lists = require("microscope.lists")
+local steps = require("microscope.steps")
 
 microscope.register({
   files = {
     chain = function(text)
-      return { files.lists.rg(), lists.fzf(text), lists.head(10) }
+      return { files.steps.rg(), steps.fzf(text), steps.head(10) }
     end,
     open = files.open,
     preview = files.preview.cat,
   },
-  second_finder = { ... }
+  second_finder = { ... },
 })
 ```

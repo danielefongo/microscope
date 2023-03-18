@@ -1,9 +1,9 @@
 local fzy = require("microscope.utils.fzy")
 local highlight = require("microscope.highlight")
 local constants = require("microscope.constants")
-local lists = {}
+local steps = {}
 
-function lists.fzf(text)
+function steps.fzf(text)
   return {
     command = "fzf",
     args = { "--filter", text },
@@ -24,11 +24,11 @@ function lists.fzf(text)
   }
 end
 
-function lists.head(lines)
+function steps.head(lines)
   return {
     command = "head",
     args = { "-n", lines },
   }
 end
 
-return lists
+return steps
