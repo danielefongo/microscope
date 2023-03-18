@@ -79,8 +79,8 @@ function results:selected()
   end
 end
 
-function results:open()
-  events.fire(constants.event.results_opened, self:selected())
+function results:open(metadata)
+  events.fire(constants.event.results_opened, { selected = self:selected(), metadata = metadata })
 
   self.selected_data = {}
 end

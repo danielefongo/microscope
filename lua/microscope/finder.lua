@@ -34,8 +34,8 @@ function finder:open(data)
   self:close()
   vim.api.nvim_set_current_win(self.old_win)
   vim.api.nvim_set_current_buf(self.old_buf)
-  for _, value in ipairs(data) do
-    self.open_fn(value, self.old_win, self.old_buf)
+  for _, value in ipairs(data.selected) do
+    self.open_fn(value, self.old_win, self.old_buf, data.metadata)
   end
 end
 
