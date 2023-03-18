@@ -77,7 +77,7 @@ function finder:toggle_full_screen()
   self:update()
 end
 
-function finder.new(global_opts, opts)
+function finder.new(opts)
   local self = setmetatable({ keys = {} }, finder)
 
   if finder.instance then
@@ -85,15 +85,14 @@ function finder.new(global_opts, opts)
   end
   finder.instance = self
 
-  self.size = global_opts.size
-  self.bindings = global_opts.bindings
-
-  self.old_win = vim.api.nvim_get_current_win()
-  self.old_buf = vim.api.nvim_get_current_buf()
-
+  self.size = opts.size
+  self.bindings = opts.bindings
   self.chain_fn = opts.chain
   self.open_fn = opts.open or function() end
   self.preview_fn = opts.preview
+
+  self.old_win = vim.api.nvim_get_current_win()
+  self.old_buf = vim.api.nvim_get_current_buf()
 
   if self.preview_fn then
     self.preview = preview.new(self.preview_fn)

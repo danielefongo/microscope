@@ -2,14 +2,19 @@ local finder = require("microscope.finder")
 local microscope = {}
 microscope.opts = {}
 microscope.finders = {}
+microscope.__index = microscope
 
 function microscope:__call()
-  finder.new(microscope.opts, self.opts)
+  finder.new(vim.tbl_deep_extend("force", microscope.opts, self.opts))
+end
+
+function microscope:override(opts)
+  self.opts = vim.tbl_deep_extend("force", self.opts, opts)
 end
 
 function microscope.finder(opts)
   local self = setmetatable({ keys = {} }, microscope)
-  self.opts = opts
+  self.opts = vim.tbl_deep_extend("force", microscope.opts, opts)
   return self
 end
 
