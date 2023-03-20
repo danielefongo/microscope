@@ -21,7 +21,9 @@ end
 local function on_input_changed(self)
   self.data = {}
   self.selected_data = {}
+end
 
+local function on_empty_results_retrieved(self)
   self:clear()
 end
 
@@ -100,6 +102,7 @@ function results.new()
 
   events.on(v, constants.event.layout_updated, on_layout_updated)
   events.on(v, constants.event.input_changed, on_input_changed)
+  events.on(v, constants.event.empty_results_retrieved, on_empty_results_retrieved)
   events.on(v, constants.event.results_retrieved, on_results_retrieved)
   events.on(v, constants.event.microscope_closed, on_close)
 
