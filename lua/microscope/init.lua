@@ -8,6 +8,12 @@ function microscope:__call()
   finder.new(vim.tbl_deep_extend("force", microscope.opts, self.opts))
 end
 
+function microscope:bind()
+  return function()
+    self()
+  end
+end
+
 function microscope:override(opts)
   self.opts = vim.tbl_deep_extend("force", self.opts, opts)
 end

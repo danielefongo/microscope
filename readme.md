@@ -43,8 +43,8 @@ On [lazy.nvim](https://github.com/folke/lazy.nvim)
 
     microscope.register(files.finders)
     microscope.register(buffers.finders)
-    vim.keymap.set("n", "<leader>of", microscope.finders.file)
-    vim.keymap.set("n", "<leader>oo", microscope.finders.old_file)
+    vim.keymap.set("n", "<leader>of", microscope.finders.file:bind())
+    vim.keymap.set("n", "<leader>oo", microscope.finders.old_file:bind())
   end,
 }
 ```
