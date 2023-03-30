@@ -15,6 +15,7 @@ local function on_layout_updated(self, layout)
   self:show(layout.results)
 
   self:set_buf_opt("buftype", "prompt")
+  self:set_win_opt("scrolloff", 10000)
   self:set_win_opt("cursorline", true)
 end
 
