@@ -18,7 +18,7 @@ local function on_close(self)
 end
 
 function input:text()
-  return string.sub(vim.api.nvim_buf_get_lines(self.buf, 0, 1, false)[1], 3)
+  return vim.api.nvim_buf_get_lines(self.buf, 0, 1, false)[1]:sub(3):gsub("^%s*(%s*.-)%s*$", "%1")
 end
 
 function input.new(preview_fun)
