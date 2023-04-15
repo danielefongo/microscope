@@ -1,11 +1,11 @@
 local constants = require("microscope.constants")
 local error = require("microscope.error")
-local preview = require("microscope.preview")
-local results = require("microscope.results")
+local preview = require("microscope.ui.preview")
+local results = require("microscope.ui.results")
 local events = require("microscope.events")
-local input = require("microscope.input")
+local input = require("microscope.ui.input")
 local stream = require("microscope.stream")
-local shape = require("microscope.shape")
+local shape = require("microscope.ui.shape")
 local finder = {}
 finder.__index = finder
 finder.finders = {}

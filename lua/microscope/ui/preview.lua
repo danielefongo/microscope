@@ -1,5 +1,5 @@
 local ansiline = require("microscope.utils.ansiline")
-local window = require("microscope.window")
+local window = require("microscope.ui.window")
 local events = require("microscope.events")
 local constants = require("microscope.constants")
 local preview = {}
