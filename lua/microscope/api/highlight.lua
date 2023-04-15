@@ -1,4 +1,13 @@
 local highlight = {}
+highlight.color = {
+  match = "MicroscopeMatch",
+  color1 = "MicroscopeColor1",
+  color2 = "MicroscopeColor2",
+  color3 = "MicroscopeColor3",
+  color4 = "MicroscopeColor4",
+  color5 = "MicroscopeColor5",
+  color6 = "MicroscopeColor6",
+}
 
 function highlight:hl(color, from, to)
   to = to or from + 1

@@ -1,4 +1,3 @@
-local constants = require("microscope.constants")
 local events = require("microscope.events")
 local error = {}
 
@@ -7,11 +6,11 @@ local function command_args_to_string(command, args)
 end
 
 function error.generic(message)
-  events.fire(constants.event.error, { message = message, critical = false })
+  events.fire(events.event.error, { message = message, critical = false })
 end
 
 function error.critical(message)
-  events.fire(constants.event.error, { message = message, critical = true })
+  events.fire(events.event.error, { message = message, critical = true })
 end
 
 function error.command_not_found(command, args)

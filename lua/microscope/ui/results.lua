@@ -1,6 +1,5 @@
 local window = require("microscope.ui.window")
 local events = require("microscope.events")
-local constants = require("microscope.constants")
 local results = {}
 setmetatable(results, window)
 
@@ -79,12 +78,12 @@ function results:selected()
   if #self.selected_data == 0 then
     return { get_focused(self) }
   else
-    return self.selected_data
+    return vim.tbl_values(self.selected_data)
   end
 end
 
 function results:open(metadata)
-  events.fire(constants.event.results_opened, { selected = self:selected(), metadata = metadata })
+  events.fire(events.event.results_opened, { selected = self:selected(), metadata = metadata })
 
   self.selected_data = {}
 end
@@ -93,7 +92,7 @@ function results:set_cursor(cursor)
   window.set_cursor(self, cursor)
   local focused = get_focused(self)
   if focused then
-    events.fire(constants.event.result_focused, focused)
+    events.fire(events.event.result_focused, focused)
   end
 end
 
@@ -102,11 +101,11 @@ function results.new()
 
   v:new_buf()
 
-  events.on(v, constants.event.layout_updated, on_layout_updated)
-  events.on(v, constants.event.input_changed, on_input_changed)
-  events.on(v, constants.event.empty_results_retrieved, on_empty_results_retrieved)
-  events.on(v, constants.event.results_retrieved, on_results_retrieved)
-  events.on(v, constants.event.microscope_closed, on_close)
+  events.on(v, events.event.layout_updated, on_layout_updated)
+  events.on(v, events.event.input_changed, on_input_changed)
+  events.on(v, events.event.empty_results_retrieved, on_empty_results_retrieved)
+  events.on(v, events.event.results_retrieved, on_results_retrieved)
+  events.on(v, events.event.microscope_closed, on_close)
 
   return v
 end

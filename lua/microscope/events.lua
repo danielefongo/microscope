@@ -1,6 +1,18 @@
 local events = {}
 events.handlers = {}
 events.group = vim.api.nvim_create_augroup("Microscope", { clear = false })
+events.event = {
+  resize = "VimResized",
+  buf_leave = "BufLeave",
+  microscope_closed = "MicroscopeClosed",
+  results_retrieved = "ResultsRetrieved",
+  empty_results_retrieved = "EmptyResultsRetrieved",
+  result_focused = "ResultFocused",
+  results_opened = "ResultsOpened",
+  layout_updated = "LayoutUpdated",
+  input_changed = "InputChanged",
+  error = "Error",
+}
 
 local function set_handler(module, main_evt, evt, opts)
   if not events.handlers[module] then

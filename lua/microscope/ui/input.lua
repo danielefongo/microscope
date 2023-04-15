@@ -1,6 +1,5 @@
 local window = require("microscope.ui.window")
 local events = require("microscope.events")
-local constants = require("microscope.constants")
 local input = {}
 setmetatable(input, window)
 
@@ -27,12 +26,12 @@ function input.new(preview_fun)
   v.preview_fun = preview_fun
   v:new_buf()
 
-  events.on(v, constants.event.layout_updated, on_layout_updated)
-  events.on(v, constants.event.microscope_closed, on_close)
+  events.on(v, events.event.layout_updated, on_layout_updated)
+  events.on(v, events.event.microscope_closed, on_close)
 
   vim.api.nvim_buf_attach(v.buf, false, {
     on_lines = function()
-      events.fire(constants.event.input_changed, v:text())
+      events.fire(events.event.input_changed, v:text())
     end,
   })
 

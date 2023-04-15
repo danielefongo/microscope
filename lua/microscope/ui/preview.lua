@@ -1,7 +1,6 @@
 local ansiline = require("microscope.utils.ansiline")
 local window = require("microscope.ui.window")
 local events = require("microscope.events")
-local constants = require("microscope.constants")
 local preview = {}
 setmetatable(preview, window)
 
@@ -56,10 +55,10 @@ function preview.new(preview_fun)
   v.preview_fun = preview_fun
   v:new_buf()
 
-  events.on(v, constants.event.result_focused, on_result_focused)
-  events.on(v, constants.event.empty_results_retrieved, on_empty_results_retrieved)
-  events.on(v, constants.event.layout_updated, on_layout_updated)
-  events.on(v, constants.event.microscope_closed, on_close)
+  events.on(v, events.event.result_focused, on_result_focused)
+  events.on(v, events.event.empty_results_retrieved, on_empty_results_retrieved)
+  events.on(v, events.event.layout_updated, on_layout_updated)
+  events.on(v, events.event.microscope_closed, on_close)
 
   return v
 end

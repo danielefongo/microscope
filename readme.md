@@ -4,7 +4,7 @@ Micro fuzzy finder for neovim.
 
 ## Disclaimer
 
-The project is full of bugs and still in development (until I abandon the project, as always :D)
+The project is still in development, so expect the API to change.
 
 ## Base setup
 
@@ -19,7 +19,7 @@ On [lazy.nvim](https://github.com/folke/lazy.nvim)
   },
   config = function()
     local microscope = require("microscope")
-    local actions = require("microscope.actions")
+    local actions = require("microscope.builtin.actions")
 
     local files = require("microscope-files")
     local buffers = require("microscope-buffers")
@@ -57,13 +57,16 @@ Every finder can be defined using the following opts:
 
 ```lua
 local opts = {
-  chain = chain_fn, -- required
+  lens = lens_spec, -- required
+  parsers = list_of_parsers -- optional
   open = open_fn, -- optional
   preview = preview_fn, -- optional
   size = custom_size, -- optional, it will override/extend the microscope size option
   bindings = custom_bindings, -- optional, it will override/extend the microscope bindings option
 }
 ```
+
+These properties are defined below.
 
 #### Creation
 
@@ -110,97 +113,89 @@ finder:override({
 })
 ```
 
-### Chain function
+### Lens spec
 
-This function represents the heart of the plugin. It accepts the prompt text, the original winnr and bufnr and returns a list of [chain-steps](#chain-step). It uses [stream](#stream) under the hood.
+This element represents a spec for a [lens](#lens), which is used to retrieve or filter data (e.g. list of files or buffers) depending on the [request](#request). It is a table containing a [lens function](#lens-function) and a list of input lenses specs.
+
+```lua
+local lens = {
+  fun = function(flow, request)
+    -- logic
+  end,
+  inputs = { ... }, -- list of other lens specs, optional
+}
+```
 
 Example:
 
 ```lua
-local chain_fn = function(text, winnr, bufnr)
+local lenses = {}
+
+function lenses.rg(cwd)
   return {
-    { command = "ls" },
-    { command = "grep", args = { text } },
+    fun = function(flow, _)
+      flow.spawn({
+        cmd = "rg",
+        args = { "--files" },
+        cwd = cwd,
+      })
+    end,
   }
 end
+
+function lenses.fzf(...)
+  return {
+    fun = function(flow, request)
+      flow.spawn({
+        cmd = "fzf",
+        args = { "-f", request.text },
+      })
+    end,
+    inputs = { ... },
+  }
+end
+
+local my_lens = lenses.fzf(lenses.rg())
 ```
 
-#### Chain step
+### Parsers
 
-A single chain-step can be either a shell command or a lua function and can be concatenated with other chain-steps to build a pipeline.
+This is a list of [parser functions](#parser-function) to parse the data retrieved from the [lens](#lens).
 
-##### Chain step command
+#### Parser function
 
-```lua
-local chain_step = {
-    command = "ls",
-    args = { "." }, -- optional
-    parser = parser_fn, -- optional
-}
-```
-
-##### Chain step function
-
-This spec changes depending on whether it is a downstream chain-step or the first chain-step in the chain.
-
-The former can be defined like
-
-```lua
-local chain_step = {
-  fun = function(on_data_callback)
-    local data = { "first", "second" }
-    on_data_callback(data)
-  end,
-  parser = parser_fn, -- optional
-}
-```
-
-The latter can be defined like
-
-```lua
-local chain_step = {
-  filter = function(text)
-    return text .. " additional text"
-  end,
-  parser = parser_fn, -- optional
-}
-```
-
-##### Parser function
-
-This optional chain-step function accepts result data and transforms it by adding extra information. The first chain-step will receive a data containing only the `text` field. Each parser function must propagate this field, even if modified, as it will be used to render the result. The extra information can be something like `file` or whatever you want to add. The final data table will be passed to the [open function](#open-function) and to the [preview function](#preview-function).
+This function accepts result data and the original [request](#request) and transforms the data by adding extra information. The first parser will receive a data containing only the `text` field. Each parser function must propagate this field, even if unmodified, as it will be used to render the result. The extra information can be something like `file` or whatever you want to add. The final data table will be passed to the [open function](#open-function) and to the [preview function](#preview-function).
 
 There is another special data field, `highlights`, which should be propagated unless you want to remove it. It represents a list of highlights to be applied to the result. For more details see the [highlight section](#highlight).
 
 Example:
 
 ```lua
-local parser_fn = function(data)
+local parser_fn = function(data, _)
   local elements = vim.split(data.text, ":", {})
 
-  return {
-    text = data.text,
-    highlights = build_highlights(data),
-    buffer = tonumber(elements[1]),
-  }
+  data.highlights = build_highlights(data)
+  data.buffer = tonumber(elements[1])
+
+  return data
 end
 ```
 
 ### Open function
 
-This function will be called with the `open` action. It accepts a single result data obtained from the chain, the original winnr and bufnr and optional metadata (sent by results:open).
+This function will be called with the [open action](#actions). It accepts a single result data obtained from the parsers, the [request](#request) and optional metadata (sent by `results:open`).
 
 Example:
 
 ```lua
-local open_fn = function(data, winnr, bufnr, metadata)
+local open_fn = function(data, request, metadata)
   vim.cmd("e " .. data.file)
 end
 ```
 
 ### Preview function
 
-This function will be called whenever a result is focused. It accepts a single result data obtained from the chain and the `preview` microscope instance.
+This function will be called whenever a result is focused. It accepts a single result data obtained from the parsers and the `preview` microscope instance.
 
 Example:
 
@@ -223,7 +218,7 @@ This table contains shortcut bindings to microscope [actions](#action).
 Example:
 
 ```lua
-local actions = require("microscope.actions")
+local actions = require("microscope.builtin.actions")
 
 local bindings = {
   ["<c-j>"] = actions.next,
@@ -249,30 +244,182 @@ local close_action = function(microscope)
 end
 ```
 
+## Builtins
+
+### Lenses
+
+Microscope exposes a list of lens specs in `microscope.builtin.lenses`:
+
+- `fzf(...)`: filter results using fzf
+- `head(lines, ...)`: limit results
+
+### Actions
+
+Microscope exposes a list of actions in `microscope.builtin.actions`:
+
+- `previous`: go to the previous result
+- `next`: go to the next result
+- `scroll_down`: scroll down preview
+- `scroll_up`: scroll up preview
+- `toggle_full_screen`: toggle full screen
+- `open`: open selected results
+- `select`: select result
+- `close`: close finder
+
+### Parsers
+
+Microscope exposes a list of parsers in `microscope.builtin.parsers`:
+
+- `fuzzy`: highlights result
+
+## Request
+
+The **request** is an object containing:
+
+- `text`: the searched text
+- `buf`: the original bufnr
+- `win`: the original winnr
+
 ## API
 
-### Stream
+## Lens
 
-The module `microscope.stream` is a utility for building chains. It can be used to execute a pipeline and to perform an action with the obtained lines.
+A lens is used to retrieve or filter data (e.g. list of files or buffers) depending on the request and it can be piped into other lenses. It accepts a [lens spec](#lens-spec).
 
 Example:
 
 ```lua
-local stream = require("microscope.stream")
+local lens = require("microscope.api.lens")
 
-local cat_stream = stream.chain({
-  { command = "cat", args = { "myfile" } },
-}, function(lines)
-  do_smth(lines)
-end)
+local function rg(cwd)
+  return {
+    fun = function(flow, _)
+      flow.spawn({
+        cmd = "rg",
+        args = { "--files" },
+        cwd = cwd,
+      })
+    end,
+  }
+end
 
-cat_stream:start()
+local function fzf(...)
+  return {
+    fun = function(flow, request)
+      flow.spawn({
+        cmd = "fzf",
+        args = { "-f", request.text },
+      })
+    end,
+    inputs = { ... },
+  }
+end
 
--- to stop before completion
-cat_stream:stop()
+local my_lens = lens.new(fzf(rg()))
 ```
 
-This function can be useful, for example, on [preview function](#preview-function): you can write the lines obtained directly in the preview window.
+### Lens function
+
+The lens function has two parameters, the [flow](#flow) and the [request](#request).
+
+#### Flow
+
+The **flow** is a bag of functions:
+
+- `can_read`: returns true if there is at least one input lens.
+- `read`: returns [array_string](#array-string) or `nil` if there is no more input data.
+- `read_iter`: returns an iterator over `read`.
+- `read_array`: returns an array of lines or `nil` if there is no more input data.
+- `read_array_iter`: returns an iterator over `read_array`.
+- `write`: it accepts an [array_string](#array-string) or a list of lines and propagate the data (e.g. to the next lens).
+- `stop`: stop the flow.
+- `stopped`: returns true if the flow is stopped (e.g. you close the finder before reaching the end of the lens function).
+- `fn`: executes a vim function passing varargs and returns its result.
+
+  > This is required because one cannot execute vim functions like `vim.api.nvim_buf_get_name` inside corutines.
+
+  ```lua
+  -- synthetic way
+  local filename = flow.fn(vim.api.nvim_buf_get_name, request.buf)
+
+  -- verbose way
+  local filename = flow.fn(function()
+     return vim.api.nvim_buf_get_name(request.buf)
+  end)
+  ```
+
+- `await`: executes a function passing varargs and awaits for its callback resolution.
+
+  > This is required because one cannot execute vim functions like `vim.api.nvim_buf_get_name` inside corutines.
+
+  ```lua
+  local data = flow.await(function(resolve, ...)
+    an_async_function(function(data)
+      resolve(data)
+    end)
+  end)
+  ```
+
+- `command`: executes a shell command and returns a list of lines.
+
+  ```lua
+  local hello_world = flow.command({
+    cmd = "echo",
+    args = {"hello", "world"}, -- optional
+    cwd = nil -- optional
+  })
+  ```
+
+- `spawn`: executes a shell command and writes its output in the flow.
+
+  ```lua
+  flow.spawn({
+    cmd = "echo",
+    args = {"hello", "world"}, -- optional
+    cwd = nil -- optional
+  })
+  ```
+
+##### Array string
+
+`array_string` is a string representing a list of lines separated by newline and terminating with a newline (e.g. _"hello\nworld\n"_).
+
+### Scope
+
+The module `microscope.api.scope` is a utility for using a lens. The `new` function accepts an object with 3 fields:
+
+- [lens](#lens-spec): a lens spec
+- `callback`: this is called at the end (optional).
+- [parser](#parser-function): this is applied to every result before the `callback` invocation.
+
+Example:
+
+```lua
+local scope = require("microscope.api.scope")
+
+local cat_scope = scope.new({
+  lens = {
+    fun = function(flow, any_request)
+      flow.spawn({
+        cmd = "cat",
+        args = { any_request.text },
+      })
+    end,
+    callback = function(lines, any_request)
+      do_smth(lines)
+    end,
+  },
+})
+
+cat_scope:search({
+  text = "my_file",
+})
+
+-- to stop before completion
+cat_scope:stop()
+```
+
+This module can be useful, for example, on [preview function](#preview-function): you can write the lines obtained directly in the preview window.
 
 ### Microscope finder
 
@@ -321,17 +468,16 @@ Preview window exposes the following functions:
 - `read(from, to)`: read lines from buffer
 - `select()`: add focused result to selected results
 - `selected()`: obtain list of results
-- `open(medatada)`: open the selected results. `metadata` can be anything you want to pass to `open` function.
+- `open(medatada)`: open the selected results. `metadata` can be anything you want to pass to `open` function
 
 ### Highlight
 
-The module `microscope.highlight` can be used to build highlights for a line.
+The module `microscope.api.highlight` can be used to build highlights for a line.
 
 Example
 
 ```lua
-local highlight = require("microscope.highlight")
-local constants = require("microscope.constants")
+local highlight = require("microscope.api.highlight")
 
 local data = {
   text = "1: buffer one",
@@ -339,49 +485,49 @@ local data = {
 }
 local highlights = highlight
   .new(data.highlights, data.text)
-  :hl_match(constants.color.color1, "(%d+:)(.*)", 1) -- highlight first group
-  :hl(constants.color.color2, 3, 10) -- highlight from col 3 to 10
+  :hl_match(highlight.color.color1, "(%d+:)(.*)", 1) -- highlight first group with color1
+  :hl(highlight.color.color2, 3, 10) -- highlight from col 3 to 10 with color2
   :get_highlights()
 ```
 
-Another utility function can be found in `microscope.utils.highlight`. This function accepts a `path` and a `bufnr` and highlights the buffer by inferring the filetype.
+Another utility function is `microscope.utils.highlight`. This function accepts a `path` and a `bufnr` and highlights the buffer by inferring the filetype.
 
 ### Error
 
-The module `microscope.error` can be used to display an error. It exposes two useful functions:
+The module `microscope.api.error` can be used to display an error. It exposes two useful functions:
 
 - `generic(message)`: it shows the error message
-- `critical(message)`: it shows the error message and close finder
+- `critical(message)`: it shows the error message and close the finder
 
 ## Plugins
 
-A plugin can expose finders, actions, steps, preview functions and open functions. In this way, it is possible to have pre-packaged finders or to easily create custom finders by using the provided building blocks.
+A plugin can expose finders, lenses specs, actions, parsers, previews and open functions. This way, it is possible to have pre-packaged finders or to easily create custom finders by using the provided building blocks.
 
 Example:
 
 ```lua
 local microscope = require("microscope")
-local steps = require("microscope.steps")
+local lenses = require("microscope.builtin.lenses")
+local parsers = require("microscope.builtin.parsers")
 
 local files = require("microscope-files")
 
-local ls_step = {
-  command = "ls",
-  parser = function(data)
-    return {
-      text = data.text,
-      file = data.text,
-    }
-  end,
-}
+local function ls()
+  return {
+    fun = function(flow, _)
+      flow.command({ cmd = "ls" })
+    end,
+  }
+end
+
+microscope.setup({ ... })
 
 microscope.register(files.finders)
 microscope.register({
   ls = {
+    lens = lenses.fzf(ls()),
     preview = files.preview.cat,
-    chain = function(text)
-      return { ls_step, steps.fzf(text) }
-    end,
+    parsers = { files.parsers.file, parsers.fuzzy },
   },
 })
 ```
