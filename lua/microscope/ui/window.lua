@@ -40,6 +40,7 @@ function window:get_cursor()
 end
 
 function window:clear()
+  self:set_buf(self.buf)
   self:write({})
 end
 

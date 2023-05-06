@@ -40,6 +40,11 @@ function scope:search(request)
         if output:sub(-1) == "\n" then
           output = output:sub(1, -2)
         end
+
+        if output == "" then
+          return self.callback({}, request)
+        end
+
         for value in vim.gsplit(output, "\n") do
           table.insert(parsed, self.parser(value, request))
         end
