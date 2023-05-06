@@ -39,7 +39,7 @@ function lens:read()
     return
   end
 
-  local ok, value = coroutine.resume(self.coroutine, self.flow, self.request)
+  local ok, value = coroutine.resume(self.coroutine, self.flow, self.request, self.context)
   if not ok then
     error.critical(debug.traceback(self.coroutine, value))
   end
@@ -124,7 +124,7 @@ function lens.new(opts)
     table.insert(l.inputs, lens.new(input_spec))
   end
   l.fn = opts.fun
-  l.init = {}
+  l.context = {}
   l.stopped = false
   l:create_flow()
 

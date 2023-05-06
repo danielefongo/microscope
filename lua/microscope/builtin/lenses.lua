@@ -33,4 +33,23 @@ function lenses.head(lines, ...)
   }
 end
 
+function lenses.cache(...)
+  return {
+    fun = function(flow, _, context)
+      if context and context.cache then
+        return flow.write(context.cache)
+      end
+
+      local full_output = ""
+      for output in flow.read_iter() do
+        full_output = full_output .. output
+        flow.write(output)
+      end
+
+      context.cache = full_output
+    end,
+    inputs = { ... },
+  }
+end
+
 return lenses

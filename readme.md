@@ -125,7 +125,7 @@ This element represents a spec for a [lens](#lens), which is used to retrieve or
 
 ```lua
 local lens = {
-  fun = function(flow, request)
+  fun = function(flow, request, context)
     -- logic
   end,
   inputs = { ... }, -- list of other lens specs, optional
@@ -139,7 +139,7 @@ local lenses = {}
 
 function lenses.rg(cwd)
   return {
-    fun = function(flow, _)
+    fun = function(flow)
       flow.spawn({
         cmd = "rg",
         args = { "--files" },
@@ -256,6 +256,7 @@ end
 
 Microscope exposes a list of lens specs in `microscope.builtin.lenses`:
 
+- `cache(...)`: cache results
 - `fzf(...)`: filter results using fzf
 - `head(lines, ...)`: limit results
 
@@ -278,17 +279,9 @@ Microscope exposes a list of parsers in `microscope.builtin.parsers`:
 
 - `fuzzy`: highlights result
 
-## Request
-
-The **request** is an object containing:
-
-- `text`: the searched text
-- `buf`: the original bufnr
-- `win`: the original winnr
-
 ## API
 
-## Lens
+### Lens
 
 A lens is used to retrieve or filter data (e.g. list of files or buffers) depending on the request and it can be piped into other lenses. It accepts a [lens spec](#lens-spec).
 
@@ -299,7 +292,7 @@ local lens = require("microscope.api.lens")
 
 local function rg(cwd)
   return {
-    fun = function(flow, _)
+    fun = function(flow)
       flow.spawn({
         cmd = "rg",
         args = { "--files" },
@@ -324,20 +317,22 @@ end
 local my_lens = lens.new(fzf(rg()))
 ```
 
-### Lens function
+#### Lens function
 
-The lens function has two parameters, the [flow](#flow) and the [request](#request).
+The lens function has two parameters, the [flow](#flow), the [request](#request) and the [context](#context).
 
-#### Flow
+##### Flow
 
 The **flow** is a bag of functions:
 
 - `can_read`: returns true if there is at least one input lens.
 - `read`: returns [array_string](#array-string) or `nil` if there is no more input data.
+  > `array_string` is a string representing a list of lines separated by newline and terminating with a newline (e.g. _"hello\nworld\n"_).
 - `read_iter`: returns an iterator over `read`.
 - `read_array`: returns an array of lines or `nil` if there is no more input data.
 - `read_array_iter`: returns an iterator over `read_array`.
 - `write`: it accepts an [array_string](#array-string) or a list of lines and propagate the data (e.g. to the next lens).
+  > `array_string` is a string representing a list of lines separated by newline and terminating with a newline (e.g. _"hello\nworld\n"_).
 - `stop`: stop the flow.
 - `stopped`: returns true if the flow is stopped (e.g. you close the finder before reaching the end of the lens function).
 - `fn`: executes a vim function passing varargs and returns its result.
@@ -386,9 +381,17 @@ The **flow** is a bag of functions:
   })
   ```
 
-##### Array string
+##### Request
 
-`array_string` is a string representing a list of lines separated by newline and terminating with a newline (e.g. _"hello\nworld\n"_).
+The **request** is an object containing:
+
+- `text`: the searched text
+- `buf`: the original bufnr
+- `win`: the original winnr
+
+##### Context
+
+The **context** is a table that is shared across multiple requests. It can be used to cache results or to do logic depending on the previous request.
 
 ### Scope
 
@@ -520,7 +523,7 @@ local files = require("microscope-files")
 
 local function ls()
   return {
-    fun = function(flow, _)
+    fun = function(flow)
       flow.command({ cmd = "ls" })
     end,
   }
