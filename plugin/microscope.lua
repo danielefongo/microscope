@@ -16,3 +16,14 @@ local highlights = {
 for k, v in pairs(highlights) do
   vim.api.nvim_set_hl(0, k, v)
 end
+
+vim.api.nvim_create_user_command("Microscope", function(opts)
+  require("microscope").finders[opts.args]()
+end, {
+  nargs = 1,
+  complete = function(_, line)
+    return vim.tbl_filter(function(val)
+      return vim.startswith(val, line:gsub("Microscope ", ""))
+    end, vim.tbl_keys(require("microscope").finders))
+  end,
+})
