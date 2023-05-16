@@ -14,6 +14,9 @@ end
 local function on_close(self)
   events.clear_module(self)
   self:close()
+
+  local cursor = vim.api.nvim_win_get_cursor(0)
+  vim.api.nvim_win_set_cursor(0, { cursor[1], cursor[2] + 1 })
 end
 
 function input:text()
