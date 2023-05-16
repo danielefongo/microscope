@@ -2,10 +2,8 @@ local ansiline = require("microscope.utils.ansiline")
 local window = require("microscope.ui.window")
 local events = require("microscope.events")
 local preview = {}
-setmetatable(preview, window)
 
 local function on_close(self)
-  events.clear_module(self)
   self.data = nil
   self:close()
 end
@@ -20,7 +18,6 @@ end
 
 local function on_empty_results_retrieved(self)
   self.data = nil
-
   self:clear()
 end
 
@@ -50,10 +47,9 @@ function preview:write_term(lines)
 end
 
 function preview.new(preview_fun)
-  local v = setmetatable(preview, { __index = window })
+  local v = window.new(preview)
 
   v.preview_fun = preview_fun
-  v:new_buf()
 
   events.on(v, events.event.result_focused, on_result_focused)
   events.on(v, events.event.empty_results_retrieved, on_empty_results_retrieved)

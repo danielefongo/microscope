@@ -1,3 +1,4 @@
+local events = require("microscope.events")
 local window = {}
 
 function window:set_buf_hl(color, line, from, to)
@@ -69,16 +70,19 @@ function window:close()
   if not self.opened then
     return
   end
+  events.clear_module(self)
+
   vim.api.nvim_win_set_buf(self.win, self.buf)
   vim.api.nvim_buf_delete(self.buf, { force = true })
   self.win = nil
   self.buf = nil
 end
 
-function window.new()
-  local w = setmetatable({ keys = {} }, window)
+function window.new(child)
+  local w = setmetatable(child or {}, { __index = window })
 
   w.opened = false
+  w:new_buf()
 
   return w
 end

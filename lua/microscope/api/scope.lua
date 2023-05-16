@@ -35,8 +35,6 @@ function scope:search(request)
       self.lens:stop()
 
       vim.schedule(function()
-        local parsed = {}
-
         if output:sub(-1) == "\n" then
           output = output:sub(1, -2)
         end
@@ -45,6 +43,7 @@ function scope:search(request)
           return self.callback({}, request)
         end
 
+        local parsed = {}
         for value in vim.gsplit(output, "\n") do
           table.insert(parsed, self.parser(value, request))
         end

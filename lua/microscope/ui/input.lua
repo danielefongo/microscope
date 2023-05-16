@@ -1,7 +1,6 @@
 local window = require("microscope.ui.window")
 local events = require("microscope.events")
 local input = {}
-setmetatable(input, window)
 
 local function on_layout_updated(self, layout)
   self:show(layout.input, true)
@@ -12,7 +11,6 @@ local function on_layout_updated(self, layout)
 end
 
 local function on_close(self)
-  events.clear_module(self)
   self:close()
 end
 
@@ -20,11 +18,8 @@ function input:text()
   return vim.api.nvim_buf_get_lines(self.buf, 0, 1, false)[1]:sub(3):gsub("^%s*(%s*.-)%s*$", "%1")
 end
 
-function input.new(preview_fun)
-  local v = setmetatable(input, { __index = window })
-
-  v.preview_fun = preview_fun
-  v:new_buf()
+function input.new()
+  local v = window.new(input)
 
   events.on(v, events.event.layout_updated, on_layout_updated)
   events.on(v, events.event.microscope_closed, on_close)

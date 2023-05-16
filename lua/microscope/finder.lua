@@ -8,7 +8,6 @@ local shape = require("microscope.ui.shape")
 
 local finder = {}
 finder.__index = finder
-finder.finders = {}
 
 local function build_parser(parsers, idx)
   idx = idx or #parsers
@@ -55,9 +54,7 @@ function finder:open(data)
 end
 
 function finder:stop_search()
-  if self.find then
-    self.find:stop()
-  end
+  self.find:stop()
 end
 
 function finder:search(text)
@@ -92,7 +89,7 @@ function finder:toggle_full_screen()
 end
 
 function finder.new(opts)
-  local self = setmetatable({ keys = {} }, finder)
+  local self = setmetatable({}, finder)
 
   if finder.instance then
     return

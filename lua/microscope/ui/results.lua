@@ -1,7 +1,6 @@
 local window = require("microscope.ui.window")
 local events = require("microscope.events")
 local results = {}
-setmetatable(results, window)
 
 local function get_focused(self)
   local cursor = self:get_cursor()[1]
@@ -48,8 +47,6 @@ end
 local function on_close(self)
   self.data = {}
   self.selected_data = {}
-
-  events.clear_module(self)
   self:close()
 end
 
@@ -97,9 +94,7 @@ function results:set_cursor(cursor)
 end
 
 function results.new()
-  local v = setmetatable(results, { __index = window })
-
-  v:new_buf()
+  local v = window.new(results)
 
   events.on(v, events.event.layout_updated, on_layout_updated)
   events.on(v, events.event.input_changed, on_input_changed)

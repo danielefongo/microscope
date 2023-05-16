@@ -19,7 +19,7 @@ function microscope:override(opts)
 end
 
 function microscope.finder(opts)
-  local self = setmetatable({ keys = {} }, microscope)
+  local self = setmetatable({}, microscope)
   self.opts = vim.tbl_deep_extend("force", microscope.opts, opts)
   return self
 end
