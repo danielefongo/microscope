@@ -9,8 +9,8 @@ local function get_focused(self)
   end
 end
 
-local function on_layout_updated(self, layout)
-  self:show(layout.results)
+local function on_layout_updated(self, build)
+  self:show(build.results)
 
   self:set_buf_opt("buftype", "prompt")
   self:set_win_opt("wrap", false)

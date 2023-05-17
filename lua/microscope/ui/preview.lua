@@ -21,8 +21,8 @@ local function on_empty_results_retrieved(self)
   self:clear()
 end
 
-local function on_layout_updated(self, layout)
-  self.layout = layout.preview
+local function on_layout_updated(self, build)
+  self.layout = build.preview
   self:show(self.layout)
 
   if self.data then

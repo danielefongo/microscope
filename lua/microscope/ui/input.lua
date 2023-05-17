@@ -2,8 +2,8 @@ local window = require("microscope.ui.window")
 local events = require("microscope.events")
 local input = {}
 
-local function on_layout_updated(self, layout)
-  self:show(layout.input, true)
+local function on_layout_updated(self, build)
+  self:show(build.input, true)
 
   vim.api.nvim_buf_set_option(self.buf, "buftype", "prompt")
   vim.fn.prompt_setprompt(self.buf, "> ")
