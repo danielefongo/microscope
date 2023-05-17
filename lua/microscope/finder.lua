@@ -4,7 +4,7 @@ local scope = require("microscope.api.scope")
 local preview = require("microscope.ui.preview")
 local results = require("microscope.ui.results")
 local input = require("microscope.ui.input")
-local shape = require("microscope.ui.shape")
+local layout = require("microscope.ui.layout")
 
 local finder = {}
 finder.__index = finder
@@ -69,17 +69,10 @@ function finder:search(text)
 end
 
 function finder:update()
-  local layout
   if self.full_screen then
-    layout = shape.generate(vim.api.nvim_list_uis()[1], self.preview_fn ~= nil)
+    layout.generate(vim.api.nvim_list_uis()[1], self.preview_fn ~= nil)
   else
-    layout = shape.generate(self.size, self.preview_fn ~= nil)
-  end
-
-  if layout then
-    return events.fire(events.event.layout_updated, layout)
-  else
-    error.critical("microscope: window too small to display")
+    layout.generate(self.size, self.preview_fn ~= nil)
   end
 end
 

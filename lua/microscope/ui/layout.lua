@@ -1,4 +1,6 @@
-local shape = {}
+local error = require("microscope.api.error")
+local events = require("microscope.events")
+local layout = {}
 
 local OFFSET = 2
 
@@ -100,7 +102,7 @@ local function vertical(size, has_preview)
   }
 end
 
-function shape.generate(size, has_preview)
+function layout.generate(size, has_preview)
   local ui = vim.api.nvim_list_uis()[1]
 
   local real_size = {
@@ -112,11 +114,18 @@ function shape.generate(size, has_preview)
     return
   end
 
+  local shape
   if ui.width < size.width then
-    return vertical(real_size, has_preview)
+    shape = vertical(real_size, has_preview)
   else
-    return horizontal(real_size, has_preview)
+    shape = horizontal(real_size, has_preview)
+  end
+
+  if shape then
+    return events.fire(events.event.layout_updated, shape)
+  else
+    error.critical("microscope: window too small to display")
   end
 end
 
-return shape
+return layout
