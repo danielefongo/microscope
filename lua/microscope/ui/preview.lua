@@ -42,7 +42,7 @@ function preview:write_term(lines)
   end
 
   vim.defer_fn(function()
-    vim.api.nvim_win_set_cursor(self.win, { 1, 0 })
+    self:set_cursor({ 1, 0 })
   end, 10)
 end
 
