@@ -56,7 +56,6 @@ function window:read(from, to)
 end
 
 function window:show(opts, enter)
-  self.opened = true
   self.layout = opts
 
   if not self.win then
@@ -67,7 +66,7 @@ function window:show(opts, enter)
 end
 
 function window:close()
-  if not self.opened then
+  if not self.win then
     return
   end
   events.clear_module(self)
@@ -81,7 +80,6 @@ end
 function window.new(child)
   local w = setmetatable(child or {}, { __index = window })
 
-  w.opened = false
   w:new_buf()
 
   return w
