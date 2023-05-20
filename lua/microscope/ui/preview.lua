@@ -9,10 +9,10 @@ local function on_close(self)
 end
 
 local function on_result_focused(self, data)
+  self.term_lines = nil
   self.data = data
 
   self:set_buf_opt("syntax", "off")
-  self:set_win_opt("scrolloff", 10000)
   self.preview_fun(data, self)
 end
 
@@ -25,11 +25,12 @@ local function on_layout_updated(self, build)
   self.layout = build.preview
   self:show(self.layout)
 
-  if self.data then
-    on_result_focused(self, self.data)
+  if self.term_lines then
+    self:write_term(self.term_lines)
   end
 
   self:set_win_opt("cursorline", true)
+  self:set_win_opt("scrolloff", 10000)
 end
 
 function preview:write_term(lines)
@@ -44,6 +45,11 @@ function preview:write_term(lines)
   vim.defer_fn(function()
     self:set_cursor({ 1, 0 })
   end, 10)
+end
+
+function preview:set_buf(buf)
+  window.set_buf(self, buf)
+  self:set_win_opt("cursorline", true)
 end
 
 function preview.new(preview_fun)

@@ -12,7 +12,6 @@ end
 local function on_layout_updated(self, build)
   self:show(build.results)
 
-  self:set_buf_opt("buftype", "prompt")
   self:set_win_opt("wrap", false)
   self:set_win_opt("scrolloff", 10000)
   self:set_win_opt("cursorline", true)
@@ -95,6 +94,7 @@ end
 
 function results.new()
   local v = window.new(results)
+  v:set_buf_opt("buftype", "prompt")
 
   events.on(v, events.event.layout_updated, on_layout_updated)
   events.on(v, events.event.input_changed, on_input_changed)

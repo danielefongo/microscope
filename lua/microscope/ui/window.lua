@@ -19,6 +19,7 @@ end
 
 function window:new_buf()
   self.buf = vim.api.nvim_create_buf(false, true)
+  self.main_buf = self.buf
 end
 
 function window:get_buf()
@@ -26,22 +27,26 @@ function window:get_buf()
 end
 
 function window:set_buf(buf)
+  self.buf = buf
   vim.api.nvim_win_set_buf(self.win, buf)
+  self:set_cursor(vim.api.nvim_win_get_cursor(self.win))
 end
 
 function window:set_cursor(cursor)
   local counts = vim.api.nvim_buf_line_count(self.buf)
   local row = math.min(math.max(cursor[1], 1), counts)
   local col = math.max(cursor[2], 0)
-  vim.api.nvim_win_set_cursor(self.win, { row, col })
+  self.cursor = { row, col }
+  vim.api.nvim_win_set_cursor(self.win, self.cursor)
 end
 
 function window:get_cursor()
-  return vim.api.nvim_win_get_cursor(self.win)
+  return self.cursor
 end
 
 function window:clear()
-  self:set_buf(self.buf)
+  self:set_buf(self.main_buf)
+  self:set_cursor({ 1, 0 })
   self:write({})
 end
 
@@ -62,6 +67,7 @@ function window:show(opts, enter)
     self.win = vim.api.nvim_open_win(self.buf, enter or false, self.layout)
   else
     vim.api.nvim_win_set_config(self.win, self.layout)
+    vim.api.nvim_win_set_buf(self.win, self.buf)
   end
 end
 
@@ -71,10 +77,11 @@ function window:close()
   end
   events.clear_module(self)
 
-  vim.api.nvim_win_set_buf(self.win, self.buf)
-  vim.api.nvim_buf_delete(self.buf, { force = true })
+  vim.api.nvim_win_set_buf(self.win, self.main_buf)
+  vim.api.nvim_buf_delete(self.main_buf, { force = true })
   self.win = nil
   self.buf = nil
+  self.main_buf = nil
 end
 
 function window.new(child)

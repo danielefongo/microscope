@@ -5,7 +5,6 @@ local input = {}
 local function on_layout_updated(self, build)
   self:show(build.input, true)
 
-  vim.api.nvim_buf_set_option(self.buf, "buftype", "prompt")
   vim.fn.prompt_setprompt(self.buf, "> ")
   vim.api.nvim_command("startinsert")
 end
@@ -20,6 +19,7 @@ end
 
 function input.new()
   local v = window.new(input)
+  v:set_buf_opt("buftype", "prompt")
 
   events.on(v, events.event.layout_updated, on_layout_updated)
   events.on(v, events.event.microscope_closed, on_close)
