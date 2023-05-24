@@ -47,11 +47,6 @@ function preview:write_term(lines)
   end, 10)
 end
 
-function preview:set_buf(buf)
-  window.set_buf(self, buf)
-  self:set_win_opt("cursorline", true)
-end
-
 function preview.new(preview_fun)
   local v = window.new(preview)
 

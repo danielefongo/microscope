@@ -452,7 +452,6 @@ Preview window exposes the following functions:
 - `set_buf_opt(key, value)`: set buffer option
 - `get_win()`: return the handled winnr
 - `get_buf()`: return the handled bufnr
-- `set_buf(buf)`: set alternative bufnr
 - `set_cursor(cursor)`: set cursor safely
 - `get_cursor(cursor)`: get the current cursor
 - `clear()`: clear text
@@ -469,7 +468,6 @@ Preview window exposes the following functions:
 - `set_buf_opt(key, value)`: set buffer option
 - `get_win()`: return the handled winnr
 - `get_buf()`: return the handled bufnr
-- `set_buf(buf)`: set alternative bufnr
 - `set_cursor(cursor)`: set cursor safely
 - `get_cursor(cursor)`: get the current cursor
 - `clear()`: clear text

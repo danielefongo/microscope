@@ -26,12 +26,6 @@ function window:get_buf()
   return self.buf
 end
 
-function window:set_buf(buf)
-  self.buf = buf
-  vim.api.nvim_win_set_buf(self.win, buf)
-  self:set_cursor(vim.api.nvim_win_get_cursor(self.win))
-end
-
 function window:set_cursor(cursor)
   local counts = vim.api.nvim_buf_line_count(self.buf)
   local row = math.min(math.max(cursor[1], 1), counts)
@@ -45,7 +39,6 @@ function window:get_cursor()
 end
 
 function window:clear()
-  self:set_buf(self.main_buf)
   self:set_cursor({ 1, 0 })
   self:write({})
 end
