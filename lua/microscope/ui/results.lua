@@ -9,8 +9,8 @@ local function get_focused(self)
   end
 end
 
-local function on_layout_updated(self, build)
-  self:show(build.results)
+function results:show(build)
+  window.show(self, build)
 
   self:set_win_opt("wrap", false)
   self:set_win_opt("scrolloff", 10000)
@@ -50,6 +50,9 @@ local function on_close(self)
 end
 
 function results:select()
+  if not self.win then
+    return
+  end
   local row = self:get_cursor()[1]
   local element = self.data[row]
 
@@ -94,9 +97,10 @@ end
 
 function results.new()
   local v = window.new(results)
-  v:set_buf_opt("buftype", "prompt")
 
-  events.on(v, events.event.layout_updated, on_layout_updated)
+  v.data = {}
+  v.selected_data = {}
+
   events.on(v, events.event.input_changed, on_input_changed)
   events.on(v, events.event.empty_results_retrieved, on_empty_results_retrieved)
   events.on(v, events.event.results_retrieved, on_results_retrieved)

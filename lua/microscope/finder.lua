@@ -1,3 +1,4 @@
+local layouts = require("microscope.builtin.layouts")
 local events = require("microscope.events")
 local error = require("microscope.api.error")
 local scope = require("microscope.api.scope")
@@ -72,11 +73,22 @@ function finder:search(text)
 end
 
 function finder:update()
+  local build
   if self.full_screen then
-    layout.generate(vim.api.nvim_list_uis()[1], self.preview_fn ~= nil)
+    build = layout.generate(vim.api.nvim_list_uis()[1], self.layout_fn, self.has_preview)
   else
-    layout.generate(self.size, self.preview_fn ~= nil)
+    build = layout.generate(self.size, self.layout_fn, self.has_preview)
   end
+  events.clear(self, events.event.win_leave)
+  self.preview:show(build.preview)
+  self.results:show(build.results)
+  self.input:show(build.input)
+  events.native(self, events.event.win_leave, finder.close)
+end
+
+function finder:set_layout(new_layout)
+  self.layout_fn = new_layout
+  self:update()
 end
 
 function finder:toggle_full_screen()
@@ -95,14 +107,16 @@ function finder.new(opts)
   self.size = opts.size
   self.bindings = opts.bindings
   self.open_fn = opts.open or function() end
-  self.preview_fn = opts.preview
+  self.has_preview = opts.preview ~= nil
+  self.preview_fn = opts.preview or function(_, win)
+    win:write({ "No preview function provided" })
+  end
+  self.layout_fn = opts.layout or layouts.default
 
   self.old_win = vim.api.nvim_get_current_win()
   self.old_buf = vim.api.nvim_get_current_buf()
 
-  if self.preview_fn then
-    self.preview = preview.new(self.preview_fn)
-  end
+  self.preview = preview.new(self.preview_fn)
   self.results = results.new()
   self.input = input.new()
 
@@ -124,12 +138,15 @@ function finder.new(opts)
   events.on(self, events.event.input_changed, finder.search)
   events.on(self, events.event.error, finder.close_with_err)
   events.native(self, events.event.resize, finder.update)
-  events.native(self, events.event.buf_leave, finder.close, { buffer = self.input.buf })
+  events.on(self, events.event.win_leave, finder.close)
 
   for lhs, action in pairs(self.bindings) do
     vim.keymap.set("i", lhs, self:bind_action(action), { buffer = self.input.buf })
+    vim.keymap.set("n", lhs, self:bind_action(action), { buffer = self.results.buf })
+    vim.keymap.set("n", lhs, self:bind_action(action), { buffer = self.preview.buf })
   end
 
+  self:search("")
   self:update()
 
   return self

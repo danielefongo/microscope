@@ -6,7 +6,9 @@ function window:set_buf_hl(color, line, from, to)
 end
 
 function window:set_win_opt(key, value)
-  vim.api.nvim_win_set_option(self.win, key, value)
+  if self.win then
+    vim.api.nvim_win_set_option(self.win, key, value)
+  end
 end
 
 function window:set_buf_opt(key, value)
@@ -19,7 +21,7 @@ end
 
 function window:new_buf()
   self.buf = vim.api.nvim_create_buf(false, true)
-  self.main_buf = self.buf
+  self.buf = self.buf
 end
 
 function window:get_buf()
@@ -31,7 +33,9 @@ function window:set_cursor(cursor)
   local row = math.min(math.max(cursor[1], 1), counts)
   local col = math.max(cursor[2], 0)
   self.cursor = { row, col }
-  vim.api.nvim_win_set_cursor(self.win, self.cursor)
+  if self.win then
+    vim.api.nvim_win_set_cursor(self.win, self.cursor)
+  end
 end
 
 function window:get_cursor()
@@ -44,43 +48,64 @@ function window:clear()
 end
 
 function window:write(lines, from, to)
+  self:set_buf_opt("modifiable", true)
   from = from or 0
   to = to or -1
   vim.api.nvim_buf_set_lines(self.buf, from, to, true, lines)
+  self:set_buf_opt("modifiable", false)
 end
 
 function window:read(from, to)
   return vim.api.nvim_buf_get_lines(self.buf, from, to, false)
 end
 
-function window:show(opts, enter)
-  self.layout = opts
+function window:show(layout)
+  if not layout then
+    return self:hide()
+  end
+  self.layout = layout or self.layout
 
   if not self.win then
-    self.win = vim.api.nvim_open_win(self.buf, enter or false, self.layout)
+    self.win = vim.api.nvim_open_win(self.buf, false, self.layout)
   else
     vim.api.nvim_win_set_config(self.win, self.layout)
     vim.api.nvim_win_set_buf(self.win, self.buf)
   end
+
+  vim.api.nvim_set_current_win(self.win)
+  if self.cursor then
+    window.set_cursor(self, self.cursor)
+  end
+end
+
+function window:hide()
+  if self.win then
+    vim.api.nvim_win_hide(self.win)
+    self.win = nil
+  end
 end
 
 function window:close()
-  if not self.win then
-    return
-  end
   events.clear_module(self)
-
-  vim.api.nvim_win_set_buf(self.win, self.main_buf)
-  vim.api.nvim_buf_delete(self.main_buf, { force = true })
-  self.win = nil
-  self.buf = nil
-  self.main_buf = nil
+  if self.win then
+    vim.api.nvim_win_set_buf(self.win, self.buf)
+    vim.api.nvim_buf_delete(self.buf, { force = true })
+    self.win = nil
+    self.buf = nil
+  end
 end
 
 function window.new(child)
   local w = setmetatable(child or {}, { __index = window })
 
   w:new_buf()
+  w:set_buf_opt("bufhidden", "hide")
+
+  events.native(w, events.event.buf_leave, function()
+    if w.win then
+      events.fire(events.event.win_leave)
+    end
+  end, { buffer = w.buf })
 
   return w
 end

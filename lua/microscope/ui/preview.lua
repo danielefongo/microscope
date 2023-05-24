@@ -21,9 +21,9 @@ local function on_empty_results_retrieved(self)
   self:clear()
 end
 
-local function on_layout_updated(self, build)
-  self.layout = build.preview
-  self:show(self.layout)
+function preview:show(build)
+  self.layout = build
+  window.show(self, build)
 
   if self.term_lines then
     self:write_term(self.term_lines)
@@ -54,7 +54,6 @@ function preview.new(preview_fun)
 
   events.on(v, events.event.result_focused, on_result_focused)
   events.on(v, events.event.empty_results_retrieved, on_empty_results_retrieved)
-  events.on(v, events.event.layout_updated, on_layout_updated)
   events.on(v, events.event.microscope_closed, on_close)
 
   return v

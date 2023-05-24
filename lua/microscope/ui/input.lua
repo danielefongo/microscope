@@ -2,11 +2,17 @@ local window = require("microscope.ui.window")
 local events = require("microscope.events")
 local input = {}
 
-local function on_layout_updated(self, build)
-  self:show(build.input, true)
+function input:show(build)
+  window.show(self, build)
 
-  vim.fn.prompt_setprompt(self.buf, "> ")
-  vim.api.nvim_command("startinsert")
+  if build == nil then
+    self:set_buf_opt("buftype", "nowrite")
+    vim.api.nvim_command("stopinsert!")
+  else
+    self:set_buf_opt("buftype", "prompt")
+    vim.api.nvim_command("startinsert!")
+    vim.fn.prompt_setprompt(self.buf, "> ")
+  end
 end
 
 local function on_close(self)
@@ -19,9 +25,7 @@ end
 
 function input.new()
   local v = window.new(input)
-  v:set_buf_opt("buftype", "prompt")
 
-  events.on(v, events.event.layout_updated, on_layout_updated)
   events.on(v, events.event.microscope_closed, on_close)
 
   vim.api.nvim_buf_attach(v.buf, false, {

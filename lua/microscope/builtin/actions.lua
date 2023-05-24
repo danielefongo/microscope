@@ -41,6 +41,12 @@ function actions.close(microscope)
   microscope:close()
 end
 
+function actions.set_layout(layout)
+  return function(microscope)
+    microscope:set_layout(layout)
+  end
+end
+
 function actions.nothing(_) end
 
 return actions

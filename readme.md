@@ -1,6 +1,6 @@
 # Microscope
 
-Micro fuzzy finder for neovim.
+A micro and highly composable finder for Neovim.
 
 ## Disclaimer
 
@@ -67,6 +67,7 @@ local opts = {
   parsers = list_of_parsers -- optional
   open = open_fn, -- optional
   preview = preview_fn, -- optional
+  layout = layout_fn, -- optional
   size = custom_size, -- optional, it will override/extend the microscope size option
   bindings = custom_bindings, -- optional, it will override/extend the microscope bindings option
 }
@@ -213,6 +214,30 @@ end
 
 More details about preview window api can be found in [its section](#preview-window).
 
+### Layout function
+
+This function defines the structure of the finder using the [display](#display) API. It takes in a table that includes the following fields:
+
+- `finder_rectangle`: represents the rectangle with the [size](#size) provided in the microscope settings.
+- `ui_rectangle`: represents the rectangle with the size of the entire UI.
+- `has_preview`: indicates whether the [preview function](#preview-function) has been set or not.
+
+Example:
+
+```lua
+local layout_fn = function(opts)
+  return display
+    .vertical({
+      display.horizontal({
+        display.results("40%"),
+        display.preview(),
+      }),
+      display.input(1),
+    })
+    :build(opts.finder_rectangle)
+end
+```
+
 ### Size
 
 Size is a lua table containing a `width` and an `height`.
@@ -271,6 +296,7 @@ Microscope exposes a list of actions in `microscope.builtin.actions`:
 - `toggle_full_screen`: toggle full screen
 - `open`: open selected results
 - `select`: select result
+- `set_layout`: it accepts a [layout function](#layout-function) and returns the corresponding action
 - `close`: close finder
 
 ### Parsers
@@ -278,6 +304,12 @@ Microscope exposes a list of actions in `microscope.builtin.actions`:
 Microscope exposes a list of parsers in `microscope.builtin.parsers`:
 
 - `fuzzy`: highlights result
+
+### Lenses
+
+Microscope exposes a list of layouts in `microscope.builtin.layouts`:
+
+- `default`
 
 ## API
 
@@ -326,12 +358,12 @@ The lens function has two parameters, the [flow](#flow), the [request](#request)
 The **flow** is a bag of functions:
 
 - `can_read`: returns true if there is at least one input lens.
-- `read`: returns [array_string](#array-string) or `nil` if there is no more input data.
+- `read`: returns `array_string` or `nil` if there is no more input data.
   > `array_string` is a string representing a list of lines separated by newline and terminating with a newline (e.g. _"hello\nworld\n"_).
 - `read_iter`: returns an iterator over `read`.
 - `read_array`: returns an array of lines or `nil` if there is no more input data.
 - `read_array_iter`: returns an iterator over `read_array`.
-- `write`: it accepts an [array_string](#array-string) or a list of lines and propagate the data (e.g. to the next lens).
+- `write`: it accepts an `array_string` or a list of lines and propagate the data (e.g. to the next lens).
   > `array_string` is a string representing a list of lines separated by newline and terminating with a newline (e.g. _"hello\nworld\n"_).
 - `stop`: stop the flow.
 - `stopped`: returns true if the flow is stopped (e.g. you close the finder before reaching the end of the lens function).
@@ -430,6 +462,41 @@ cat_scope:stop()
 
 This module can be useful, for example, on [preview function](#preview-function): you can write the lines obtained directly in the preview window.
 
+### Display
+
+This module assists you in building a layout. The functions to create a display are as follows:
+
+- `input(size)`: defines the input display. Default size is 1.
+- `results(size)`: defines the results display. Default size is nil.
+- `preview(size)`: defines the preview display. Default size is nil.
+- `space(size)`: defines a fake display to create spacing between and around displays. The default size is 1.
+- `vertical(displays, size)`: represents a vertical display. The first parameter is a list of displays, and the second one is the size.
+- `horizontal(displays, size)`: represents a horizontal display. The first parameter is a list of displays, and the second one is the size.
+
+The size can be specified as follows:
+
+- An integer: represents the number of rows or columns.
+- A percentage string (e.g. "40%"): represents the percentage of rows or columns.
+- `nil`: indicates that the component will expand to occupy as much space as possible.
+
+To construct the layout, you can invoke the `build` function of the display instance by passing a rectangle.
+
+Example:
+
+```lua
+display
+  .vertical({
+    display.horizontal({
+      display.results("40%"),
+      display.space(4),
+      display.preview(),
+    }),
+    display.space("10%"),
+    display.input(1),
+  })
+  :build(finder_rectangle)
+```
+
 ### Microscope finder
 
 Microscope's finder instance exposes 3 components:
@@ -441,6 +508,7 @@ Microscope's finder instance exposes 3 components:
 In addition, finder exposes the following functions:
 
 - `close()`: close the finder
+- `set_layout(layout_fn)`: set the new layout
 - `toggle_full_screen()`: toggle full screen
 
 ### Preview window
