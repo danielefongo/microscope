@@ -58,13 +58,16 @@ function finder:stop_search()
 end
 
 function finder:search(text)
+  if self.request and self.request.text == text then
+    return
+  end
+
+  self:stop_search()
   self.request = {
     text = text,
     buf = self.old_buf,
     win = self.old_win,
   }
-
-  self:stop_search()
   self.find:search(self.request)
 end
 
