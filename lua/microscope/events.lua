@@ -14,6 +14,20 @@ events.event = {
   error = "Error",
 }
 
+local function alive_handler(module, evt)
+  return events.handlers[module] and events.handlers[module][evt]
+end
+
+local function make_callback(module, evt, callback)
+  return function(payload)
+    vim.schedule(function()
+      if alive_handler(module, evt) then
+        callback(module, payload.data)
+      end
+    end)
+  end
+end
+
 local function set_handler(module, main_evt, evt, opts)
   if not events.handlers[module] then
     events.handlers[module] = {}
@@ -25,11 +39,7 @@ end
 function events.on(module, evt, callback)
   local opts = {
     group = events.group,
-    callback = function(payload)
-      vim.schedule(function()
-        callback(module, payload.data)
-      end)
-    end,
+    callback = make_callback(module, evt, callback),
     pattern = evt,
   }
 
@@ -39,18 +49,14 @@ end
 function events.native(module, evt, callback, opts)
   opts = vim.tbl_deep_extend("force", {
     group = events.group,
-    callback = function(payload)
-      vim.schedule(function()
-        callback(module, payload.data)
-      end)
-    end,
+    callback = make_callback(module, evt, callback),
   }, opts or {})
 
   set_handler(module, evt, evt, opts)
 end
 
 function events.clear(module, evt)
-  if not events.handlers[module] or not events.handlers[module][evt] then
+  if not alive_handler(module, evt) then
     return
   end
 
@@ -59,7 +65,7 @@ function events.clear(module, evt)
 end
 
 function events.clear_module(module)
-  for evt, _ in pairs(events.handlers[module]) do
+  for evt, _ in pairs(events.handlers[module] or {}) do
     events.clear(module, evt)
   end
   events.handlers[module] = nil
