@@ -218,9 +218,10 @@ More details about preview window api can be found in [its section](#preview-win
 
 This function defines the structure of the finder using the [display](#display) API. It takes in a table that includes the following fields:
 
-- `finder_rectangle`: represents the rectangle with the [size](#size) provided in the microscope settings.
-- `ui_rectangle`: represents the rectangle with the size of the entire UI.
-- `has_preview`: indicates whether the [preview function](#preview-function) has been set or not.
+- `finder_size`: represents the [size](#size) provided in the microscope settings.
+- `ui_size`: represents the size of the entire UI.
+- `preview`: indicates whether the [preview function](#preview-function) has been set or not.
+- `full_screen`: indicates whether the full screen option has been set or not.
 
 Example:
 
@@ -234,7 +235,7 @@ local layout_fn = function(opts)
       }),
       display.input(1),
     })
-    :build(opts.finder_rectangle)
+    :build(opts.finder_size)
 end
 ```
 
@@ -479,7 +480,7 @@ The size can be specified as follows:
 - A percentage string (e.g. "40%"): represents the percentage of rows or columns.
 - `nil`: indicates that the component will expand to occupy as much space as possible.
 
-To construct the layout, you can invoke the `build` function of the display instance by passing a rectangle.
+To construct the layout, you can invoke the `build` function of the display instance by passing a size (e.g. finder size).
 
 Example:
 
@@ -494,7 +495,7 @@ display
     display.space("10%"),
     display.input(1),
   })
-  :build(finder_rectangle)
+  :build(finder_size)
 ```
 
 ### Microscope finder

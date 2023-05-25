@@ -1,7 +1,27 @@
+local error = require("microscope.api.error")
 local display = {}
 display.__index = display
 
 local OFFSET = 2
+
+local function validate_rectangle(rectangle, reference_rectangle)
+  return rectangle.col >= reference_rectangle.col
+    and rectangle.col + rectangle.width <= reference_rectangle.col + reference_rectangle.width
+    and rectangle.row >= reference_rectangle.row
+    and rectangle.row + rectangle.height <= reference_rectangle.row + reference_rectangle.height
+    and rectangle.height > 0
+    and rectangle.width > 0
+end
+
+local function generate_rectangle(width, height)
+  local ui = vim.api.nvim_list_uis()[1]
+  return {
+    width = width,
+    height = height,
+    col = (ui.width / 2) - (width / 2) - 1,
+    row = (ui.height / 2) - (height / 2) - 1,
+  }
+end
 
 local function relative_rectangle(rectangle, opts)
   return {
@@ -67,9 +87,23 @@ function display:gen(rectangle, build)
   end
 end
 
-function display:build(rectangle)
+function display:build(finder_size)
+  local ui_size = vim.api.nvim_list_uis()[1]
   local build = {}
-  display.vertical({ self }):gen(rectangle, build)
+
+  local finder_rectangle =
+    generate_rectangle(math.min(finder_size.width, ui_size.width - 4), math.min(finder_size.height, ui_size.height - 4))
+  local ui_rectangle = generate_rectangle(ui_size.width - 4, ui_size.height - 4)
+
+  display.vertical({ self }):gen(finder_rectangle, build)
+
+  for _, value in pairs(build) do
+    if not validate_rectangle(value, ui_rectangle) then
+      error.generic("microscope: cannot be rendered")
+      return {}
+    end
+  end
+
   return build
 end
 

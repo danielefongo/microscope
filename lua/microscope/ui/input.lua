@@ -2,6 +2,10 @@ local window = require("microscope.ui.window")
 local events = require("microscope.events")
 local input = {}
 
+local function on_close(self)
+  self:close()
+end
+
 function input:show(build)
   window.show(self, build)
 
@@ -13,10 +17,6 @@ function input:show(build)
     vim.api.nvim_command("startinsert!")
     vim.fn.prompt_setprompt(self.buf, "> ")
   end
-end
-
-local function on_close(self)
-  self:close()
 end
 
 function input:text()

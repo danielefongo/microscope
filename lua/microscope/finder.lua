@@ -5,7 +5,6 @@ local scope = require("microscope.api.scope")
 local preview = require("microscope.ui.preview")
 local results = require("microscope.ui.results")
 local input = require("microscope.ui.input")
-local layout = require("microscope.ui.layout")
 
 local finder = {}
 finder.__index = finder
@@ -73,12 +72,13 @@ function finder:search(text)
 end
 
 function finder:update()
-  local build
-  if self.full_screen then
-    build = layout.generate(vim.api.nvim_list_uis()[1], self.layout_fn, self.has_preview)
-  else
-    build = layout.generate(self.size, self.layout_fn, self.has_preview)
-  end
+  local build = self.layout_fn({
+    finder_size = self.size,
+    ui_size = vim.api.nvim_list_uis()[1],
+    preview = self.has_preview,
+    full_screen = self.full_screen,
+  })
+
   events.clear(self, events.event.win_leave)
   self.preview:show(build.preview)
   self.results:show(build.results)

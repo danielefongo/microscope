@@ -9,14 +9,6 @@ local function get_focused(self)
   end
 end
 
-function results:show(build)
-  window.show(self, build)
-
-  self:set_win_opt("wrap", false)
-  self:set_win_opt("scrolloff", 10000)
-  self:set_win_opt("cursorline", true)
-end
-
 local function on_input_changed(self)
   self.data = {}
   self.selected_data = {}
@@ -47,6 +39,14 @@ local function on_close(self)
   self.data = {}
   self.selected_data = {}
   self:close()
+end
+
+function results:show(build)
+  window.show(self, build)
+
+  self:set_win_opt("wrap", false)
+  self:set_win_opt("scrolloff", 10000)
+  self:set_win_opt("cursorline", true)
 end
 
 function results:select()
