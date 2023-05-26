@@ -124,7 +124,7 @@ function display.horizontal(elements, size)
 end
 
 function display.input(size)
-  return setmetatable({ type = "input", size = size or 1 }, display)
+  return setmetatable({ type = "input", size = size }, display)
 end
 
 function display.results(size)

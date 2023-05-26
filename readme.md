@@ -470,7 +470,7 @@ This module assists you in building a layout. The functions to create a display 
 - `input(size)`: defines the input display. Default size is 1.
 - `results(size)`: defines the results display. Default size is nil.
 - `preview(size)`: defines the preview display. Default size is nil.
-- `space(size)`: defines a fake display to create spacing between and around displays. The default size is 1.
+- `space(size)`: defines a fake display to create spacing between and around displays. The default size is nil.
 - `vertical(displays, size)`: represents a vertical display. The first parameter is a list of displays, and the second one is the size.
 - `horizontal(displays, size)`: represents a horizontal display. The first parameter is a list of displays, and the second one is the size.
 
