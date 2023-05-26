@@ -30,6 +30,7 @@ function preview:show(build)
   end
 
   self:set_win_opt("cursorline", true)
+  self:set_win_opt("wrap", true)
   self:set_win_opt("scrolloff", 10000)
 end
 
