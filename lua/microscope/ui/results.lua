@@ -91,7 +91,7 @@ function results:set_cursor(cursor)
   window.set_cursor(self, cursor)
   local focused = get_focused(self)
   if focused then
-    events.fire(events.event.result_focused, focused)
+    events.fire(events.event.result_focused, focused, 100)
   end
 end
 

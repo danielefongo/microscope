@@ -1,3 +1,4 @@
+local uv = vim.loop
 local events = {}
 events.handlers = {}
 events.group = vim.api.nvim_create_augroup("Microscope", { clear = false })
@@ -13,6 +14,15 @@ events.event = {
   input_changed = "InputChanged",
   error = "Error",
 }
+
+local function unschedule(evt)
+  local timer = events.timers[evt]
+  if timer and uv.is_active(timer) then
+    uv.timer_stop(timer)
+    uv.close(timer)
+    events.timers[evt] = nil
+  end
+end
 
 local function alive_handler(module, evt)
   return events.handlers[module] and events.handlers[module][evt]
@@ -71,10 +81,11 @@ function events.clear_module(module)
   events.handlers[module] = nil
 end
 
-function events.fire(evt, data)
-  vim.schedule(function()
+function events.fire(evt, data, delay)
+  unschedule(evt)
+  events.timers[evt] = vim.defer_fn(function()
     vim.api.nvim_exec_autocmds("User", { group = events.group, pattern = evt, data = data })
-  end)
+  end, delay or 0)
 end
 
 return events
