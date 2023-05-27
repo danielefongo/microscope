@@ -1,6 +1,7 @@
 local uv = vim.loop
 local events = {}
 events.handlers = {}
+events.timers = {}
 events.group = vim.api.nvim_create_augroup("Microscope", { clear = false })
 events.event = {
   resize = "VimResized",
