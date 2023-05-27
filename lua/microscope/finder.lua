@@ -32,6 +32,8 @@ end
 
 function finder:close()
   events.clear_module(self)
+  vim.api.nvim_set_current_win(self.old_win)
+  vim.api.nvim_set_current_buf(self.old_buf)
   events.fire(events.event.microscope_closed)
   self:stop_search()
   finder.instance = nil
@@ -46,8 +48,6 @@ end
 
 function finder:open(data)
   self:close()
-  vim.api.nvim_set_current_win(self.old_win)
-  vim.api.nvim_set_current_buf(self.old_buf)
   for _, value in ipairs(data.selected) do
     self.open_fn(value, self.request, data.metadata)
   end
