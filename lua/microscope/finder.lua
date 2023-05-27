@@ -84,9 +84,9 @@ function finder:update()
   })
 
   events.clear(self, events.event.win_leave)
-  self.preview:show(build.preview)
-  self.results:show(build.results)
-  self.input:show(build.input)
+  self.preview:show(build.preview, build.input == nil)
+  self.results:show(build.results, build.input == nil)
+  self.input:show(build.input, true)
   events.native(self, events.event.win_leave, finder.close)
 end
 

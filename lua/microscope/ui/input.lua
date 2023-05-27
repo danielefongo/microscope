@@ -6,8 +6,8 @@ local function on_close(self)
   self:close()
 end
 
-function input:show(build)
-  window.show(self, build)
+function input:show(build, focus)
+  window.show(self, build, focus)
 
   if build == nil then
     self:set_buf_opt("buftype", "nowrite")

@@ -59,7 +59,7 @@ function window:read(from, to)
   return vim.api.nvim_buf_get_lines(self.buf, from, to, false)
 end
 
-function window:show(layout)
+function window:show(layout, focus)
   if not layout then
     return self:hide()
   end
@@ -72,9 +72,11 @@ function window:show(layout)
     vim.api.nvim_win_set_buf(self.win, self.buf)
   end
 
-  vim.api.nvim_set_current_win(self.win)
-  if self.cursor then
-    window.set_cursor(self, self.cursor)
+  if focus then
+    vim.api.nvim_set_current_win(self.win)
+    if self.cursor then
+      window.set_cursor(self, self.cursor)
+    end
   end
 end
 

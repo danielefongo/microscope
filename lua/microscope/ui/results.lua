@@ -41,8 +41,8 @@ local function on_close(self)
   self:close()
 end
 
-function results:show(build)
-  window.show(self, build)
+function results:show(build, focus)
+  window.show(self, build, focus)
 
   self:set_win_opt("wrap", false)
   self:set_win_opt("scrolloff", 10000)

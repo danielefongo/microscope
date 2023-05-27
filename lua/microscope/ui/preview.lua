@@ -21,9 +21,8 @@ local function on_empty_results_retrieved(self)
   self:clear()
 end
 
-function preview:show(build)
-  self.layout = build
-  window.show(self, build)
+function preview:show(build, focus)
+  window.show(self, build, focus)
 
   if self.term_lines then
     self:write_term(self.term_lines)
