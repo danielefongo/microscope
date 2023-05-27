@@ -12,37 +12,35 @@ end
 local function on_input_changed(self)
   self.data = {}
   self.selected_data = {}
+  self.results = {}
 end
 
 local function on_empty_results_retrieved(self)
   self:clear()
 end
 
-local function on_results_retrieved(self, data)
-  self.data = data
+local function on_new_request(self, request)
+  self.request = request
+end
 
-  local list = vim.tbl_map(function(el)
-    return el.text
-  end, self.data)
+local function on_results_retrieved(self, list)
+  self.results = list
 
   self:write(list)
   self:set_cursor({ 1, 0 })
-
-  for row = 1, vim.api.nvim_buf_line_count(self.buf), 1 do
-    for _, hl in pairs(data[row].highlights or {}) do
-      self:set_buf_hl(hl.color, row, hl.from, hl.to)
-    end
-  end
 end
 
 local function on_close(self)
   self.data = {}
   self.selected_data = {}
+  self.results = {}
   self:close()
 end
 
 function results:show(build, focus)
   window.show(self, build, focus)
+
+  self:parse()
 
   self:set_win_opt("wrap", false)
   self:set_win_opt("scrolloff", 10000)
@@ -73,6 +71,25 @@ function results:select()
   end
 end
 
+function results:parse()
+  if #self.results == 0 then
+    return
+  end
+
+  local height = self.layout and self.layout.height or 10
+  local min = math.max(self:get_cursor()[1] - height - 1, 1)
+  local max = math.min(self:get_cursor()[1] + height + 1, self:line_count())
+
+  for idx = min, max, 1 do
+    if not self.data[idx] then
+      self.data[idx] = self.parser(self.results[idx], self.request)
+      for _, hl in pairs(self.data[idx].highlights or {}) do
+        self:set_buf_hl(hl.color, idx, hl.from, hl.to)
+      end
+    end
+  end
+end
+
 function results:selected()
   if #self.selected_data == 0 then
     return { get_focused(self) }
@@ -89,21 +106,25 @@ end
 
 function results:set_cursor(cursor)
   window.set_cursor(self, cursor)
+  self:parse()
   local focused = get_focused(self)
   if focused then
     events.fire(events.event.result_focused, focused, 100)
   end
 end
 
-function results.new()
+function results.new(parser)
   local v = window.new(results)
 
   v.data = {}
   v.selected_data = {}
+  v.results = {}
+  v.parser = parser
 
   events.on(v, events.event.input_changed, on_input_changed)
   events.on(v, events.event.empty_results_retrieved, on_empty_results_retrieved)
   events.on(v, events.event.results_retrieved, on_results_retrieved)
+  events.on(v, events.event.new_request, on_new_request)
   events.on(v, events.event.microscope_closed, on_close)
   events.native(v, events.event.cursor_moved, function()
     if v.win then

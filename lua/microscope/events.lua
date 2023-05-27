@@ -14,6 +14,7 @@ events.event = {
   result_focused = "ResultFocused",
   results_opened = "ResultsOpened",
   input_changed = "InputChanged",
+  new_request = "NewRequest",
   error = "Error",
 }
 

@@ -42,6 +42,10 @@ function window:get_cursor()
   return self.cursor
 end
 
+function window:line_count()
+  return vim.api.nvim_buf_line_count(self.buf)
+end
+
 function window:clear()
   self:set_cursor({ 1, 0 })
   self:write({})
@@ -56,6 +60,8 @@ function window:write(lines, from, to)
 end
 
 function window:read(from, to)
+  from = from or 0
+  to = to or -1
   return vim.api.nvim_buf_get_lines(self.buf, from, to, false)
 end
 
@@ -89,6 +95,7 @@ end
 
 function window:close()
   events.clear_module(self)
+  self.cursor = nil
   if self.win then
     vim.api.nvim_win_set_buf(self.win, self.buf)
     vim.api.nvim_buf_delete(self.buf, { force = true })

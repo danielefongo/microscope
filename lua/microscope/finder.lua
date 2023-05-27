@@ -72,6 +72,7 @@ function finder:search(text)
     buf = self.old_buf,
     win = self.old_win,
   }
+  events.fire(events.event.new_request, self.request)
   self.find:search(self.request)
 end
 
@@ -121,14 +122,13 @@ function finder.new(opts)
   self.old_buf = vim.api.nvim_get_current_buf()
 
   self.preview = preview.new(self.preview_fn)
-  self.results = results.new()
+  self.results = results.new(build_parser(opts.parsers or {}))
   self.input = input.new()
 
   self.full_screen = false
 
   self.find = scope.new({
     lens = opts.lens,
-    parser = build_parser(opts.parsers or {}),
     callback = function(list)
       if #list > 0 then
         events.fire(events.event.results_retrieved, list)

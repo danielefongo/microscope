@@ -428,11 +428,10 @@ The **context** is a table that is shared across multiple requests. It can be us
 
 ### Scope
 
-The module `microscope.api.scope` is a utility for using a lens. The `new` function accepts an object with 3 fields:
+The module `microscope.api.scope` is a utility for using a lens. The `new` function accepts an object with 2 fields:
 
 - [lens](#lens-spec): a lens spec
 - `callback`: this is called at the end (optional).
-- [parser](#parser-function): this is applied to every result before the `callback` invocation.
 
 Example:
 

@@ -43,13 +43,10 @@ function scope:search(request)
           return self.callback({}, request)
         end
 
-        local parsed = {}
-        for value in vim.gsplit(output, "\n") do
-          table.insert(parsed, self.parser(value, request))
-        end
+        local data = vim.split(output, "\n")
         output = ""
 
-        self.callback(parsed, request)
+        self.callback(data, request)
       end)
 
       self.idle:stop()
@@ -63,9 +60,6 @@ function scope.new(opts)
   opts = opts or {}
 
   s.lens = lens.new(opts.lens)
-  s.parser = opts.parser or function(x)
-    return x
-  end
   s.callback = opts.callback or function() end
 
   return s
