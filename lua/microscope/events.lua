@@ -6,6 +6,7 @@ events.group = vim.api.nvim_create_augroup("Microscope", { clear = false })
 events.event = {
   resize = "VimResized",
   buf_leave = "BufLeave",
+  cursor_moved = "CursorMoved",
   win_leave = "WinLeave",
   microscope_closed = "MicroscopeClosed",
   results_retrieved = "ResultsRetrieved",

@@ -105,6 +105,12 @@ function results.new()
   events.on(v, events.event.empty_results_retrieved, on_empty_results_retrieved)
   events.on(v, events.event.results_retrieved, on_results_retrieved)
   events.on(v, events.event.microscope_closed, on_close)
+  events.native(v, events.event.cursor_moved, function()
+    if v.win then
+      local cursor = vim.api.nvim_win_get_cursor(v.win)
+      v:set_cursor(cursor)
+    end
+  end)
 
   return v
 end
