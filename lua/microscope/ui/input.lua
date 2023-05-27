@@ -30,6 +30,12 @@ function input.new()
 
   vim.api.nvim_buf_attach(v.buf, false, {
     on_lines = function()
+      if vim.api.nvim_buf_line_count(v.buf) > 1 then
+        return vim.schedule(function()
+          vim.api.nvim_buf_set_lines(v.buf, 0, -1, false, { "> " .. v:text() })
+          vim.api.nvim_command("startinsert!")
+        end)
+      end
       events.fire(events.event.input_changed, v:text())
     end,
   })
