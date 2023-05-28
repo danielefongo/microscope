@@ -33,6 +33,10 @@ function preview:show(build, focus)
   self:set_win_opt("scrolloff", 10000)
 end
 
+function preview:set_preview_function(fn)
+  self.preview_fun = fn
+end
+
 function preview:write_term(lines)
   self:clear()
   self.term = vim.api.nvim_open_term(self:get_buf(), {})
@@ -47,10 +51,10 @@ function preview:write_term(lines)
   end, 10)
 end
 
-function preview.new(preview_fun)
+function preview.new()
   local v = window.new(preview)
 
-  v.preview_fun = preview_fun
+  v.preview_fun = function() end
 
   events.on(v, events.event.result_focused, on_result_focused)
   events.on(v, events.event.empty_results_retrieved, on_empty_results_retrieved)

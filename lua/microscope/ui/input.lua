@@ -23,6 +23,11 @@ function input:text()
   return vim.api.nvim_buf_get_lines(self.buf, 0, 1, false)[1]:sub(3):gsub("^%s*(%s*.-)%s*$", "%1")
 end
 
+function input:reset()
+  vim.api.nvim_buf_set_lines(self.buf, 0, 1, false, {})
+  events.fire(events.event.input_changed, "")
+end
+
 function input.new()
   local v = window.new(input)
 

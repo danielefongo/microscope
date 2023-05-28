@@ -1,3 +1,4 @@
+local clone = require("microscope.utils.clone")
 local layouts = require("microscope.builtin.layouts")
 local events = require("microscope.events")
 local error = require("microscope.api.error")
@@ -8,21 +9,6 @@ local input = require("microscope.ui.input")
 
 local finder = {}
 finder.__index = finder
-
-local function build_parser(parsers, idx)
-  idx = idx or #parsers
-  if idx == 0 then
-    return function(data, _)
-      return { text = data }
-    end
-  end
-
-  local prev_parser = build_parser(parsers, idx - 1)
-
-  return function(data, request)
-    return parsers[idx](prev_parser(data, request), request)
-  end
-end
 
 function finder:bind_action(fun)
   return function()
@@ -53,7 +39,7 @@ end
 function finder:open(data)
   self:close()
   for _, value in ipairs(data.selected) do
-    self.open_fn(value, self.request, data.metadata)
+    self.opts.open(value, self.request, data.metadata)
   end
 end
 
@@ -77,10 +63,10 @@ function finder:search(text)
 end
 
 function finder:update()
-  local build = self.layout_fn({
-    finder_size = self.size,
+  local build = self.opts.layout({
+    finder_size = self.opts.size,
     ui_size = vim.api.nvim_list_uis()[1],
-    preview = self.has_preview,
+    preview = self.opts.preview ~= nil,
     full_screen = self.full_screen,
   })
 
@@ -91,41 +77,45 @@ function finder:update()
   events.native(self, events.event.win_leave, finder.close)
 end
 
-function finder:set_layout(new_layout)
-  self.layout_fn = new_layout
-  self:update()
-end
-
 function finder:toggle_full_screen()
   self.full_screen = not self.full_screen
   self:update()
 end
 
-function finder.new(opts)
-  local self = setmetatable({}, finder)
+function finder:alter(lambda)
+  self:set_opts(lambda(self:get_opts()))
+end
 
-  if finder.instance then
-    return
-  end
-  finder.instance = self
+function finder:get_opts()
+  return clone(self.opts)
+end
 
-  self.size = opts.size
-  self.bindings = opts.bindings
-  self.open_fn = opts.open or function() end
-  self.has_preview = opts.preview ~= nil
-  self.preview_fn = opts.preview or function(_, win)
+function finder:set_opts(opts)
+  opts.open = opts.open or function(_, _, _) end
+  opts.layout = opts.layout or layouts.default
+  opts.bindings = opts.bindings or {}
+  opts.preview = opts.preview or function(_, win)
     win:write({ "No preview function provided" })
   end
-  self.layout_fn = opts.layout or layouts.default
 
-  self.old_win = vim.api.nvim_get_current_win()
-  self.old_buf = vim.api.nvim_get_current_buf()
+  for lhs, _ in pairs(self.opts and self.opts.bindings or {}) do
+    vim.keymap.del("i", lhs, { buffer = self.input.buf })
+    vim.keymap.del("n", lhs, { buffer = self.results.buf })
+    vim.keymap.del("n", lhs, { buffer = self.preview.buf })
+  end
 
-  self.preview = preview.new(self.preview_fn)
-  self.results = results.new(build_parser(opts.parsers or {}))
-  self.input = input.new()
-
+  self.opts = opts
   self.full_screen = false
+  self.request = nil
+
+  self.results:set_parsers(self.opts.parsers)
+  self.preview:set_preview_function(self.opts.preview)
+
+  for lhs, action in pairs(self.opts.bindings) do
+    vim.keymap.set("i", lhs, self:bind_action(action), { buffer = self.input.buf })
+    vim.keymap.set("n", lhs, self:bind_action(action), { buffer = self.results.buf })
+    vim.keymap.set("n", lhs, self:bind_action(action), { buffer = self.preview.buf })
+  end
 
   self.find = scope.new({
     lens = opts.lens,
@@ -138,20 +128,32 @@ function finder.new(opts)
     end,
   })
 
+  self:update()
+  self.input:reset()
+end
+
+function finder.new(opts)
+  local self = setmetatable({}, finder)
+
+  if finder.instance then
+    return
+  end
+  finder.instance = self
+
+  self.old_win = vim.api.nvim_get_current_win()
+  self.old_buf = vim.api.nvim_get_current_buf()
+
+  self.preview = preview.new()
+  self.results = results.new()
+  self.input = input.new()
+
   events.on(self, events.event.results_opened, finder.open)
   events.on(self, events.event.input_changed, finder.search)
   events.on(self, events.event.error, finder.close_with_err)
   events.native(self, events.event.resize, finder.update)
   events.on(self, events.event.win_leave, finder.close)
 
-  for lhs, action in pairs(self.bindings) do
-    vim.keymap.set("i", lhs, self:bind_action(action), { buffer = self.input.buf })
-    vim.keymap.set("n", lhs, self:bind_action(action), { buffer = self.results.buf })
-    vim.keymap.set("n", lhs, self:bind_action(action), { buffer = self.preview.buf })
-  end
-
-  self:search("")
-  self:update()
+  self:set_opts(opts)
 
   return self
 end

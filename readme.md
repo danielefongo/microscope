@@ -508,7 +508,8 @@ Microscope's finder instance exposes 3 components:
 In addition, finder exposes the following functions:
 
 - `close()`: close the finder
-- `set_layout(layout_fn)`: set the new layout
+- `get_opts()`: obtain finder's instance options
+- `set_opts(opts)`: override finder's instance options
 - `toggle_full_screen()`: toggle full screen
 
 ### Preview window

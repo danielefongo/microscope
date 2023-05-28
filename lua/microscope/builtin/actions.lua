@@ -43,7 +43,10 @@ end
 
 function actions.set_layout(layout)
   return function(microscope)
-    microscope:set_layout(layout)
+    microscope:alter(function(opts)
+      opts.layout = layout
+      return opts
+    end)
   end
 end
 

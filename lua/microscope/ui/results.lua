@@ -2,6 +2,21 @@ local window = require("microscope.ui.window")
 local events = require("microscope.events")
 local results = {}
 
+local function build_parser(parsers, idx)
+  idx = idx or #parsers
+  if idx == 0 then
+    return function(data, _)
+      return { text = data }
+    end
+  end
+
+  local prev_parser = build_parser(parsers, idx - 1)
+
+  return function(data, request)
+    return parsers[idx](prev_parser(data, request), request)
+  end
+end
+
 local function get_focused(self)
   local cursor = self:get_cursor()[1]
   if self.data and self.data[cursor] then
@@ -113,13 +128,19 @@ function results:set_cursor(cursor)
   end
 end
 
-function results.new(parser)
+function results:set_parsers(parsers)
+  self.parser = build_parser(parsers)
+end
+
+function results.new()
   local v = window.new(results)
 
   v.data = {}
   v.selected_data = {}
   v.results = {}
-  v.parser = parser
+  v.parser = function(x)
+    return x
+  end
 
   events.on(v, events.event.input_changed, on_input_changed)
   events.on(v, events.event.empty_results_retrieved, on_empty_results_retrieved)
