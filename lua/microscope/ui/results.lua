@@ -128,6 +128,10 @@ function results:set_cursor(cursor)
   end
 end
 
+function results:raw_results()
+  return self.results
+end
+
 function results:set_parsers(parsers)
   self.parser = build_parser(parsers)
 end

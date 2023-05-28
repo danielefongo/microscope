@@ -52,4 +52,12 @@ function lenses.cache(...)
   }
 end
 
+function lenses.write(data)
+  return {
+    fun = function(flow)
+      flow.write(data)
+    end,
+  }
+end
+
 return lenses

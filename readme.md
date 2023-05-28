@@ -38,6 +38,7 @@ On [lazy.nvim](https://github.com/folke/lazy.nvim)
         ["<esc>"] = actions.close,
         ["<tab>"] = actions.select,
         ["<c-f>"] = actions.toggle_full_screen,
+        ["<a-s>"] = actions.refine,
       },
     })
 
@@ -284,7 +285,8 @@ Microscope exposes a list of lens specs in `microscope.builtin.lenses`:
 
 - `cache(...)`: cache results
 - `fzf(...)`: filter results using fzf
-- `head(lines, ...)`: limit results
+- `head(limit, ...)`: limit results
+- `write(data)`: write data directly into the flow
 
 ### Actions
 
@@ -297,7 +299,9 @@ Microscope exposes a list of actions in `microscope.builtin.actions`:
 - `toggle_full_screen`: toggle full screen
 - `open`: open selected results
 - `select`: select result
-- `set_layout`: it accepts a [layout function](#layout-function) and returns the corresponding action
+- `set_layout(layout_fun)`: it accepts a [layout function](#layout-function) and returns the corresponding action
+- `refine`: start a new search on retrieved results using a fuzzy lens
+- `refine_with(lens, parser)`: start a new search on retrieved results using a specific lens and parser
 - `close`: close finder
 
 ### Parsers
@@ -542,6 +546,7 @@ Preview window exposes the following functions:
 - `clear()`: clear text
 - `write(lines, from, to)`: write lines to buffer (from and to are optionals)
 - `read(from, to)`: read lines from buffer
+- `raw_results()`: return the list of retrieved and unparsed results
 - `select()`: add focused result to selected results
 - `selected()`: obtain list of results
 - `open(medatada)`: open the selected results. `metadata` can be anything you want to pass to `open` function

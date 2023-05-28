@@ -1,3 +1,5 @@
+local lenses = require("microscope.builtin.lenses")
+local parsers = require("microscope.builtin.parsers")
 local actions = {}
 
 function actions.previous(microscope)
@@ -48,6 +50,27 @@ function actions.set_layout(layout)
       return opts
     end)
   end
+end
+
+function actions.refine_with(lens, lens_parser)
+  return function(microscope)
+    microscope:alter(function(opts)
+      local new_parsers = {}
+      for _, parser in ipairs(opts.parsers or {}) do
+        new_parsers[parser] = parser
+      end
+      table.insert(new_parsers, lens_parser)
+
+      opts.parsers = vim.tbl_values(new_parsers)
+      opts.lens = lens(lenses.write(microscope.results:raw_results()))
+
+      return opts
+    end)
+  end
+end
+
+function actions.refine(microscope)
+  actions.refine_with(lenses.fzf, parsers.fuzzy)(microscope)
 end
 
 function actions.nothing(_) end
