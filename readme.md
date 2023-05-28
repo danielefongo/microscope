@@ -1,10 +1,10 @@
 # Microscope
 
-A micro and highly composable finder for Neovim.
+A micro and highly composable finder for Neovim with no dependencies.
 
 ## Disclaimer
 
-The project is still in development, so expect the API to change.
+Please note that this project is still under development, so the API may change.
 
 ## Base setup
 
@@ -45,11 +45,11 @@ On [lazy.nvim](https://github.com/folke/lazy.nvim)
     microscope.register(files.finders)
     microscope.register(buffers.finders)
 
-    -- bind using microscope instance
+    -- Bind using microscope instance
     vim.keymap.set("n", "<leader>of", microscope.finders.file:bind())
     vim.keymap.set("n", "<leader>oo", microscope.finders.old_file:bind())
 
-    -- bind using microscope commands
+    -- Bind using microscope commands
     vim.keymap.set("n", "<leader>of", ":Microscope file<cr>")
     vim.keymap.set("n", "<leader>oo", ":Microscope old_file<cr>")
   end,
@@ -60,21 +60,21 @@ You can create your own [finder](#finder).
 
 ## Finder
 
-Every finder can be defined using the following opts:
+Each finder can be defined using the following options:
 
 ```lua
 local opts = {
   lens = lens_spec, -- required
-  parsers = list_of_parsers -- optional
+  parsers = list_of_parsers, -- optional
   open = open_fn, -- optional
   preview = preview_fn, -- optional
   layout = layout_fn, -- optional
-  size = custom_size, -- optional, it will override/extend the microscope size option
-  bindings = custom_bindings, -- optional, it will override/extend the microscope bindings option
+  size = custom_size, -- optional (overrides/extends the microscope size option)
+  bindings = custom_bindings, -- optional (overrides/extends the microscope bindings option)
 }
 ```
 
-These properties are defined below.
+These properties are explained below.
 
 #### Creation
 
@@ -83,10 +83,10 @@ A finder can be created in one of two ways:
 ```lua
 local microscope = require("microscope")
 
--- first way
+-- First way
 local finder = microscope.finder(opts)
 
--- second way (it will register finder as microscope.finders.name)
+-- Second way (registers the finder as microscope.finders.name)
 local finder = microscope.register({
   name = opts
 })
@@ -94,19 +94,22 @@ local finder = microscope.register({
 
 #### Binding
 
-After its creation, the finder can be invoked as a function, so it is enough to bind it to a shortcut:
+After creating the finder, you can use it by binding it to a shortcut. There are three ways to achieve this:
 
 ```lua
--- first way
-vim.keymap.set("n", "<leader>of", finder)
+-- First way
+vim.keymap.set("n", "<leader>of", finder:bind())
 
--- second way
-vim.keymap.set("n", "<leader>of", microscope.finders.name)
+-- Second way
+vim.keymap.set("n", "<leader>of", microscope.finders.name:bind())
+
+-- Third way
+vim.keymap.set("n", "<leader>of", ":Microscope name<cr>")
 ```
 
 #### Opts override
 
-After the finder creation, it is possible to override its opts.
+After creating the finder, you have the option to override its opts using the `override()` method. Here's an example:
 
 Example:
 
@@ -123,14 +126,14 @@ finder:override({
 
 ### Lens spec
 
-This element represents a spec for a [lens](#lens), which is used to retrieve or filter data (e.g. list of files or buffers) depending on the [request](#request). It is a table containing a [lens function](#lens-function) and a list of input lenses specs.
+This element represents a specification for a [lens](#lens), which is used to retrieve or filter data (e.g. list of files or buffers), based on the [request](#request). It is a table that consists of a [lens function](#lens-function) and an optional list of input lens specifications.
 
 ```lua
 local lens = {
   fun = function(flow, request, context)
     -- logic
   end,
-  inputs = { ... }, -- list of other lens specs, optional
+  inputs = { ... }, -- optional list of other lens specs
 }
 ```
 
@@ -168,13 +171,13 @@ local my_lens = lenses.fzf(lenses.rg())
 
 ### Parsers
 
-This is a list of [parser functions](#parser-function) to parse the data retrieved from the [lens](#lens).
+This is a list of functions, called [parser functions](#parser-function), used to parse the data retrieved from the [lens](#lens).
 
 #### Parser function
 
-This function accepts result data and the original [request](#request) and transforms the data by adding extra information. The first parser will receive a data containing only the `text` field. Each parser function must propagate this field, even if unmodified, as it will be used to render the result. The extra information can be something like `file` or whatever you want to add. The final data table will be passed to the [open function](#open-function) and to the [preview function](#preview-function).
+This function accepts result data and the original [request](#request), and transforms the data by adding extra information. The first parser will receive a data containing only the `text` field. It is important for each parser function to propagate this field, even if unmodified, as it will be used to render the result. The additional information can include things like `file` or any other custom data you wish to add. The final data table will be passed to the [open function](#open-function) and the [preview function](#preview-function).
 
-There is another special data field, `highlights`, which should be propagated unless you want to remove it. It represents a list of highlights to be applied to the result. For more details see the [highlight section](#highlight).
+There is another special data field called `highlights`, which should be propagated unless you intend to remove it. This field represents a list of highlights to be applied to the result. For more details, please refer to the [highlight section](#highlight).
 
 Example:
 
@@ -191,7 +194,7 @@ end
 
 ### Open function
 
-This function will be called with the [open action](#actions). It accepts a single result data obtained from the parsers, the [request](#request) and optional metadata (sent by `results:open`).
+The open function is called when the [open action](#actions) is triggered. It takes a single result data obtained from the parsers, the [request](#request), and optional metadata (sent by `results:open`).
 
 Example:
 
@@ -203,7 +206,7 @@ end
 
 ### Preview function
 
-This function will be called whenever a result is focused. It accepts a single result data obtained from the parsers and the `preview` microscope instance.
+The preview function is called when a result is focused. It takes a single result data obtained from the parsers and the `preview` microscope instance.
 
 Example:
 
@@ -213,16 +216,16 @@ local preview_fn = function(data, window)
 end
 ```
 
-More details about preview window api can be found in [its section](#preview-window).
+For more details about the preview window API, refer to the [preview window section](#preview-window).
 
 ### Layout function
 
-This function defines the structure of the finder using the [display](#display) API. It takes in a table that includes the following fields:
+The layout function is responsible for defining the structure of the finder using the [display](#display) API. It receives a table with the following fields:
 
 - `finder_size`: represents the [size](#size) provided in the microscope settings.
 - `ui_size`: represents the size of the entire UI.
 - `preview`: indicates whether the [preview function](#preview-function) has been set or not.
-- `full_screen`: indicates whether the full screen option has been set or not.
+- `full_screen`: indicates whether the full-screen option has been set or not.
 
 Example:
 
@@ -242,11 +245,11 @@ end
 
 ### Size
 
-Size is a lua table containing a `width` and an `height`.
+The `size` is represented as a table containing `width` and `height` fields.
 
 ### Bindings
 
-This table contains shortcut bindings to microscope [actions](#action).
+The `bindings` table is used to define shortcut bindings for microscope [actions](#action).
 
 Example:
 
@@ -283,27 +286,27 @@ end
 
 Microscope exposes a list of lens specs in `microscope.builtin.lenses`:
 
-- `cache(...)`: cache results
-- `fzf(...)`: filter results using fzf
-- `head(limit, ...)`: limit results
-- `write(data)`: write data directly into the flow
+- `cache(...)`: caches results
+- `fzf(...)`: filters results using fzf
+- `head(limit, ...)`: limits results
+- `write(data)`: writes data directly into the flow
 
 ### Actions
 
 Microscope exposes a list of actions in `microscope.builtin.actions`:
 
-- `previous`: go to the previous result
-- `next`: go to the next result
-- `scroll_down`: scroll down preview
-- `scroll_up`: scroll up preview
-- `toggle_full_screen`: toggle full screen
-- `open`: open selected results
-- `select`: select result
-- `set_layout(layout_fun)`: it accepts a [layout function](#layout-function) and returns the corresponding action
-- `alter(override_opts)`: it accepts a table of options to be overridden in finder's instance
-- `refine`: start a new search on retrieved results using a fuzzy lens
-- `refine_with(lens, parser)`: start a new search on retrieved results using a specific lens and parser
-- `close`: close finder
+- `previous`: goes to the previous result
+- `next`: goes to the next result
+- `scroll_down`: scrolls down preview
+- `scroll_up`: scrolls up preview
+- `toggle_full_screen`: toggles full screen
+- `open`: opens selected results
+- `select`: selects result
+- `set_layout(layout_fun)`: accepts a [layout function](#layout-function) and returns the corresponding action
+- `alter(override_opts)`: accepts a table of options to override in the finder's instance
+- `refine`: starts a new search on retrieved results using a fuzzy lens
+- `refine_with(lens, parser)`: starts a new search on retrieved results using a specific lens and parser
+- `close`: closes finder
 
 ### Parsers
 
@@ -321,7 +324,7 @@ Microscope exposes a list of layouts in `microscope.builtin.layouts`:
 
 ### Lens
 
-A lens is used to retrieve or filter data (e.g. list of files or buffers) depending on the request and it can be piped into other lenses. It accepts a [lens spec](#lens-spec).
+A lens is used to retrieve or filter data (e.g., a list of files or buffers) depending on the request, and it can be piped into other lenses. It accepts a [lens spec](#lens-spec).
 
 Example:
 
@@ -357,7 +360,7 @@ local my_lens = lens.new(fzf(rg()))
 
 #### Lens function
 
-The lens function has two parameters, the [flow](#flow), the [request](#request) and the [context](#context).
+The lens function has two parameters: the [flow](#flow), the [request](#request), and the [context](#context).
 
 ##### Flow
 
@@ -365,31 +368,31 @@ The **flow** is a bag of functions:
 
 - `can_read`: returns true if there is at least one input lens.
 - `read`: returns `array_string` or `nil` if there is no more input data.
-  > `array_string` is a string representing a list of lines separated by newline and terminating with a newline (e.g. _"hello\nworld\n"_).
+  > `array_string` is a string representing a list of lines separated by a newline and terminating with a newline (e.g., "hello\nworld\n").
 - `read_iter`: returns an iterator over `read`.
 - `read_array`: returns an array of lines or `nil` if there is no more input data.
 - `read_array_iter`: returns an iterator over `read_array`.
-- `write`: it accepts an `array_string` or a list of lines and propagate the data (e.g. to the next lens).
-  > `array_string` is a string representing a list of lines separated by newline and terminating with a newline (e.g. _"hello\nworld\n"_).
-- `stop`: stop the flow.
-- `stopped`: returns true if the flow is stopped (e.g. you close the finder before reaching the end of the lens function).
-- `fn`: executes a vim function passing varargs and returns its result.
+- `write`: accepts an `array_string` or a list of lines and propagates the data (e.g., to the next lens).
+  > `array_string` is a string representing a list of lines separated by a newline and terminating with a newline (e.g., "hello\nworld\n").
+- `stop`: stops the flow.
+- `stopped`: returns true if the flow is stopped (e.g., you close the finder before reaching the end of the lens function).
+- `fn`: executes a Vim function passing varargs and returns its result.
 
-  > This is required because one cannot execute vim functions like `vim.api.nvim_buf_get_name` inside corutines.
+  > This is required because one cannot execute Vim functions like `vim.api.nvim_buf_get_name` inside coroutines.
 
   ```lua
-  -- synthetic way
+  -- Synthetic way
   local filename = flow.fn(vim.api.nvim_buf_get_name, request.buf)
 
-  -- verbose way
+  -- Verbose way
   local filename = flow.fn(function()
      return vim.api.nvim_buf_get_name(request.buf)
   end)
   ```
 
-- `await`: executes a function passing varargs and awaits for its callback resolution.
+- `await`: executes a function passing varargs and awaits its callback resolution.
 
-  > This is required because one cannot execute vim functions like `vim.api.nvim_buf_get_name` inside corutines.
+  > This is required because one cannot execute Vim functions like `vim.api.nvim_buf_get_name` inside coroutines.
 
   ```lua
   local data = flow.await(function(resolve, ...)
@@ -409,7 +412,7 @@ The **flow** is a bag of functions:
   })
   ```
 
-- `spawn`: executes a shell command and writes its output in the flow.
+- `spawn`: executes a shell command and writes its output into the flow.
 
   ```lua
   flow.spawn({
@@ -429,14 +432,14 @@ The **request** is an object containing:
 
 ##### Context
 
-The **context** is a table that is shared across multiple requests. It can be used to cache results or to do logic depending on the previous request.
+The **context** is a table that is shared across multiple requests. It can be used to cache results or to perform logic based on the previous request.
 
 ### Scope
 
-The module `microscope.api.scope` is a utility for using a lens. The `new` function accepts an object with 2 fields:
+The `microscope.api.scope` module provides a utility for working with lenses. The `new` function accepts an object with two fields:
 
-- [lens](#lens-spec): a lens spec
-- `callback`: this is called at the end (optional).
+- `lens`: a [lens specification](#lens-spec)
+- `callback`: an optional callback function that is called at the end
 
 Example:
 
@@ -452,7 +455,7 @@ local cat_scope = scope.new({
       })
     end,
     callback = function(lines, any_request)
-      do_smth(lines)
+      do_something(lines)
     end,
   },
 })
@@ -461,30 +464,30 @@ cat_scope:search({
   text = "my_file",
 })
 
--- to stop before completion
+-- To stop before completion
 cat_scope:stop()
 ```
 
-This module can be useful, for example, on [preview function](#preview-function): you can write the lines obtained directly in the preview window.
+This module can be particularly useful when working with the [preview function](#preview-function). You can use it to directly write the obtained lines into the preview window, providing a convenient way to display and interact with the data retrieved by the lens.
 
 ### Display
 
-This module assists you in building a layout. The functions to create a display are as follows:
+This module provides assistance in building layouts. The functions available for creating displays are as follows:
 
-- `input(size)`: defines the input display. Default size is 1.
-- `results(size)`: defines the results display. Default size is nil.
-- `preview(size)`: defines the preview display. Default size is nil.
+- `input(size)`: defines the input display. The default size is 1.
+- `results(size)`: defines the results display. The default size is nil.
+- `preview(size)`: defines the preview display. The default size is nil.
 - `space(size)`: defines a fake display to create spacing between and around displays. The default size is nil.
 - `vertical(displays, size)`: represents a vertical display. The first parameter is a list of displays, and the second one is the size.
 - `horizontal(displays, size)`: represents a horizontal display. The first parameter is a list of displays, and the second one is the size.
 
-The size can be specified as follows:
+The size can be specified in the following ways:
 
 - An integer: represents the number of rows or columns.
-- A percentage string (e.g. "40%"): represents the percentage of rows or columns.
+- A percentage string (e.g., "40%"): represents the percentage of rows or columns.
 - `nil`: indicates that the component will expand to occupy as much space as possible.
 
-To construct the layout, you can invoke the `build` function of the display instance by passing a size (e.g. finder size).
+To construct the layout, you can use the `build` function of the display instance by passing a size (e.g., finder size).
 
 Example:
 
@@ -502,61 +505,63 @@ display
   :build(finder_size)
 ```
 
-### Microscope finder
+### Microscope Finder
 
-Microscope's finder instance exposes 3 components:
+The Microscope Finder instance exposes three components:
 
-- [preview window](#preview-window)
-- [results window](#results-window)
-- input window (not really useful)
+- [Preview Window](#preview-window)
+- [Results Window](#results-window)
+- Input Window (not very useful)
 
-In addition, finder exposes the following functions:
+In addition, the finder provides the following functions:
 
-- `close()`: close the finder
-- `get_opts()`: obtain finder's instance options
-- `set_opts(opts)`: override finder's instance options
-- `toggle_full_screen()`: toggle full screen
+- `close()`: closes the finder.
+- `get_opts()`: retrieves the finder's instance options.
+- `set_opts(opts)`: overrides the finder's instance options.
+  > This differs from [opts override](#opts-override) since it is only for the instance.
+- `alter(lambda)`: overrides the finder's instance options. It accepts a lambda function with one parameter, which is a copy of the finder's instance options. This function should return the new options (`opts`) that will be set. This function effectively combines the functionality of `get_opts` and `set_opts`.
+- `toggle_full_screen()`: toggles full screen mode.
 
-### Preview window
+### Preview Window
 
-Preview window exposes the following functions:
+The preview window provides the following functions:
 
-- `set_buf_hl(color, line, from, to)`: highlight buffer
-- `set_win_opt(key, value)`: set window option
-- `set_buf_opt(key, value)`: set buffer option
-- `get_win()`: return the handled winnr
-- `get_buf()`: return the handled bufnr
-- `set_cursor(cursor)`: set cursor safely
-- `get_cursor(cursor)`: get the current cursor
-- `clear()`: clear text
-- `write(lines, from, to)`: write lines to buffer (from and to are optionals)
-- `write_term(lines)`: write ansi lines
-- `read(from, to)`: read lines from buffer
+- `set_buf_hl(color, line, from, to)`: highlights the buffer.
+- `set_win_opt(key, value)`: sets a window option.
+- `set_buf_opt(key, value)`: sets a buffer option.
+- `get_win()`: returns the window number of the preview window.
+- `get_buf()`: returns the buffer number of the preview window.
+- `set_cursor(cursor)`: sets the cursor position safely.
+- `get_cursor(cursor)`: retrieves the current cursor position.
+- `clear()`: clears the text in the preview window.
+- `write(lines, from, to)`: writes lines of text to the buffer of the preview window. The `from` and `to` parameters are optional.
+- `write_term(lines)`: writes ANSI lines to the buffer.
+- `read(from, to)`: reads lines from the buffer of the preview window.
 
-### Results window
+### Results Window
 
-Preview window exposes the following functions:
+The results window provides the following functions:
 
-- `set_buf_hl(color, line, from, to)`: highlight buffer
-- `set_win_opt(key, value)`: set window option
-- `set_buf_opt(key, value)`: set buffer option
-- `get_win()`: return the handled winnr
-- `get_buf()`: return the handled bufnr
-- `set_cursor(cursor)`: set cursor safely
-- `get_cursor(cursor)`: get the current cursor
-- `clear()`: clear text
-- `write(lines, from, to)`: write lines to buffer (from and to are optionals)
-- `read(from, to)`: read lines from buffer
-- `raw_results()`: return the list of retrieved and unparsed results
-- `select()`: add focused result to selected results
-- `selected()`: obtain list of results
-- `open(medatada)`: open the selected results. `metadata` can be anything you want to pass to `open` function
+- `set_buf_hl(color, line, from, to)`: highlights the buffer.
+- `set_win_opt(key, value)`: sets a window option.
+- `set_buf_opt(key, value)`: sets a buffer option.
+- `get_win()`: returns the window number of the results window.
+- `get_buf()`: returns the buffer number of the results window.
+- `set_cursor(cursor)`: sets the cursor position safely.
+- `get_cursor(cursor)`: retrieves the current cursor position.
+- `clear()`: clears the text in the results window.
+- `write(lines, from, to)`: writes lines of text to the buffer of the results window. The `from` and `to` parameters are optional.
+- `read(from, to)`: reads lines from the buffer of the results window.
+- `raw_results()`: returns the list of retrieved and unparsed results.
+- `select()`: adds the focused result to the selected results.
+- `selected()`: obtains the list of selected results.
+- `open(metadata)`: opens the selected results. The `metadata` parameter can be any data you want to pass to the `open` function.
 
 ### Highlight
 
-The module `microscope.api.highlight` can be used to build highlights for a line.
+The `microscope.api.highlight` module allows you to create highlights for a line.
 
-Example
+Example:
 
 ```lua
 local highlight = require("microscope.api.highlight")
@@ -567,25 +572,23 @@ local data = {
 }
 local highlights = highlight
   .new(data.highlights, data.text)
-  :hl_match(highlight.color.color1, "(%d+:)(.*)", 1) -- highlight first group with color1
-  :hl(highlight.color.color2, 3, 10) -- highlight from col 3 to 10 with color2
+  :hl_match(highlight.color.color1, "(%d+:)(.*)", 1) -- highlight the first group with color1
+  :hl(highlight.color.color2, 3, 10) -- highlight from column 3 to 10 with color2
   :get_highlights()
 ```
 
-Another utility function is `microscope.utils.highlight`. This function accepts a `path` and a `bufnr` and highlights the buffer by inferring the filetype.
+Another utility function is `microscope.utils.highlight`. This function accepts a `path` and a `bufnr` and automatically highlights the buffer based on the inferred filetype.
 
 ### Error
 
-The module `microscope.api.error` can be used to display an error. It exposes two useful functions:
+The `microscope.api.error` module allows you to display an error. It provides two useful functions:
 
-- `generic(message)`: it shows the error message
-- `critical(message)`: it shows the error message and close the finder
+- `generic(message)`: displays a generic error message.
+- `critical(message)`: displays an error message and closes the finder.
 
 ## Plugins
 
-A plugin can expose finders, lenses specs, actions, parsers, previews and open functions. This way, it is possible to have pre-packaged finders or to easily create custom finders by using the provided building blocks.
-
-Example:
+Plugins can expose finders, lens specs, actions, parsers, previews, and open functions. This allows you to use pre-packaged finders or easily create custom finders using the provided building blocks. Here's an example:
 
 ```lua
 local microscope = require("microscope")
@@ -614,7 +617,7 @@ microscope.register({
 })
 ```
 
-Take a look to already published plugins:
+You can also explore the already published plugins:
 
 - [microscope-buffers](https://github.com/danielefongo/microscope-buffers)
 - [microscope-code](https://github.com/danielefongo/microscope-code)
