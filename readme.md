@@ -300,6 +300,7 @@ Microscope exposes a list of actions in `microscope.builtin.actions`:
 - `open`: open selected results
 - `select`: select result
 - `set_layout(layout_fun)`: it accepts a [layout function](#layout-function) and returns the corresponding action
+- `alter(override_opts)`: it accepts a table of options to be overridden in finder's instance
 - `refine`: start a new search on retrieved results using a fuzzy lens
 - `refine_with(lens, parser)`: start a new search on retrieved results using a specific lens and parser
 - `close`: close finder

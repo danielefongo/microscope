@@ -43,13 +43,16 @@ function actions.close(microscope)
   microscope:close()
 end
 
-function actions.set_layout(layout)
+function actions.alter(opts)
   return function(microscope)
-    microscope:alter(function(opts)
-      opts.layout = layout
-      return opts
+    microscope:alter(function(old_opts)
+      return vim.tbl_deep_extend("force", old_opts, opts)
     end)
   end
+end
+
+function actions.set_layout(layout)
+  return actions.alter({ layout = layout })
 end
 
 function actions.refine_with(lens, lens_parser)
