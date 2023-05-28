@@ -59,7 +59,7 @@ function actions.refine_with(lens, lens_parser)
       for _, parser in ipairs(opts.parsers or {}) do
         new_parsers[parser] = parser
       end
-      table.insert(new_parsers, lens_parser)
+      new_parsers[lens_parser] = lens_parser
 
       opts.parsers = vim.tbl_values(new_parsers)
       opts.lens = lens(lenses.write(microscope.results:raw_results()))
