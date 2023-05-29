@@ -106,10 +106,11 @@ function results:parse()
 end
 
 function results:selected()
-  if #self.selected_data == 0 then
+  local selected = vim.tbl_values(self.selected_data)
+  if #selected == 0 then
     return { get_focused(self) }
   else
-    return vim.tbl_values(self.selected_data)
+    return selected
   end
 end
 
