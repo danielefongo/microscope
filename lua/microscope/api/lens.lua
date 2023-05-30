@@ -55,7 +55,6 @@ function lens:write(data)
 end
 
 function lens:stop()
-  self.context = {}
   for _, input in pairs(self.inputs) do
     input:stop()
   end
