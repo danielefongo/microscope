@@ -45,6 +45,10 @@ local function on_results_retrieved(self, list)
   self:set_cursor({ 1, 0 })
 end
 
+local function on_new_opts(self, opts)
+  self.parser = build_parser(opts.parsers)
+end
+
 local function on_close(self)
   self.data = {}
   self.selected_data = {}
@@ -133,10 +137,6 @@ function results:raw_results()
   return self.results
 end
 
-function results:set_parsers(parsers)
-  self.parser = build_parser(parsers)
-end
-
 function results.new()
   local v = window.new(results)
 
@@ -152,6 +152,7 @@ function results.new()
   events.on(v, events.event.results_retrieved, on_results_retrieved)
   events.on(v, events.event.new_request, on_new_request)
   events.on(v, events.event.microscope_closed, on_close)
+  events.on(v, events.event.new_opts, on_new_opts)
   events.native(v, events.event.cursor_moved, function()
     if v.win then
       local cursor = vim.api.nvim_win_get_cursor(v.win)

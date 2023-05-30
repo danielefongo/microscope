@@ -108,8 +108,7 @@ function finder:set_opts(opts)
   self.full_screen = false
   self.request = nil
 
-  self.results:set_parsers(self.opts.parsers)
-  self.preview:set_preview_function(self.opts.preview)
+  events.fire(events.event.new_opts, self.opts)
 
   for lhs, action in pairs(self.opts.bindings) do
     vim.keymap.set("i", lhs, self:bind_action(action), { buffer = self.input.buf })
