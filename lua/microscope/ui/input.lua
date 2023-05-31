@@ -11,7 +11,7 @@ local function on_new_opts(self, opts)
 
   self.prompt = opts.prompt
   vim.fn.prompt_setprompt(self.buf, self.prompt)
-  vim.api.nvim_buf_set_lines(self.buf, 0, -1, false, { self.prompt .. old_text })
+  self:write({ self.prompt .. old_text })
 end
 
 function input:show(layout, focus)
@@ -31,11 +31,11 @@ function input:text()
     return ""
   end
 
-  return vim.api.nvim_buf_get_lines(self.buf, 0, 1, false)[1]:sub(#self.prompt):gsub("^%s*(%s*.-)%s*$", "%1")
+  return self:read(0, 1)[1]:sub(#self.prompt):gsub("^%s*(%s*.-)%s*$", "%1")
 end
 
 function input:reset()
-  vim.api.nvim_buf_set_lines(self.buf, 0, 1, false, {})
+  self:clear()
 end
 
 function input.new()
@@ -48,7 +48,7 @@ function input.new()
     on_lines = function()
       if vim.api.nvim_buf_line_count(v.buf) > 1 then
         return vim.schedule(function()
-          vim.api.nvim_buf_set_lines(v.buf, 0, -1, false, { v.prompt .. v:text() })
+          v:write({ v.prompt .. v:text() })
           vim.api.nvim_command("startinsert!")
         end)
       end
