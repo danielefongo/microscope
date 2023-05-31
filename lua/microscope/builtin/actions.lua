@@ -69,6 +69,8 @@ function actions.refine_with(lens, lens_parser)
 
       return opts
     end)
+
+    microscope.input:reset()
   end
 end
 

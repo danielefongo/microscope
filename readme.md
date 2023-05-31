@@ -509,9 +509,9 @@ display
 
 The Microscope Finder instance exposes three components:
 
+- [Input Window](#input-window)
 - [Preview Window](#preview-window)
 - [Results Window](#results-window)
-- Input Window (not very useful)
 
 In addition, the finder provides the following functions:
 
@@ -521,6 +521,13 @@ In addition, the finder provides the following functions:
   > This differs from [opts override](#opts-override) since it is only for the instance.
 - `alter(lambda)`: overrides the finder's instance options. It accepts a lambda function with one parameter, which is a copy of the finder's instance options. This function should return the new options (`opts`) that will be set. This function effectively combines the functionality of `get_opts` and `set_opts`.
 - `toggle_full_screen()`: toggles full screen mode.
+
+### Input Window
+
+The input window provides the following functions:
+
+- `text()`: returns the text.
+- `reset()`: resets the text.
 
 ### Preview Window
 
