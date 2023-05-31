@@ -62,11 +62,13 @@ function window:clear()
 end
 
 function window:write(lines, from, to)
+  local is_modifiable = self:get_buf_opt("modifiable")
+
   self:set_buf_opt("modifiable", true)
   from = from or 0
   to = to or -1
   vim.api.nvim_buf_set_lines(self.buf, from, to, true, lines)
-  self:set_buf_opt("modifiable", false)
+  self:set_buf_opt("modifiable", is_modifiable)
 end
 
 function window:read(from, to)
