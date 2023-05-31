@@ -128,7 +128,6 @@ function finder:set_opts(opts)
   })
 
   self:update()
-  self.input:reset()
 end
 
 function finder.new(opts)
@@ -153,6 +152,7 @@ function finder.new(opts)
   events.on(self, events.event.win_leave, finder.close)
 
   self:set_opts(opts)
+  self.input:reset()
 
   return self
 end
