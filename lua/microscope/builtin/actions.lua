@@ -57,6 +57,12 @@ end
 
 function actions.refine_with(lens, lens_parser, prompt)
   return function(microscope)
+    local current_search = microscope.input:text()
+
+    if current_search == "" then
+      return
+    end
+
     microscope:alter(function(opts)
       local new_parsers = {}
       for _, parser in ipairs(opts.parsers or {}) do
@@ -66,7 +72,11 @@ function actions.refine_with(lens, lens_parser, prompt)
 
       opts.parsers = vim.tbl_values(new_parsers)
       opts.lens = lens(lenses.write(microscope.results:raw_results()))
-      opts.prompt = prompt or microscope.input:text() .. " > "
+
+      opts.searches = opts.searches or {}
+      table.insert(opts.searches, current_search)
+
+      opts.prompt = prompt or table.concat(opts.searches, " | ") .. " > "
 
       return opts
     end)
