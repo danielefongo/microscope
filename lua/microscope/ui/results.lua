@@ -24,17 +24,14 @@ local function get_focused(self)
   end
 end
 
-local function on_input_changed(self)
-  self.data = {}
-  self.selected_data = {}
-  self.results = {}
-end
-
 local function on_empty_results_retrieved(self)
   self:clear()
 end
 
 local function on_new_request(self, request)
+  self.data = {}
+  self.selected_data = {}
+  self.results = {}
   self.request = request
 end
 
@@ -147,7 +144,6 @@ function results.new()
     return x
   end
 
-  events.on(v, events.event.input_changed, on_input_changed)
   events.on(v, events.event.empty_results_retrieved, on_empty_results_retrieved)
   events.on(v, events.event.results_retrieved, on_results_retrieved)
   events.on(v, events.event.new_request, on_new_request)
