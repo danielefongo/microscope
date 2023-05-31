@@ -541,7 +541,9 @@ The preview window provides the following functions:
 
 - `set_buf_hl(color, line, from, to)`: highlights the buffer.
 - `set_win_opt(key, value)`: sets a window option.
+- `get_win_opt(key)`: gets a window option.
 - `set_buf_opt(key, value)`: sets a buffer option.
+- `get_buf_opt(key)`: gets a buffer option.
 - `get_win()`: returns the window number of the preview window.
 - `get_buf()`: returns the buffer number of the preview window.
 - `set_cursor(cursor)`: sets the cursor position safely.

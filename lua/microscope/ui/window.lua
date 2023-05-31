@@ -5,10 +5,20 @@ function window:set_buf_hl(color, line, from, to)
   vim.api.nvim_buf_add_highlight(self.buf, 0, color, line - 1, from - 1, to)
 end
 
+function window:get_win_opt(key)
+  if self.win then
+    return vim.api.nvim_win_get_option(self.win, key)
+  end
+end
+
 function window:set_win_opt(key, value)
   if self.win then
     vim.api.nvim_win_set_option(self.win, key, value)
   end
+end
+
+function window:get_buf_opt(key)
+  return vim.api.nvim_buf_get_option(self.buf, key)
 end
 
 function window:set_buf_opt(key, value)
