@@ -23,6 +23,7 @@ local function shell(opts, input_stream)
     output_stream:read_stop()
     output_stream:close()
     handle:close()
+    handle:kill(vim.loop.constants.SIGTERM)
     if input_stream then
       input_stream:read_stop()
       input_stream:close()
