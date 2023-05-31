@@ -27,6 +27,7 @@ end
 function microscope.setup(opts)
   microscope.opts.size = opts.size
   microscope.opts.bindings = opts.bindings
+  microscope.opts.prompt = opts.prompt or "> "
 
   return microscope
 end

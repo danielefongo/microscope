@@ -25,6 +25,7 @@ On [lazy.nvim](https://github.com/folke/lazy.nvim)
     local buffers = require("microscope-buffers")
 
     microscope.setup({
+      prompt = ":> " -- optional (default is "> ")
       size = {
         width = 80,
         height = 30,
@@ -71,6 +72,7 @@ local opts = {
   layout = layout_fn, -- optional
   size = custom_size, -- optional (overrides/extends the microscope size option)
   bindings = custom_bindings, -- optional (overrides/extends the microscope bindings option)
+  prompt = prompt, -- optional (overrides/extends the microscope bindings option)
 }
 ```
 
@@ -280,6 +282,10 @@ local close_action = function(microscope)
 end
 ```
 
+### Prompt
+
+The `prompt` is a string prefixed to the search query, defaults to "> ".
+
 ## Builtins
 
 ### Lenses
@@ -305,7 +311,7 @@ Microscope exposes a list of actions in `microscope.builtin.actions`:
 - `set_layout(layout_fun)`: accepts a [layout function](#layout-function) and returns the corresponding action
 - `alter(override_opts)`: accepts a table of options to override in the finder's instance
 - `refine`: starts a new search on retrieved results using a fuzzy lens
-- `refine_with(lens, parser)`: starts a new search on retrieved results using a specific lens and parser
+- `refine_with(lens, parser, prompt)`: starts a new search on retrieved results using a specific lens, parser and optional prompt
 - `close`: closes finder
 
 ### Parsers

@@ -6,6 +6,14 @@ local function on_close(self)
   self:close()
 end
 
+local function on_new_opts(self, opts)
+  local old_text = self:text()
+
+  self.prompt = opts.prompt
+  vim.fn.prompt_setprompt(self.buf, self.prompt)
+  vim.api.nvim_buf_set_lines(self.buf, 0, -1, false, { self.prompt .. old_text })
+end
+
 function input:show(layout, focus)
   window.show(self, layout, focus)
 
@@ -15,29 +23,32 @@ function input:show(layout, focus)
   else
     self:set_buf_opt("buftype", "prompt")
     vim.api.nvim_command("startinsert!")
-    vim.fn.prompt_setprompt(self.buf, "> ")
   end
 end
 
 function input:text()
-  return vim.api.nvim_buf_get_lines(self.buf, 0, 1, false)[1]:sub(3):gsub("^%s*(%s*.-)%s*$", "%1")
+  if not self.prompt then
+    return ""
+  end
+
+  return vim.api.nvim_buf_get_lines(self.buf, 0, 1, false)[1]:sub(#self.prompt):gsub("^%s*(%s*.-)%s*$", "%1")
 end
 
 function input:reset()
   vim.api.nvim_buf_set_lines(self.buf, 0, 1, false, {})
-  events.fire(events.event.input_changed, "")
 end
 
 function input.new()
   local v = window.new(input)
 
   events.on(v, events.event.microscope_closed, on_close)
+  events.on(v, events.event.new_opts, on_new_opts)
 
   vim.api.nvim_buf_attach(v.buf, false, {
     on_lines = function()
       if vim.api.nvim_buf_line_count(v.buf) > 1 then
         return vim.schedule(function()
-          vim.api.nvim_buf_set_lines(v.buf, 0, -1, false, { "> " .. v:text() })
+          vim.api.nvim_buf_set_lines(v.buf, 0, -1, false, { v.prompt .. v:text() })
           vim.api.nvim_command("startinsert!")
         end)
       end

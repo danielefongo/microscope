@@ -55,7 +55,7 @@ function actions.set_layout(layout)
   return actions.alter({ layout = layout })
 end
 
-function actions.refine_with(lens, lens_parser)
+function actions.refine_with(lens, lens_parser, prompt)
   return function(microscope)
     microscope:alter(function(opts)
       local new_parsers = {}
@@ -66,6 +66,7 @@ function actions.refine_with(lens, lens_parser)
 
       opts.parsers = vim.tbl_values(new_parsers)
       opts.lens = lens(lenses.write(microscope.results:raw_results()))
+      opts.prompt = prompt or microscope.input:text() .. " > "
 
       return opts
     end)
