@@ -60,7 +60,7 @@ local function calculate_fill_size(elements, size)
   return (size - other_elements_size - (#elements - 1) * 2) / number_of_fills
 end
 
-local function build_box(rectangle, build, spec, axis, axis_dimension)
+local function build_box(rectangle, layout, spec, axis, axis_dimension)
   local previous_size = 0
 
   local fill_size = calculate_fill_size(spec.box.elements, rectangle[axis_dimension])
@@ -69,42 +69,42 @@ local function build_box(rectangle, build, spec, axis, axis_dimension)
     local element_size = calculate_size(element.size, rectangle[axis_dimension], fill_size)
     local element_rectangle = relative_rectangle(rectangle, { [axis] = previous_size, [axis_dimension] = element_size })
 
-    element:gen(element_rectangle, build)
+    element:gen(element_rectangle, layout)
 
     previous_size = previous_size + element_size + OFFSET
   end
 end
 
-function display:gen(rectangle, build)
+function display:gen(rectangle, layout)
   if self.type == "box" then
     if self.box.direction == "vertical" then
-      build_box(rectangle, build, self, "y", "height")
+      build_box(rectangle, layout, self, "y", "height")
     elseif self.box.direction == "horizontal" then
-      build_box(rectangle, build, self, "x", "width")
+      build_box(rectangle, layout, self, "x", "width")
     end
   elseif self.type ~= "space" then
-    build[self.type] = rectangle
+    layout[self.type] = rectangle
   end
 end
 
 function display:build(finder_size)
   local ui_size = vim.api.nvim_list_uis()[1]
-  local build = {}
+  local layout = {}
 
   local finder_rectangle =
     generate_rectangle(math.min(finder_size.width, ui_size.width - 4), math.min(finder_size.height, ui_size.height - 4))
   local ui_rectangle = generate_rectangle(ui_size.width - 4, ui_size.height - 4)
 
-  display.vertical({ self }):gen(finder_rectangle, build)
+  display.vertical({ self }):gen(finder_rectangle, layout)
 
-  for _, value in pairs(build) do
+  for _, value in pairs(layout) do
     if not validate_rectangle(value, ui_rectangle) then
       error.generic("microscope: cannot be rendered")
       return {}
     end
   end
 
-  return build
+  return layout
 end
 
 function display.vertical(elements, size)

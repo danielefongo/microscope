@@ -1,5 +1,5 @@
 local clone = require("microscope.utils.clone")
-local layouts = require("microscope.builtin.layouts")
+local default_layout = require("microscope.builtin.layouts").default
 local events = require("microscope.events")
 local error = require("microscope.api.error")
 local scope = require("microscope.api.scope")
@@ -63,7 +63,7 @@ function finder:search(text)
 end
 
 function finder:update()
-  local build = self.opts.layout({
+  local layout = self.opts.layout({
     finder_size = self.opts.size,
     ui_size = vim.api.nvim_list_uis()[1],
     preview = self.opts.preview ~= nil,
@@ -71,9 +71,9 @@ function finder:update()
   })
 
   events.clear(self, events.event.win_leave)
-  self.preview:show(build.preview, build.input == nil)
-  self.results:show(build.results, build.input == nil)
-  self.input:show(build.input, true)
+  self.preview:show(layout.preview, layout.input == nil)
+  self.results:show(layout.results, layout.input == nil)
+  self.input:show(layout.input, true)
   events.native(self, events.event.win_leave, finder.close)
 end
 
@@ -92,7 +92,7 @@ end
 
 function finder:set_opts(opts)
   opts.open = opts.open or function(_, _, _) end
-  opts.layout = opts.layout or layouts.default
+  opts.layout = opts.layout or default_layout
   opts.bindings = opts.bindings or {}
   opts.preview = opts.preview or function(_, win)
     win:write({ "No preview function provided" })

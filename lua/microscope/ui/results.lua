@@ -53,8 +53,8 @@ local function on_close(self)
   self:close()
 end
 
-function results:show(build, focus)
-  window.show(self, build, focus)
+function results:show(layout, focus)
+  window.show(self, layout, focus)
 
   self:parse()
 

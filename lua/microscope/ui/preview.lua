@@ -25,8 +25,8 @@ local function on_new_opts(self, opts)
   self.preview_fun = opts.preview
 end
 
-function preview:show(build, focus)
-  window.show(self, build, focus)
+function preview:show(layout, focus)
+  window.show(self, layout, focus)
 
   if self.term_lines then
     self:write_term(self.term_lines)

@@ -6,10 +6,10 @@ local function on_close(self)
   self:close()
 end
 
-function input:show(build, focus)
-  window.show(self, build, focus)
+function input:show(layout, focus)
+  window.show(self, layout, focus)
 
-  if build == nil then
+  if layout == nil then
     self:set_buf_opt("buftype", "nowrite")
     vim.api.nvim_command("stopinsert!")
   else
