@@ -105,7 +105,6 @@ function finder:set_opts(opts)
   end
 
   self.opts = opts
-  self.full_screen = false
   self.request = nil
 
   events.fire(events.event.new_opts, self.opts)
@@ -144,6 +143,7 @@ function finder.new(opts)
   self.preview = preview.new()
   self.results = results.new()
   self.input = input.new()
+  self.full_screen = false
 
   events.on(self, events.event.results_opened, finder.open)
   events.on(self, events.event.input_changed, finder.search)
