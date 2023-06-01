@@ -153,7 +153,11 @@ function results.new()
   events.native(v, events.event.cursor_moved, function()
     if v.win then
       local cursor = vim.api.nvim_win_get_cursor(v.win)
-      v:set_cursor(cursor)
+      local win_cursor = v:get_cursor()
+
+      if win_cursor and cursor[1] ~= win_cursor[1] and cursor[2] ~= win_cursor[2] then
+        v:set_cursor(cursor)
+      end
     end
   end)
 
