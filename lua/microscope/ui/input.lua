@@ -4,6 +4,7 @@ local input = {}
 
 local function on_close(self)
   self:close()
+  self.old_text = nil
 end
 
 local function on_new_opts(self, opts)
@@ -46,6 +47,9 @@ function input.new()
 
   vim.api.nvim_buf_attach(v.buf, false, {
     on_lines = function()
+      if v:text() == v.old_text then
+        return
+      end
       if vim.api.nvim_buf_line_count(v.buf) > 1 then
         return vim.schedule(function()
           v:write({ v.prompt .. v:text() })
@@ -53,6 +57,7 @@ function input.new()
         end)
       end
       events.fire(events.event.input_changed, v:text())
+      v.old_text = v:text()
     end,
   })
 
