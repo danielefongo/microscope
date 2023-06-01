@@ -38,6 +38,10 @@ local function shell(opts, input_stream)
   end)
 
   local function iterator()
+    if handle and handle:is_active() and not output:find("\n") then
+      return ""
+    end
+
     local result
     if handle and handle:is_active() or output ~= "" then
       result, output = split_last_newline(output)
