@@ -126,7 +126,9 @@ function finder:set_opts(opts)
     end,
   })
 
-  self:update()
+  vim.defer_fn(function()
+    self:update()
+  end, 10)
 end
 
 function finder.new(opts)
