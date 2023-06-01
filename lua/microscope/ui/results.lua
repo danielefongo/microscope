@@ -143,6 +143,7 @@ function results.new()
   v.parser = function(x)
     return x
   end
+  v:set_buf_opt("modifiable", false)
 
   events.on(v, events.event.empty_results_retrieved, on_empty_results_retrieved)
   events.on(v, events.event.results_retrieved, on_results_retrieved)

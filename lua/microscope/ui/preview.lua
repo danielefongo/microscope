@@ -55,6 +55,7 @@ function preview.new()
   local v = window.new(preview)
 
   v.preview_fun = function() end
+  v:set_buf_opt("modifiable", false)
 
   events.on(v, events.event.result_focused, on_result_focused)
   events.on(v, events.event.empty_results_retrieved, on_empty_results_retrieved)
