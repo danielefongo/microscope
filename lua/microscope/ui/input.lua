@@ -47,14 +47,14 @@ function input.new()
 
   vim.api.nvim_buf_attach(v.buf, false, {
     on_lines = function()
-      if v:text() == v.old_text then
-        return
-      end
       if vim.api.nvim_buf_line_count(v.buf) > 1 then
         return vim.schedule(function()
           v:write({ v.prompt .. v:text() })
           vim.api.nvim_command("startinsert!")
         end)
+      end
+      if v:text() == v.old_text then
+        return
       end
       events.fire(events.event.input_changed, v:text())
       v.old_text = v:text()
