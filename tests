@@ -1,0 +1,4 @@
+#!/bin/bash
+
+cd lua
+nvim --headless -c "PlenaryBustedDirectory tests"

@@ -47,6 +47,9 @@ function lens:read()
 end
 
 function lens:write(data)
+  if self.stopped then
+    return ""
+  end
   if type(data) == "string" then
     coroutine.yield(data)
   elseif type(data) == "table" then
@@ -96,9 +99,6 @@ function lens:create_flow()
     end,
     write = function(data)
       self:write(data)
-    end,
-    text = function()
-      return self.request.text
     end,
     fn = function(fn, ...)
       return scheduled.fn(self.flow, fn, ...)

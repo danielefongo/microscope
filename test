@@ -1,0 +1,5 @@
+#!/bin/bash
+
+test=$(rg --files ".*_spec.lua" ./lua/tests | fzf)
+cd lua
+nvim --headless -c "PlenaryBustedFile ${test/lua\//}"

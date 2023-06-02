@@ -103,6 +103,9 @@ function command.command(flow, opts)
       table.insert(outputs, value)
     end
   end
+  if outputs[#outputs] == "" then
+    table.remove(outputs)
+  end
   return outputs
 end
 
