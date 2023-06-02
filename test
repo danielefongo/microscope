@@ -1,5 +1,10 @@
 #!/bin/bash
 
-test=$(rg --files ".*_spec.lua" ./lua/tests | fzf)
+test=$(rg -g "*_spec.lua" --files ./lua/tests | fzf)
+if [[ -z "$test" ]]; then
+  echo "No test provided"
+  exit 1
+fi
+
 cd lua
 nvim --headless -c "PlenaryBustedFile ${test/lua\//}"
