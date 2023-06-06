@@ -10,7 +10,7 @@ highlight.color = {
 }
 
 function highlight:hl(color, from, to)
-  to = to or from + 1
+  to = to or from
   table.insert(self.highlights, {
     from = from,
     to = to,
