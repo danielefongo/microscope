@@ -1,9 +1,13 @@
 #!/bin/bash
 
-test=$(rg -g "*_spec.lua" --files ./lua/tests | fzf)
-if [[ -z "$test" ]]; then
-  echo "No test provided"
-  exit 1
+if [[ -z "$1" ]]; then
+	test=$(rg -g "*_spec.lua" --files ./lua/tests | fzf)
+	if [[ -z "$test" ]]; then
+		echo "No test provided"
+		exit 1
+	fi
+else
+	test="$1"
 fi
 
 cd lua
