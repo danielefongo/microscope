@@ -10,5 +10,4 @@ else
 	test="$1"
 fi
 
-cd lua
-nvim --headless -c "PlenaryBustedFile ${test/lua\//}"
+nvim --noplugin -u scripts/runtime.vim --headless -c "PlenaryBustedFile ${test}"
