@@ -35,14 +35,14 @@ describe("preview", function()
         local preview_fn = helpers.spy_function()
 
         events.fire(events.event.new_opts, {
-          preview = function(...)
-            preview_fn(...)
+          preview = function(data, _)
+            preview_fn(data)
           end,
         })
         events.fire(events.event.result_focused, { text = "smth" })
         helpers.wait(10)
 
-        assert.spy(preview_fn).was.called_with({ text = "smth" }, preview_window)
+        assert.spy(preview_fn).was.called_with({ text = "smth" })
       end)
     end)
 

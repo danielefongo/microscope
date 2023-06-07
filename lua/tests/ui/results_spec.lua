@@ -175,6 +175,8 @@ describe("results", function()
       results_window:set_cursor({ 2, 0 })
       helpers.wait(300)
 
+      helpers.remove_spy_event_handler(focus)
+
       assert.spy(focus).was.called_with({ text = "result2" })
     end)
 
@@ -186,6 +188,8 @@ describe("results", function()
 
       results_window:set_cursor({ 2, 0 })
       helpers.wait(300)
+
+      helpers.remove_spy_event_handler(focus)
 
       assert.spy(focus).was.not_called()
     end)
@@ -248,6 +252,8 @@ describe("results", function()
       results_window:open("metadata")
       helpers.wait(10)
 
+      helpers.remove_spy_event_handler(open)
+
       assert.spy(open).was.called_with({
         selected = { { text = "result1" } },
         metadata = "metadata",
@@ -267,6 +273,8 @@ describe("results", function()
       results_window:open("metadata")
       helpers.wait(10)
 
+      helpers.remove_spy_event_handler(open)
+
       assert.spy(open).was.called_with({
         selected = { { text = "result1" }, { text = "result3" } },
         metadata = "metadata",
@@ -278,6 +286,8 @@ describe("results", function()
 
       results_window:open("metadata")
       helpers.wait(10)
+
+      helpers.remove_spy_event_handler(open)
 
       assert.spy(open).was.not_called()
     end)

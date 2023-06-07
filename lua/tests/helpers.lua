@@ -37,6 +37,10 @@ function helpers.spy_event_handler(evt)
   return my_spy
 end
 
+function helpers.remove_spy_event_handler(my_spy)
+  events.clear_module(my_spy)
+end
+
 function helpers.spy_function()
   return spy.new(function() end)
 end

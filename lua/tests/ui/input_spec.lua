@@ -39,6 +39,8 @@ describe("input", function()
       helpers.insert("text")
       helpers.wait(20)
 
+      helpers.remove_spy_event_handler(input_changed)
+
       assert.spy(input_changed).was.called_with("text")
     end)
 
@@ -51,6 +53,8 @@ describe("input", function()
       input_window:reset()
       helpers.wait(50)
 
+      helpers.remove_spy_event_handler(input_changed)
+
       assert.spy(input_changed).was.called_with("")
     end)
 
@@ -62,6 +66,8 @@ describe("input", function()
 
       input_window:set_text("text")
       helpers.wait(50)
+
+      helpers.remove_spy_event_handler(input_changed)
 
       assert.spy(input_changed).was.called_with("text")
     end)
