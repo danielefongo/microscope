@@ -46,9 +46,10 @@ function preview:write_term(lines)
     vim.api.nvim_chan_send(self.term, ansiline(i, self.layout.width))
   end
 
-  vim.defer_fn(function()
-    self:set_cursor({ 1, 0 })
-  end, 10)
+  vim.wait(20)
+  self:write({}, #lines)
+  self:set_cursor({ 1, 0 })
+  self:set_buf_opt("modifiable", false)
 end
 
 function preview.new()

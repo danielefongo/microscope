@@ -20,8 +20,8 @@ end
 function helpers.dummy_layout()
   return {
     relative = "editor",
-    width = 1,
-    height = 1,
+    width = 10,
+    height = 10,
     col = 1,
     row = 1,
     style = "minimal",
@@ -30,11 +30,15 @@ function helpers.dummy_layout()
 end
 
 function helpers.spy_event_handler(evt)
-  local my_spy = spy.new(function() end)
+  local my_spy = helpers.spy_function()
   events.on(my_spy, evt, function(_, ...)
     my_spy(...)
   end)
   return my_spy
+end
+
+function helpers.spy_function()
+  return spy.new(function() end)
 end
 
 return helpers

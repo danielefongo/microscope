@@ -1,5 +1,3 @@
-local spy = require("luassert.spy")
-
 local window = require("microscope.ui.window")
 local highlight = require("microscope.api.highlight")
 local results = require("microscope.ui.results")
