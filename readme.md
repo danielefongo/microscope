@@ -533,6 +533,7 @@ In addition, the finder provides the following functions:
 The input window provides the following functions:
 
 - `text()`: returns the text.
+- `set_text(text)`: sets the text.
 - `reset()`: resets the text.
 
 ### Preview Window

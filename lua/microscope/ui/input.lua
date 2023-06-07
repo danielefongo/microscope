@@ -11,8 +11,7 @@ local function on_new_opts(self, opts)
   local old_text = self:text()
 
   self.prompt = opts.prompt
-  vim.fn.prompt_setprompt(self.buf, self.prompt)
-  self:write({ self.prompt .. old_text })
+  self:set_text(old_text)
 end
 
 function input:show(layout, focus)
@@ -25,6 +24,11 @@ function input:show(layout, focus)
     self:set_buf_opt("buftype", "prompt")
     vim.api.nvim_command("startinsert!")
   end
+end
+
+function input:set_text(text)
+  vim.fn.prompt_setprompt(self.buf, self.prompt)
+  self:write({ self.prompt .. text })
 end
 
 function input:text()
@@ -41,6 +45,7 @@ end
 
 function input.new()
   local v = window.new(input)
+  v.prompt = "% "
 
   events.on(v, events.event.microscope_closed, on_close)
   events.on(v, events.event.new_opts, on_new_opts)
