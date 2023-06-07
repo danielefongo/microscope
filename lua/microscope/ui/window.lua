@@ -1,8 +1,9 @@
 local events = require("microscope.events")
 local window = {}
+window.namespace = vim.api.nvim_create_namespace("MicroscopeHighlight")
 
 function window:set_buf_hl(color, line, from, to)
-  vim.api.nvim_buf_add_highlight(self.buf, 0, color, line - 1, from - 1, to)
+  vim.api.nvim_buf_add_highlight(self.buf, window.namespace, color, line - 1, from - 1, to)
 end
 
 function window:get_win_opt(key)

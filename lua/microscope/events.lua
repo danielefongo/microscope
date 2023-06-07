@@ -92,4 +92,11 @@ function events.fire(evt, data, delay)
   end, delay or 0)
 end
 
+function events.fire_native(evt, delay)
+  unschedule(evt)
+  events.timers[evt] = vim.defer_fn(function()
+    vim.api.nvim_exec_autocmds(evt, { group = events.group })
+  end, delay or 0)
+end
+
 return events

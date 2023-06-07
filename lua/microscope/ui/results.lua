@@ -18,6 +18,10 @@ local function build_parser(parsers, idx)
 end
 
 local function get_focused(self)
+  if not self:get_cursor() then
+    return
+  end
+
   local cursor = self:get_cursor()[1]
   if self.data and self.data[cursor] then
     return self.data[cursor]
@@ -50,6 +54,7 @@ local function on_close(self)
   self.data = {}
   self.selected_data = {}
   self.results = {}
+  self.request = nil
   self:close()
 end
 
@@ -64,10 +69,13 @@ function results:show(layout, focus)
 end
 
 function results:select()
-  if not self.win then
+  local cursor = self:get_cursor()
+
+  if not cursor then
     return
   end
-  local row = self:get_cursor()[1]
+
+  local row = cursor[1]
   local element = self.data[row]
 
   if element then
@@ -99,6 +107,7 @@ function results:parse()
   for idx = min, max, 1 do
     if not self.data[idx] then
       self.data[idx] = self.parser(self.results[idx], self.request)
+      self:write({ self.data[idx].text }, idx - 1, idx)
       for _, hl in pairs(self.data[idx].highlights or {}) do
         self:set_buf_hl(hl.color, idx, hl.from, hl.to)
       end
@@ -108,15 +117,23 @@ end
 
 function results:selected()
   local selected = vim.tbl_values(self.selected_data)
-  if #selected == 0 then
-    return { get_focused(self) }
-  else
+  local focused = get_focused(self)
+
+  if #selected == 0 and focused then
+    return { focused }
+  elseif #selected > 0 then
     return selected
+  else
+    return {}
   end
 end
 
 function results:open(metadata)
-  events.fire(events.event.results_opened, { selected = self:selected(), metadata = metadata })
+  local selected = self:selected()
+
+  if #selected > 0 then
+    events.fire(events.event.results_opened, { selected = selected, metadata = metadata })
+  end
 
   self.selected_data = {}
 end
@@ -140,9 +157,7 @@ function results.new()
   v.data = {}
   v.selected_data = {}
   v.results = {}
-  v.parser = function(x)
-    return x
-  end
+  v.parser = build_parser({})
   v:set_buf_opt("modifiable", false)
 
   events.on(v, events.event.empty_results_retrieved, on_empty_results_retrieved)
@@ -155,7 +170,7 @@ function results.new()
       local cursor = vim.api.nvim_win_get_cursor(v.win)
       local win_cursor = v:get_cursor()
 
-      if win_cursor and cursor[1] ~= win_cursor[1] and cursor[2] ~= win_cursor[2] then
+      if win_cursor and cursor[1] ~= win_cursor[1] then
         v:set_cursor(cursor)
       end
     end
