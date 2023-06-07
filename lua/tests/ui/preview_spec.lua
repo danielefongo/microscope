@@ -2,21 +2,6 @@ local preview = require("microscope.ui.preview")
 local events = require("microscope.events")
 local helpers = require("tests.helpers")
 
-local function read_terminal_channel(terminal_buffer, terminal_channel)
-  -- local terminal_buffer = vim.api.nvim_create_buf(false, true)
-  -- local terminal_channel = vim.fn.termopen("<comando del terminale>")
-  -- vim.api.nvim_set_current_buf(terminal_buffer)
-
-  -- -- Collega il channel del terminale al buffer
-  -- vim.fn.termattach(terminal_channel, terminal_buffer) -- Attendi un breve periodo di tempo per consentire al terminale di inviare dati al buffer
-  vim.wait(100)
-
-  local data = vim.api.nvim_call_function("getbufline", { terminal_buffer, 1, "$" })
-
-  -- local data = vim.api.nvim_call_function("getbufline", { terminal_buffer, 1, "$" })
-  vim.pretty_print(data)
-end
-
 describe("preview", function()
   local preview_window
 
