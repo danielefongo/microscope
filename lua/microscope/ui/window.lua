@@ -40,10 +40,14 @@ function window:get_buf()
 end
 
 function window:set_cursor(cursor)
-  local counts = vim.api.nvim_buf_line_count(self.buf)
+  local counts = self:line_count()
   local row = math.min(math.max(cursor[1], 1), counts)
-  local col = math.max(cursor[2], 0)
+
+  local row_chars = self:read(row - 1, row)[1]
+  local col = math.min(math.max(cursor[2], 0), math.max(#row_chars - 1, 0))
+
   self.cursor = { row, col }
+
   if self.win then
     vim.api.nvim_win_set_cursor(self.win, self.cursor)
   end
@@ -75,20 +79,19 @@ end
 function window:read(from, to)
   from = from or 0
   to = to or -1
-  return vim.api.nvim_buf_get_lines(self.buf, from, to, false)
+  return vim.api.nvim_buf_get_lines(self.buf, from, to, true)
 end
 
 function window:show(layout, focus)
+  self.layout = layout or self.layout
   if not layout then
     return self:hide()
   end
-  self.layout = layout or self.layout
 
   if not self.win then
     self.win = vim.api.nvim_open_win(self.buf, false, self.layout)
   else
     vim.api.nvim_win_set_config(self.win, self.layout)
-    vim.api.nvim_win_set_buf(self.win, self.buf)
   end
 
   if focus then
@@ -108,6 +111,7 @@ end
 
 function window:close()
   events.clear_module(self)
+  self.layout = nil
   self.cursor = nil
   if self.win then
     vim.api.nvim_win_set_buf(self.win, self.buf)
