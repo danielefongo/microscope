@@ -11,6 +11,11 @@ jobs:
       - name: checkout
         uses: actions/checkout@v3
 
+      - name: install fzf
+        run: |
+          sudo apt-get update -y
+          sudo apt install fzf
+
       - name: install lua
         uses: leafo/gh-actions-lua@v10
 
