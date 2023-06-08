@@ -66,7 +66,7 @@ function helpers.consume_lens(my_lens, time)
     final_out = (final_out or "") .. out
   end)
 
-  helpers.wait(time or 10)
+  helpers.wait(time or 30)
 
   return final_out
 end
