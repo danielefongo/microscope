@@ -1,13 +1,12 @@
 #!/bin/bash
+set -e
 
-if [[ -z "$1" ]]; then
-	test=$(rg -g "*_spec.lua" --files ./lua/tests | fzf)
-	if [[ -z "$test" ]]; then
-		echo "No test provided"
-		exit 1
-	fi
+REPO_DIR=$(git rev-parse --show-toplevel)
+TESTS_DIR="$REPO_DIR/lua/tests"
+INIT_FILE="$TESTS_DIR/init.lua"
+
+if [ -n "$1" ]; then
+	nvim --noplugin -u "$INIT_FILE" --headless -c "lua require('plenary.busted').run('$1')"
 else
-	test="$1"
+	nvim --noplugin -u "$INIT_FILE" --headless -c "lua require('plenary.test_harness').test_directory( '$TESTS_DIR', { sequential = true })" -c "qa!"
 fi
-
-nvim --noplugin -u scripts/runtime.vim --headless -c "PlenaryBustedFile ${test}"

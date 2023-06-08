@@ -639,3 +639,8 @@ You can also explore the already published plugins:
 - [microscope-code](https://github.com/danielefongo/microscope-code)
 - [microscope-files](https://github.com/danielefongo/microscope-files)
 - [microscope-git](https://github.com/danielefongo/microscope-git)
+
+## Testing
+
+- Clone [plenary.nvim](https://github.com/nvim-lua/plenary.nvim) in root folder.
+- Run `make test [test=<path-to-file>]`

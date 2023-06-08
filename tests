@@ -1,3 +1,0 @@
-#!/bin/bash
-
-nvim --noplugin -u scripts/runtime.vim --headless -c "PlenaryBustedDirectory lua/tests { sequential = true }"

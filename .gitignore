@@ -1,2 +1,2 @@
-!lua/microscope
 .luarc.json
+plenary.nvim

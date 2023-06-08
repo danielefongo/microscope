@@ -8,17 +8,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - name: checkout
+        uses: actions/checkout@v3
 
-      - name: Install Neovim
-        uses: MunifTanjim/setup-neovim-action@v1
+      - name: install plenary.nvim
+        uses: actions/checkout@v3
+        with:
+          repository: nvim-lua/plenary.nvim
+          path: plenary.nvim
 
-      - name: Install plugins
-        run: |
-          mkdir -p ~/.local/share/nvim/site/pack/vendor/start
-           git clone --depth 1 https://github.com/nvim-lua/plenary.nvim ~/.local/share/nvim/site/pack/vendor/start/plenary.nvim
-           ln -s $(pwd) ~/.local/share/nvim/site/pack/vendor/start
+      - name: install neovim
+        uses: rhysd/action-setup-vim@v1
+        with:
+          neovim: true
 
-      - name: Run tests
-        run: |
-          nvim --headless --noplugin -u scripts/runtime.vim -c "PlenaryBustedDirectory lua/tests { sequential = true }"
+      - name: run tests
+        run: make test
