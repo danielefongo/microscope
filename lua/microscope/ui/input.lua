@@ -32,10 +32,6 @@ function input:set_text(text)
 end
 
 function input:text()
-  if not self.prompt then
-    return ""
-  end
-
   return self:read(0, 1)[1]:sub(#self.prompt):gsub("^%s*(%s*.-)%s*$", "%1")
 end
 

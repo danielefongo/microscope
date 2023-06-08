@@ -6,3 +6,4 @@ return {
   },
   includeuntestedfiles = true,
 }
+-- vim:ft=lua

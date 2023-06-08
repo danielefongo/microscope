@@ -31,7 +31,55 @@ describe("input", function()
     end)
   end)
 
+  describe("text", function()
+    it("get empty input", function()
+      vim.api.nvim_set_current_buf(input_window:get_buf())
+      helpers.wait(10)
+
+      assert.are.same(input_window:text(), "")
+    end)
+
+    it("get non empty input", function()
+      vim.api.nvim_set_current_buf(input_window:get_buf())
+      helpers.wait(10)
+
+      helpers.insert("text")
+      helpers.wait(10)
+
+      assert.are.same(input_window:text(), "text")
+    end)
+
+    it("do not change input on newline", function()
+      local input_changed = helpers.spy_event_handler(events.event.input_changed)
+
+      vim.api.nvim_set_current_buf(input_window:get_buf())
+      helpers.wait(20)
+
+      helpers.insert("text")
+      helpers.insert("<s-cr>")
+      helpers.wait(20)
+
+      helpers.remove_spy_event_handler(input_changed)
+
+      assert.are.same(input_window:text(), "text")
+    end)
+  end)
+
   describe("search", function()
+    it("does not trigger input_changed if input is the same", function()
+      local input_changed = helpers.spy_event_handler(events.event.input_changed)
+
+      vim.api.nvim_set_current_buf(input_window:get_buf())
+      helpers.wait(20)
+
+      helpers.insert("<bs>")
+      helpers.wait(20)
+
+      helpers.remove_spy_event_handler(input_changed)
+
+      assert.spy(input_changed).was.called(1)
+    end)
+
     it("text", function()
       local input_changed = helpers.spy_event_handler(events.event.input_changed)
 

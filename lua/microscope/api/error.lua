@@ -1,26 +1,12 @@
 local events = require("microscope.events")
 local error = {}
 
-local function command_args_to_string(command, args)
-  return string.format("%s %s", command, table.concat(args, " ")):gsub("^(%s*.-)%s*$", "%1")
-end
-
 function error.generic(message)
   events.fire(events.event.error, { message = message, critical = false })
 end
 
 function error.critical(message)
   events.fire(events.event.error, { message = message, critical = true })
-end
-
-function error.command_not_found(command, args)
-  local command_args = command_args_to_string(command, args)
-  error.generic(string.format('microscope: command "%s" not found.', command_args))
-end
-
-function error.command_failed(command, args, data)
-  local command_args = command_args_to_string(command, args)
-  error.generic(string.format('microscope: command "%s" failed.\n%s', command_args, data))
 end
 
 function error.show(data)
