@@ -643,4 +643,23 @@ You can also explore the already published plugins:
 ## Testing
 
 - Clone [plenary.nvim](https://github.com/nvim-lua/plenary.nvim) in root folder.
-- Run `make test [test=<path-to-file>]`
+- Install luacov
+
+  ```bash
+  luarocks install luacov
+  luarocks install luacov-console
+  luarocks install luacov-html
+  ```
+
+- Run tests
+
+  ```bash
+  # without coverage
+  make test [test=<path-to-file>]
+
+  # with coverage
+  make testcov
+
+  # with coverage + html report
+  make testcov-html
+  ```

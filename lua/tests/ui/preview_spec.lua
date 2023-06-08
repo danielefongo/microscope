@@ -14,6 +14,8 @@ describe("preview", function()
     preview_window:close()
   end)
 
+  helpers.eventually_store_coverage()
+
   describe("event", function()
     describe("result_focused", function()
       it("calls the preview function", function()

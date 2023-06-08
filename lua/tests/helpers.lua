@@ -45,4 +45,12 @@ function helpers.spy_function()
   return spy.new(function() end)
 end
 
+function helpers.eventually_store_coverage()
+  after_each(function()
+    if os.getenv("TEST_COV") then
+      require("luacov.runner").save_stats()
+    end
+  end)
+end
+
 return helpers

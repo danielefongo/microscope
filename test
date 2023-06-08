@@ -3,10 +3,11 @@ set -e
 
 REPO_DIR=$(git rev-parse --show-toplevel)
 TESTS_DIR="$REPO_DIR/lua/tests"
-INIT_FILE="$TESTS_DIR/init.lua"
+INIT_FILE="$TESTS_DIR/init.vim"
+MINIMAL_INIT_FILE="$TESTS_DIR/minimal_init.lua"
 
 if [ -n "$1" ]; then
 	nvim --noplugin -u "$INIT_FILE" --headless -c "lua require('plenary.busted').run('$1')"
 else
-	nvim --noplugin -u "$INIT_FILE" --headless -c "lua require('plenary.test_harness').test_directory( '$TESTS_DIR', { sequential = true })" -c "qa!"
+	nvim --noplugin -u "$INIT_FILE" --headless -c "lua require('plenary.test_harness').test_directory( '$TESTS_DIR', { sequential = true, minimal_init = '$MINIMAL_INIT_FILE' })" -c "qa!"
 fi

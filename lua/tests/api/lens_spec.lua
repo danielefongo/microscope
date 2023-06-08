@@ -1,3 +1,4 @@
+local helpers = require("tests.helpers")
 local lens = require("microscope.api.lens")
 
 local function consume(my_lens, time)
@@ -36,6 +37,8 @@ local function write_n_times(data, times)
 end
 
 describe("lens", function()
+  helpers.eventually_store_coverage()
+
   it("returns nothing if no request is fed", function()
     local my_lens = lens.new({
       fun = function(flow)

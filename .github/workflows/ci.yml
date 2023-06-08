@@ -11,11 +11,22 @@ jobs:
       - name: checkout
         uses: actions/checkout@v3
 
+      - name: install lua
+        uses: leafo/gh-actions-lua@v10
+
+      - name: install luarocks
+        uses: leafo/gh-actions-luarocks@v4
+
       - name: install plenary.nvim
         uses: actions/checkout@v3
         with:
           repository: nvim-lua/plenary.nvim
           path: plenary.nvim
+
+      - name: install luacov
+        run: |
+          luarocks install luacov
+          luarocks install luacov-console
 
       - name: install neovim
         uses: rhysd/action-setup-vim@v1
@@ -23,4 +34,11 @@ jobs:
           neovim: true
 
       - name: run tests
-        run: make test
+        run: NOCLEAN=1 make testcov
+
+      - name: upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: luacov.report.out, luacov.stats.out
+          token: ${{ secrets.CODECOV_TOKEN }}
+          verbose: true

@@ -1,5 +1,6 @@
 local mock = require("luassert.mock")
 
+local helpers = require("tests.helpers")
 local display = require("microscope.api.display")
 
 local vim_api
@@ -25,6 +26,8 @@ describe("display", function()
   after_each(function()
     mock.revert(vim_api)
   end)
+
+  helpers.eventually_store_coverage()
 
   it("space is not stored in layout", function()
     local size = { width = 100, height = 100 }

@@ -1,2 +1,4 @@
+.env
 .luarc.json
 plenary.nvim
+luacov*

@@ -1,3 +1,4 @@
+local helpers = require("tests.helpers")
 local highlight = require("microscope.api.highlight")
 local color = highlight.color
 
@@ -20,6 +21,8 @@ local function assert_hl(text, data, expectation)
 end
 
 describe("highlight", function()
+  helpers.eventually_store_coverage()
+
   describe("hl match", function()
     it("no highlights if no match", function()
       assert_hl_match("abc", {

@@ -1,3 +1,4 @@
+local helpers = require("tests.helpers")
 local lenses = require("microscope.builtin.lenses")
 local scope = require("microscope.api.scope")
 
@@ -22,6 +23,8 @@ local function slow(seconds, ...)
 end
 
 describe("scope", function()
+  helpers.eventually_store_coverage()
+
   it("starts empty search", function()
     local my_data = nil
 

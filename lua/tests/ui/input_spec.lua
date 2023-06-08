@@ -14,6 +14,8 @@ describe("input", function()
     input_window:close()
   end)
 
+  helpers.eventually_store_coverage()
+
   describe("event", function()
     describe("new_opts", function()
       it("stores new prompt", function()
