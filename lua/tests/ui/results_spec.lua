@@ -50,7 +50,7 @@ describe("results", function()
         local focus = helpers.spy_event_handler(events.event.result_focused)
 
         events.fire(events.event.results_retrieved, { "result1", "result2" })
-        helpers.wait(300)
+        helpers.wait(10)
 
         assert.spy(focus).was.called_with({ text = "result1" })
       end)
@@ -175,7 +175,7 @@ describe("results", function()
       helpers.wait(10)
 
       results_window:set_cursor({ 2, 0 })
-      helpers.wait(300)
+      helpers.wait(10)
 
       helpers.remove_spy_event_handler(focus)
 
@@ -189,7 +189,7 @@ describe("results", function()
       helpers.wait(10)
 
       results_window:set_cursor({ 2, 0 })
-      helpers.wait(300)
+      helpers.wait(10)
 
       helpers.remove_spy_event_handler(focus)
 

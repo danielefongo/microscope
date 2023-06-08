@@ -98,7 +98,7 @@ describe("scope", function()
     local my_data = {}
 
     local my_scope = scope.new({
-      lens = slow(0.3, lenses.write({ "hello", "world" })),
+      lens = slow(0.1, lenses.write({ "hello", "world" })),
       callback = function(data)
         my_data = data
       end,
@@ -106,7 +106,7 @@ describe("scope", function()
 
     my_scope:search()
 
-    vim.wait(500)
+    vim.wait(150)
 
     assert.are.same(my_data, { "hello", "world" })
   end)
@@ -115,8 +115,8 @@ describe("scope", function()
     local calls = 0
 
     local my_scope = scope.new({
-      lens = slow(0.3, lenses.write({ "hello", "world" })),
-      callback = function(data)
+      lens = slow(0.1, lenses.write({ "hello", "world" })),
+      callback = function()
         calls = calls + 1
       end,
     })
@@ -127,7 +127,7 @@ describe("scope", function()
       my_scope:stop()
     end, 10)
 
-    vim.wait(500)
+    vim.wait(150)
 
     assert.are.same(calls, 0)
   end)
@@ -136,7 +136,7 @@ describe("scope", function()
     local calls = 0
 
     local my_scope = scope.new({
-      lens = slow(0.3, lenses.write({ "hello", "world" })),
+      lens = slow(0.1, lenses.write({ "hello", "world" })),
       callback = function(data)
         calls = calls + 1
       end,
@@ -148,7 +148,7 @@ describe("scope", function()
       my_scope:search()
     end, 10)
 
-    vim.wait(500)
+    vim.wait(150)
 
     assert.are.same(calls, 1)
   end)

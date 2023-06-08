@@ -3,6 +3,15 @@ local events = require("microscope.events")
 
 local helpers = {}
 
+vim.api.nvim_list_uis = function()
+  return {
+    { width = 100, height = 100 },
+  }
+end
+vim.defer_fn = function(fn)
+  return fn()
+end
+
 function helpers.feed(text, feed_opts)
   feed_opts = feed_opts or "n"
   local to_feed = vim.api.nvim_replace_termcodes(text, true, false, true)
