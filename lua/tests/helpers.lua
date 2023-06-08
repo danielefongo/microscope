@@ -54,6 +54,23 @@ function helpers.spy_function()
   return spy.new(function() end)
 end
 
+function helpers.consume_lens(my_lens, time)
+  local final_out
+
+  local async = vim.loop.new_idle()
+  async:start(function()
+    local out = my_lens:read()
+    if out == nil then
+      return async:stop()
+    end
+    final_out = (final_out or "") .. out
+  end)
+
+  helpers.wait(time or 10)
+
+  return final_out
+end
+
 function helpers.eventually_store_coverage()
   after_each(function()
     if os.getenv("TEST_COV") then

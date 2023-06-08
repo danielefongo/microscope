@@ -1,23 +1,6 @@
 local helpers = require("tests.helpers")
 local lens = require("microscope.api.lens")
 
-local function consume(my_lens, time)
-  local final_out
-
-  local async = vim.loop.new_idle()
-  async:start(function()
-    local out = my_lens:read()
-    if out == nil then
-      return async:stop()
-    end
-    final_out = (final_out or "") .. out
-  end)
-
-  vim.wait(time or 10)
-
-  return final_out
-end
-
 local function write(data)
   return {
     fun = function(flow)
@@ -46,7 +29,7 @@ describe("lens", function()
       end,
     })
 
-    assert.are.same(consume(my_lens), nil)
+    assert.are.same(helpers.consume_lens(my_lens), nil)
   end)
 
   it("returns nothing if no lens is stopped", function()
@@ -59,7 +42,7 @@ describe("lens", function()
     my_lens:feed("")
     my_lens:stop()
 
-    assert.are.same(consume(my_lens), nil)
+    assert.are.same(helpers.consume_lens(my_lens), nil)
   end)
 
   it("returns nothing if nothing is written", function()
@@ -69,7 +52,7 @@ describe("lens", function()
 
     my_lens:feed("")
 
-    assert.are.same(consume(my_lens), nil)
+    assert.are.same(helpers.consume_lens(my_lens), nil)
   end)
 
   describe("request", function()
@@ -82,7 +65,7 @@ describe("lens", function()
 
       local request = { count = 0 }
       my_lens:feed(request)
-      consume(my_lens)
+      helpers.consume_lens(my_lens)
 
       assert.are.same(request.count, 1)
     end)
@@ -102,9 +85,9 @@ describe("lens", function()
       })
 
       my_lens:feed("")
-      local out1 = consume(my_lens)
+      local out1 = helpers.consume_lens(my_lens)
       my_lens:feed("")
-      local out2 = consume(my_lens)
+      local out2 = helpers.consume_lens(my_lens)
 
       assert.are.same(out1 .. out2, "hello\nworld\n")
     end)
@@ -121,7 +104,7 @@ describe("lens", function()
 
         my_lens:feed("")
 
-        assert.are.same(consume(my_lens), "hello\nworld\n")
+        assert.are.same(helpers.consume_lens(my_lens), "hello\nworld\n")
       end)
 
       it("returns data using an array", function()
@@ -133,7 +116,7 @@ describe("lens", function()
 
         my_lens:feed("")
 
-        assert.are.same(consume(my_lens), "hello\nworld\n")
+        assert.are.same(helpers.consume_lens(my_lens), "hello\nworld\n")
       end)
     end)
 
@@ -149,7 +132,7 @@ describe("lens", function()
 
       my_lens:feed("")
 
-      assert.are.same(consume(my_lens), "hello\n")
+      assert.are.same(helpers.consume_lens(my_lens), "hello\n")
     end)
 
     it("await", function()
@@ -164,7 +147,7 @@ describe("lens", function()
 
       my_lens:feed("")
 
-      assert.are.same(consume(my_lens), "hello\n")
+      assert.are.same(helpers.consume_lens(my_lens), "hello\n")
     end)
 
     it("spawn", function()
@@ -176,7 +159,7 @@ describe("lens", function()
 
       my_lens:feed("")
 
-      assert.are.same(consume(my_lens, 100), "hello\nworld\n")
+      assert.are.same(helpers.consume_lens(my_lens, 100), "hello\nworld\n")
     end)
 
     it("command", function()
@@ -189,7 +172,7 @@ describe("lens", function()
 
       my_lens:feed("")
 
-      assert.are.same(consume(my_lens, 100), "hello\nworld\n")
+      assert.are.same(helpers.consume_lens(my_lens, 100), "hello\nworld\n")
     end)
 
     describe("stop", function()
@@ -205,7 +188,7 @@ describe("lens", function()
 
         my_lens:feed("")
 
-        assert.are.same(consume(my_lens), "hello\n")
+        assert.are.same(helpers.consume_lens(my_lens), "hello\n")
       end)
 
       it("returns data using an array", function()
@@ -218,7 +201,7 @@ describe("lens", function()
 
         my_lens:feed("")
 
-        assert.are.same(consume(my_lens), "hello\nworld\n")
+        assert.are.same(helpers.consume_lens(my_lens), "hello\nworld\n")
       end)
     end)
 
