@@ -10,18 +10,6 @@ local function fake_ui(size)
   vim_api.nvim_list_uis.returns({ size })
 end
 
-local function rect(width, height, col, row)
-  return {
-    relative = "editor",
-    width = width,
-    height = height,
-    col = col,
-    row = row,
-    style = "minimal",
-    border = "rounded",
-  }
-end
-
 describe("display", function()
   after_each(function()
     mock.revert(vim_api)
@@ -52,7 +40,7 @@ describe("display", function()
       })
       :build(size)
 
-    assert.are.same(layout.input, rect(10, 10, 46, 46))
+    assert.are.same(layout.input, helpers.layout(10, 10, 46, 46))
   end)
 
   describe("full size", function()
@@ -65,21 +53,21 @@ describe("display", function()
 
     describe("simple", function()
       it("uses fixed size", function()
-        assert.are.same(display.input(2):build(size).input, rect(100, 2, 1, 1))
-        assert.are.same(display.results(2):build(size).results, rect(100, 2, 1, 1))
-        assert.are.same(display.preview(2):build(size).preview, rect(100, 2, 1, 1))
+        assert.are.same(display.input(2):build(size).input, helpers.layout(100, 2, 1, 1))
+        assert.are.same(display.results(2):build(size).results, helpers.layout(100, 2, 1, 1))
+        assert.are.same(display.preview(2):build(size).preview, helpers.layout(100, 2, 1, 1))
       end)
 
       it("uses percentage size", function()
-        assert.are.same(display.input("50%"):build(size).input, rect(100, 50, 1, 1))
-        assert.are.same(display.results("50%"):build(size).results, rect(100, 50, 1, 1))
-        assert.are.same(display.preview("50%"):build(size).preview, rect(100, 50, 1, 1))
+        assert.are.same(display.input("50%"):build(size).input, helpers.layout(100, 49, 1, 1))
+        assert.are.same(display.results("50%"):build(size).results, helpers.layout(100, 49, 1, 1))
+        assert.are.same(display.preview("50%"):build(size).preview, helpers.layout(100, 49, 1, 1))
       end)
 
       it("grows to fill the provided size", function()
-        assert.are.same(display.input():build(size).input, rect(100, 100, 1, 1))
-        assert.are.same(display.results():build(size).results, rect(100, 100, 1, 1))
-        assert.are.same(display.preview():build(size).preview, rect(100, 100, 1, 1))
+        assert.are.same(display.input():build(size).input, helpers.layout(100, 100, 1, 1))
+        assert.are.same(display.results():build(size).results, helpers.layout(100, 100, 1, 1))
+        assert.are.same(display.preview():build(size).preview, helpers.layout(100, 100, 1, 1))
       end)
     end)
 
@@ -95,9 +83,9 @@ describe("display", function()
           :build(size)
 
         assert.are.same(layout, {
-          input = rect(100, 1, 1, 1),
-          results = rect(100, 10, 1, 4),
-          preview = rect(100, 3, 1, 18),
+          input = helpers.layout(100, 1, 1, 1),
+          results = helpers.layout(100, 9, 1, 4),
+          preview = helpers.layout(100, 4, 1, 17),
         })
       end)
 
@@ -112,9 +100,9 @@ describe("display", function()
           :build(size)
 
         assert.are.same(layout, {
-          input = rect(1, 20, 1, 1),
-          results = rect(50, 20, 4, 1),
-          preview = rect(43, 20, 58, 1),
+          input = helpers.layout(1, 20, 1, 1),
+          results = helpers.layout(49, 20, 4, 1),
+          preview = helpers.layout(44, 20, 57, 1),
         })
       end)
 
@@ -130,9 +118,9 @@ describe("display", function()
           :build(size)
 
         assert.are.same(layout, {
-          input = rect(100, 1, 1, 1),
-          results = rect(49, 10, 1, 4),
-          preview = rect(49, 10, 52, 4),
+          input = helpers.layout(100, 1, 1, 1),
+          results = helpers.layout(49, 10, 1, 4),
+          preview = helpers.layout(49, 10, 52, 4),
         })
       end)
     end)

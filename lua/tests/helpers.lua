@@ -71,6 +71,18 @@ function helpers.consume_lens(my_lens, time)
   return final_out
 end
 
+function helpers.layout(width, height, col, row)
+  return {
+    relative = "editor",
+    width = width,
+    height = height,
+    col = col,
+    row = row,
+    style = "minimal",
+    border = "rounded",
+  }
+end
+
 function helpers.eventually_store_coverage()
   after_each(function()
     if os.getenv("TEST_COV") then

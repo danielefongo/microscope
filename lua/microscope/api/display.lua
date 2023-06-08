@@ -39,7 +39,7 @@ local function calculate_size(size, container_size, fill_size)
   if not size then
     return math.floor(fill_size)
   elseif type(size) == "string" and size:sub(-1) == "%" then
-    return math.floor(container_size / 100 * tonumber(size:sub(0, -2)))
+    return math.floor(container_size / 100 * tonumber(size:sub(0, -2)) - 1)
   else
     return size
   end
