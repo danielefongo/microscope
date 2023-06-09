@@ -22,7 +22,14 @@ local function on_empty_results_retrieved(self)
 end
 
 local function on_new_opts(self, opts)
+  local changed = self.preview_fun ~= opts.preview
+
   self.preview_fun = opts.preview
+
+  if changed and self.data then
+    self:clear()
+    self.preview_fun(self.data, self)
+  end
 end
 
 function preview:show(layout, focus)

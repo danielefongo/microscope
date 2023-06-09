@@ -45,6 +45,42 @@ describe("preview", function()
         assert.are.same(preview_window:read(), { "" })
       end)
     end)
+
+    describe("new_opts", function()
+      it("refresh window if the function is changed", function()
+        local preview_fn = helpers.spy_function()
+
+        events.fire(events.event.result_focused, { text = "smth" })
+        helpers.wait(10)
+
+        events.fire(events.event.new_opts, {
+          preview = function(data, _)
+            preview_fn(data)
+          end,
+        })
+        helpers.wait(10)
+
+        assert.spy(preview_fn).was.called_with({ text = "smth" })
+      end)
+
+      it("does not refresh window if the function is not changed", function()
+        local preview_fn = helpers.spy_function()
+        local fun = function(data, _)
+          preview_fn(data)
+        end
+
+        events.fire(events.event.result_focused, { text = "smth" })
+        helpers.wait(10)
+
+        events.fire(events.event.new_opts, { preview = fun })
+        helpers.wait(10)
+
+        events.fire(events.event.new_opts, { preview = fun })
+        helpers.wait(10)
+
+        assert.spy(preview_fn).was.called(1)
+      end)
+    end)
   end)
 
   describe("write_term", function()
