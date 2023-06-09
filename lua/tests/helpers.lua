@@ -3,6 +3,8 @@ local events = require("microscope.events")
 
 local helpers = {}
 
+vim.api.nvim_out_write = function() end
+
 vim.api.nvim_list_uis = function()
   return {
     { width = 100, height = 100 },

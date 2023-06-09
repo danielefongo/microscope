@@ -1,6 +1,9 @@
 return {
   include = { "lua/microscope/.+$" },
-  exclude = { "lua/tests/.+$" },
+  exclude = {
+    "lua/tests/.+$",
+    "lua/microscope/utils/highlight",
+  },
   modules = {
     ["microscope.*"] = "lua/",
   },

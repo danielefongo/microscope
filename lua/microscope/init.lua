@@ -5,7 +5,7 @@ microscope.finders = {}
 microscope.__index = microscope
 
 function microscope:__call()
-  finder.new(vim.tbl_deep_extend("force", microscope.opts, self.opts))
+  return finder.new(vim.tbl_deep_extend("force", microscope.opts, self.opts))
 end
 
 function microscope:bind()
@@ -16,6 +16,7 @@ end
 
 function microscope:override(opts)
   self.opts = vim.tbl_deep_extend("force", self.opts, opts)
+  return self
 end
 
 function microscope.finder(opts)
@@ -26,7 +27,7 @@ end
 
 function microscope.setup(opts)
   microscope.opts.size = opts.size
-  microscope.opts.bindings = opts.bindings
+  microscope.opts.bindings = opts.bindings or {}
   microscope.opts.prompt = opts.prompt or "> "
 
   return microscope
