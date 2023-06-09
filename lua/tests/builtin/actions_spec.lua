@@ -80,6 +80,39 @@ describe("actions", function()
     my_user:sees_focused_line_in("preview", "hello")
   end)
 
+  it("toggle full screen", function()
+    local small_layout = display.input(1):build({ width = 1, height = 1 })
+    local big_layout = display.input():build({ width = 4, height = 4 })
+
+    local layout = function(opts)
+      if opts.full_screen then
+        return big_layout
+      else
+        return small_layout
+      end
+    end
+
+    my_user = user.open_finder({
+      lens = lenses.write({}),
+      layout = layout,
+      bindings = {
+        ["<c-f>"] = actions.toggle_full_screen,
+      },
+    })
+
+    my_user:focus("input")
+
+    my_user:sees_window("input", small_layout.input)
+
+    my_user:keystroke("<c-f>", "i")
+
+    my_user:sees_window("input", big_layout.input)
+
+    my_user:keystroke("<c-f>", "i")
+
+    my_user:sees_window("input", small_layout.input)
+  end)
+
   it("open", function()
     local old_win = vim.api.nvim_get_current_win()
 
@@ -97,7 +130,7 @@ describe("actions", function()
     my_user:sees_text_in(old_win, { "opened", "hello" })
   end)
 
-  it("selection", function()
+  it("select", function()
     my_user = user.open_finder({
       lens = lenses.write({ "hello", "world" }),
       bindings = { ["<tab>"] = actions.select },

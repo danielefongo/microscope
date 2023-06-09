@@ -63,7 +63,7 @@ function finder:update()
     finder_size = self.opts.size,
     ui_size = vim.api.nvim_list_uis()[1],
     preview = self.opts.preview ~= nil,
-    full_screen = self.full_screen,
+    full_screen = self.opts.full_screen,
   })
 
   events.clear(self, events.event.win_leave)
@@ -71,11 +71,6 @@ function finder:update()
   self.results:show(layout.results, layout.input == nil)
   self.input:show(layout.input, true)
   events.native(self, events.event.win_leave, finder.close)
-end
-
-function finder:toggle_full_screen()
-  self.full_screen = not self.full_screen
-  self:update()
 end
 
 function finder:alter(lambda)
@@ -90,6 +85,7 @@ function finder:set_opts(opts)
   opts.open = opts.open or function(_, _, _) end
   opts.layout = opts.layout or default_layout
   opts.bindings = opts.bindings or {}
+  opts.full_screen = opts.full_screen or false
   opts.preview = opts.preview or function(_, win)
     win:write({ "No preview function provided" })
   end

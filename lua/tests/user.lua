@@ -37,8 +37,11 @@ function user:does_not_see_window(window)
   assert.is.Nil(self.finder[window].win)
 end
 
-function user:sees_window(window)
+function user:sees_window(window, layout)
   assert.is_not.Nil(self.finder[window].win)
+  if layout then
+    assert.are.same(self.finder[window].layout, layout)
+  end
 end
 
 function user:sees_text_in(window, lines)

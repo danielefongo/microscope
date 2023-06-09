@@ -27,7 +27,10 @@ function actions.scroll_up(microscope)
 end
 
 function actions.toggle_full_screen(microscope)
-  microscope:toggle_full_screen()
+  microscope:alter(function(opts)
+    opts.full_screen = not opts.full_screen
+    return opts
+  end)
 end
 
 function actions.open(microscope)
