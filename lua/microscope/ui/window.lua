@@ -92,6 +92,7 @@ function window:show(layout, focus)
     self.win = vim.api.nvim_open_win(self.buf, false, self.layout)
   else
     vim.api.nvim_win_set_config(self.win, self.layout)
+    vim.api.nvim_win_set_buf(self.win, self.buf)
   end
 
   if focus then
