@@ -61,8 +61,9 @@ end
 function actions.refine_with(lens, lens_parser, prompt)
   return function(microscope)
     local current_search = microscope.input:text()
+    local current_results = microscope.results:raw_results()
 
-    if current_search == "" then
+    if current_search == "" or #current_results == 0 then
       return
     end
 
@@ -74,7 +75,7 @@ function actions.refine_with(lens, lens_parser, prompt)
       new_parsers[lens_parser] = lens_parser
 
       opts.parsers = vim.tbl_values(new_parsers)
-      opts.lens = lens(lenses.write(microscope.results:raw_results()))
+      opts.lens = lens(lenses.write(current_results))
 
       opts.searches = opts.searches or {}
       table.insert(opts.searches, current_search)

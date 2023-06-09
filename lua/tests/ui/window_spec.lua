@@ -280,12 +280,26 @@ describe("window", function()
     end)
   end)
 
-  it("close destroys everything", function()
-    custom_window:show(helpers.dummy_layout())
-    custom_window:close()
+  describe("close", function()
+    it("destroys everything", function()
+      custom_window:show(helpers.dummy_layout())
+      custom_window:close()
 
-    assert.is.Nil(custom_window:get_buf())
-    assert.is.Nil(custom_window:get_win())
-    assert.is.Nil(custom_window:get_cursor())
+      assert.is.Nil(custom_window:get_buf())
+      assert.is.Nil(custom_window:get_win())
+      assert.is.Nil(custom_window:get_cursor())
+    end)
+
+    it("safely close if the window was closed from vim", function()
+      custom_window:show(helpers.dummy_layout())
+
+      vim.api.nvim_win_close(custom_window:get_win(), true)
+
+      custom_window:close()
+
+      assert.is.Nil(custom_window:get_buf())
+      assert.is.Nil(custom_window:get_win())
+      assert.is.Nil(custom_window:get_cursor())
+    end)
   end)
 end)

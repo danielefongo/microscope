@@ -115,7 +115,9 @@ function window:close()
   self.layout = nil
   self.cursor = nil
   if self.win then
-    vim.api.nvim_win_set_buf(self.win, self.buf)
+    pcall(function()
+      vim.api.nvim_win_set_buf(self.win, self.buf)
+    end)
     vim.api.nvim_buf_delete(self.buf, { force = true })
     self.win = nil
     self.buf = nil
