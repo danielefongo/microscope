@@ -1,5 +1,8 @@
 # Microscope
 
+![ci](https://img.shields.io/github/actions/workflow/status/danielefongo/microscope/ci.yml?style=for-the-badge)
+![code-coverage](https://img.shields.io/codecov/c/github/danielefongo/microscope?style=for-the-badge)
+
 A micro and highly composable finder for Neovim with no dependencies.
 
 ## Disclaimer
