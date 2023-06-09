@@ -47,7 +47,7 @@ local function on_results_retrieved(self, list)
 end
 
 local function on_new_opts(self, opts)
-  self.parser = build_parser(opts.parsers)
+  self.parser = build_parser(opts.parsers or {})
 end
 
 local function on_close(self)

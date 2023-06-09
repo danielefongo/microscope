@@ -22,6 +22,11 @@ function helpers.insert(text)
   helpers.feed("i" .. text, "x")
 end
 
+function helpers.focus(microscope_window)
+  vim.api.nvim_set_current_win(microscope_window:get_win())
+  vim.api.nvim_set_current_buf(microscope_window:get_buf())
+end
+
 function helpers.wait(duration)
   vim.wait(duration, function() end)
 end
