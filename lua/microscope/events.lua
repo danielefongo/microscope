@@ -19,15 +19,6 @@ events.event = {
   error = "Error",
 }
 
-local function unschedule(evt)
-  local timer = events.timers[evt]
-  if timer and uv.is_active(timer) then
-    uv.timer_stop(timer)
-    uv.close(timer)
-    events.timers[evt] = nil
-  end
-end
-
 local function alive_handler(module, evt)
   return events.handlers[module] and events.handlers[module][evt]
 end
@@ -86,17 +77,26 @@ function events.clear_module(module)
 end
 
 function events.fire(evt, data, delay)
-  unschedule(evt)
+  events.cancel(evt)
   events.timers[evt] = vim.defer_fn(function()
     vim.api.nvim_exec_autocmds("User", { group = events.group, pattern = evt, data = data })
-  end, delay or 0)
+  end, (events.delay_enabled and delay or 0) or 0)
 end
 
 function events.fire_native(evt, delay)
-  unschedule(evt)
+  events.cancel(evt)
   events.timers[evt] = vim.defer_fn(function()
     vim.api.nvim_exec_autocmds(evt, { group = events.group })
-  end, delay or 0)
+  end, (events.delay_enabled and delay or 0) or 0)
+end
+
+function events.cancel(evt)
+  local timer = events.timers[evt]
+  if timer and uv.is_active(timer) then
+    uv.timer_stop(timer)
+    uv.close(timer)
+    events.timers[evt] = nil
+  end
 end
 
 return events
