@@ -1,4 +1,3 @@
-local clone = require("microscope.utils.clone")
 local default_layout = require("microscope.builtin.layouts").default
 local events = require("microscope.events")
 local error = require("microscope.api.error")
@@ -78,7 +77,7 @@ function finder:alter(lambda)
 end
 
 function finder:get_opts()
-  return clone(self.opts)
+  return vim.deepcopy(self.opts)
 end
 
 function finder:set_opts(opts)
