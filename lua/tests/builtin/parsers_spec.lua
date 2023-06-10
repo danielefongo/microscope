@@ -3,7 +3,7 @@ local parsers = require("microscope.builtin.parsers")
 local highlight = require("microscope.api.highlight")
 
 describe("parsers", function()
-  helpers.eventually_store_coverage()
+  helpers.setup()
 
   describe("fuzzy", function()
     it("get no highlights without request or valid text", function()

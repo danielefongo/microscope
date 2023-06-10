@@ -21,7 +21,7 @@ local function assert_hl(text, data, expectation)
 end
 
 describe("highlight", function()
-  helpers.eventually_store_coverage()
+  helpers.setup()
 
   describe("hl match", function()
     it("no highlights if no match", function()

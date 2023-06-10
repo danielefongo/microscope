@@ -13,7 +13,7 @@ describe("window", function()
     custom_window:close()
   end)
 
-  helpers.eventually_store_coverage()
+  helpers.setup()
 
   describe("opt", function()
     it("does not set win opt if there is no window", function()

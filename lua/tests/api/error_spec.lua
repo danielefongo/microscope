@@ -3,9 +3,7 @@ local error = require("microscope.api.error")
 local events = require("microscope.events")
 
 describe("error", function()
-  after_each(function()
-    helpers.eventually_store_coverage()
-  end)
+  helpers.setup()
 
   it("generic error", function()
     local spy = helpers.spy_event_handler(events.event.error)

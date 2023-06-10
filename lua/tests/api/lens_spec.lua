@@ -20,7 +20,7 @@ local function write_n_times(data, times)
 end
 
 describe("lens", function()
-  helpers.eventually_store_coverage()
+  helpers.setup()
 
   it("returns nothing if no request is fed", function()
     local my_lens = lens.new({

@@ -4,7 +4,7 @@ local user = require("tests.user")
 local lenses = require("microscope.builtin.lenses")
 
 describe("microscope", function()
-  helpers.eventually_store_coverage()
+  helpers.setup()
 
   local microscope
 

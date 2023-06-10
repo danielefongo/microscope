@@ -23,7 +23,7 @@ local function slow(seconds, ...)
 end
 
 describe("scope", function()
-  helpers.eventually_store_coverage()
+  helpers.setup()
 
   it("starts empty search", function()
     local my_data = nil

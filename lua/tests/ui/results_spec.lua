@@ -25,7 +25,7 @@ describe("results", function()
     results_window:close()
   end)
 
-  helpers.eventually_store_coverage()
+  helpers.setup()
 
   describe("event", function()
     describe("results_retrieved", function()

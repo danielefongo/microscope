@@ -14,7 +14,7 @@ describe("preview", function()
     preview_window:close()
   end)
 
-  helpers.eventually_store_coverage()
+  helpers.setup()
 
   describe("event", function()
     describe("result_focused", function()

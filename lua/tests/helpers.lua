@@ -1,18 +1,65 @@
+local stub = require("luassert.stub")
 local spy = require("luassert.spy")
 local events = require("microscope.events")
 
+-- local functions
+
+local function setup_defer_fn(defer_fn)
+  local time = defer_fn or 0
+
+  before_each(function()
+    stub(vim, "defer_fn", function(fn)
+      vim.wait(time)
+      fn()
+    end)
+  end)
+
+  after_each(function()
+    if vim.defer_fn then
+      vim.defer_fn:revert()
+    end
+  end)
+end
+
+local function setup_ui(ui_size)
+  local size = ui_size or { width = 100, height = 100 }
+
+  before_each(function()
+    stub(vim.api, "nvim_list_uis", function()
+      return { size }
+    end)
+  end)
+
+  after_each(function()
+    if vim.api.nvim_list_uis then
+      vim.api.nvim_list_uis:revert()
+    end
+  end)
+end
+
+local function setup_write()
+  before_each(function()
+    stub(vim.api, "nvim_out_write")
+  end)
+
+  after_each(function()
+    if vim.api.nvim_out_write then
+      vim.api.nvim_out_write:revert()
+    end
+  end)
+end
+
+local function setup_test_cov()
+  after_each(function()
+    if os.getenv("TEST_COV") then
+      require("luacov.runner").save_stats()
+    end
+  end)
+end
+
+-- helpers
+
 local helpers = {}
-
-vim.api.nvim_out_write = function() end
-
-vim.api.nvim_list_uis = function()
-  return {
-    { width = 100, height = 100 },
-  }
-end
-vim.defer_fn = function(fn)
-  return fn()
-end
 
 function helpers.feed(text, feed_opts)
   feed_opts = feed_opts or "n"
@@ -90,12 +137,13 @@ function helpers.layout(width, height, col, row)
   }
 end
 
-function helpers.eventually_store_coverage()
-  after_each(function()
-    if os.getenv("TEST_COV") then
-      require("luacov.runner").save_stats()
-    end
-  end)
+function helpers.setup(opts)
+  opts = opts or {}
+
+  setup_defer_fn(opts.defer_fn)
+  setup_ui(opts.ui_size)
+  setup_write()
+  setup_test_cov()
 end
 
 return helpers

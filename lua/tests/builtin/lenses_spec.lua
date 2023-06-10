@@ -3,7 +3,7 @@ local lens = require("microscope.api.lens")
 local lenses = require("microscope.builtin.lenses")
 
 describe("lens", function()
-  helpers.eventually_store_coverage()
+  helpers.setup()
 
   describe("fzf", function()
     it("with empty request", function()

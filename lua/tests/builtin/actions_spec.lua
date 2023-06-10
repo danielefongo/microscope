@@ -8,7 +8,7 @@ local actions = require("microscope.builtin.actions")
 describe("actions", function()
   local my_user
 
-  helpers.eventually_store_coverage()
+  helpers.setup()
 
   after_each(function()
     my_user:close_finder()

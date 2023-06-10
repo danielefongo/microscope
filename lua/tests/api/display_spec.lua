@@ -1,36 +1,19 @@
-local mock = require("luassert.mock")
-
 local helpers = require("tests.helpers")
 local display = require("microscope.api.display")
 
-local vim_api
-
-local function fake_ui(size)
-  vim_api = mock(vim.api, true)
-  vim_api.nvim_list_uis.returns({ size })
-end
-
 describe("display", function()
-  after_each(function()
-    mock.revert(vim_api)
-  end)
+  local ui_size = { width = 104, height = 104 }
 
-  helpers.eventually_store_coverage()
+  helpers.setup({ ui_size = ui_size })
 
   it("space is not stored in layout", function()
     local size = { width = 100, height = 100 }
-    local ui_size = { width = 104, height = 104 }
-
-    fake_ui(ui_size)
 
     assert.are.same(display.space():build(size).space, nil)
   end)
 
   it("layout is centered", function()
     local size = { width = 10, height = 10 }
-    local ui_size = { width = 104, height = 104 }
-
-    fake_ui(ui_size)
 
     local layout = display
       .vertical({
@@ -45,11 +28,6 @@ describe("display", function()
 
   describe("full size", function()
     local size = { width = 100, height = 100 }
-    local ui_size = { width = 104, height = 104 }
-
-    before_each(function()
-      fake_ui(ui_size)
-    end)
 
     describe("simple", function()
       it("uses fixed size", function()

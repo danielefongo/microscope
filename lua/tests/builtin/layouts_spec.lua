@@ -1,25 +1,12 @@
-local mock = require("luassert.mock")
-
 local helpers = require("tests.helpers")
 local layouts = require("microscope.builtin.layouts")
 
-local vim_api
-local function fake_ui(size)
-  vim_api = mock(vim.api, true)
-  vim_api.nvim_list_uis.returns({ size })
-  return size
-end
-
 describe("layouts", function()
-  helpers.eventually_store_coverage()
-
-  after_each(function()
-    mock.revert(vim_api)
-  end)
+  local ui_size = { width = 104, height = 104 }
+  helpers.setup({ ui_size = ui_size })
 
   describe("default", function()
     it("build without preview", function()
-      local ui_size = fake_ui({ width = 104, height = 104 })
       local finder_size = { width = 100, height = 100 }
 
       assert.are.same(
@@ -37,7 +24,6 @@ describe("layouts", function()
     end)
 
     it("build with preview when ui_size is bigger than finder_size", function()
-      local ui_size = fake_ui({ width = 104, height = 104 })
       local finder_size = { width = 100, height = 100 }
 
       assert.are.same(
@@ -56,7 +42,6 @@ describe("layouts", function()
     end)
 
     it("build with preview when ui_size less bigger than finder_size", function()
-      local ui_size = fake_ui({ width = 104, height = 104 })
       local finder_size = { width = 200, height = 200 }
 
       assert.are.same(
