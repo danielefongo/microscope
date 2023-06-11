@@ -97,7 +97,7 @@ function finder:set_opts(opts)
   end
 
   self.opts = opts
-  self.request = nil
+  self.request = self.request or nil
 
   events:fire(events.event.new_opts, self.opts)
 
