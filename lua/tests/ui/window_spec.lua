@@ -6,7 +6,7 @@ describe("window", function()
   local custom_window
 
   before_each(function()
-    custom_window = window.new()
+    custom_window = window.new({}, events.new())
   end)
 
   after_each(function()

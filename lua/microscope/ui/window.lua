@@ -111,7 +111,7 @@ function window:hide()
 end
 
 function window:close()
-  events.clear_module(self)
+  self.events:clear_module(self)
   self.layout = nil
   self.cursor = nil
   if self.win then
@@ -124,15 +124,16 @@ function window:close()
   end
 end
 
-function window.new(child)
+function window.new(child, events_instance)
   local w = setmetatable(child or {}, { __index = window })
 
+  w.events = events_instance
   w:new_buf()
   w:set_buf_opt("bufhidden", "hide")
 
-  events.native(w, events.event.buf_leave, function()
+  w.events:native(w, events.event.buf_leave, function()
     if w.win then
-      events.fire(events.event.win_leave)
+      w.events:fire(events.event.win_leave)
     end
   end, { buffer = w.buf })
 

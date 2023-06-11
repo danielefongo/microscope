@@ -4,9 +4,11 @@ local helpers = require("tests.helpers")
 
 describe("input", function()
   local input_window
+  local my_events
 
   before_each(function()
-    input_window = input.new()
+    my_events = events.new()
+    input_window = input.new(my_events)
     input_window:show(helpers.dummy_layout(), true)
   end)
 
@@ -21,7 +23,7 @@ describe("input", function()
       it("stores new prompt", function()
         assert.are.same(input_window.prompt, "% ")
 
-        events.fire(events.event.new_opts, {
+        my_events:fire(events.event.new_opts, {
           prompt = "newprompt >",
         })
         helpers.wait(10)
@@ -50,8 +52,6 @@ describe("input", function()
     end)
 
     it("do not change input on newline", function()
-      local input_changed = helpers.spy_event_handler(events.event.input_changed)
-
       vim.api.nvim_set_current_buf(input_window:get_buf())
       helpers.wait(20)
 
@@ -59,15 +59,13 @@ describe("input", function()
       helpers.insert("<s-cr>")
       helpers.wait(20)
 
-      helpers.remove_spy_event_handler(input_changed)
-
       assert.are.same(input_window:text(), "text")
     end)
   end)
 
   describe("search", function()
     it("does not trigger input_changed if input is the same", function()
-      local input_changed = helpers.spy_event_handler(events.event.input_changed)
+      local input_changed = helpers.spy_event_handler(my_events, input_window, events.event.input_changed)
 
       vim.api.nvim_set_current_buf(input_window:get_buf())
       helpers.wait(20)
@@ -75,13 +73,11 @@ describe("input", function()
       helpers.insert("<bs>")
       helpers.wait(20)
 
-      helpers.remove_spy_event_handler(input_changed)
-
       assert.spy(input_changed).was.called(1)
     end)
 
     it("text", function()
-      local input_changed = helpers.spy_event_handler(events.event.input_changed)
+      local input_changed = helpers.spy_event_handler(my_events, input_window, events.event.input_changed)
 
       vim.api.nvim_set_current_buf(input_window:get_buf())
       helpers.wait(10)
@@ -89,13 +85,11 @@ describe("input", function()
       helpers.insert("text")
       helpers.wait(10)
 
-      helpers.remove_spy_event_handler(input_changed)
-
       assert.spy(input_changed).was.called_with("text")
     end)
 
     it("empty text on reset", function()
-      local input_changed = helpers.spy_event_handler(events.event.input_changed)
+      local input_changed = helpers.spy_event_handler(my_events, input_window, events.event.input_changed)
 
       vim.api.nvim_set_current_buf(input_window:get_buf())
       helpers.wait(10)
@@ -103,21 +97,17 @@ describe("input", function()
       input_window:reset()
       helpers.wait(10)
 
-      helpers.remove_spy_event_handler(input_changed)
-
       assert.spy(input_changed).was.called_with("")
     end)
 
     it("with set_text", function()
-      local input_changed = helpers.spy_event_handler(events.event.input_changed)
+      local input_changed = helpers.spy_event_handler(my_events, input_window, events.event.input_changed)
 
       vim.api.nvim_set_current_buf(input_window:get_buf())
       helpers.wait(10)
 
       input_window:set_text("text")
       helpers.wait(10)
-
-      helpers.remove_spy_event_handler(input_changed)
 
       assert.spy(input_changed).was.called_with("text")
     end)

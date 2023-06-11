@@ -39,12 +39,12 @@ function input:reset()
   self:clear()
 end
 
-function input.new()
-  local v = window.new(input)
-  v.prompt = "% "
+function input.new(events_instance)
+  local v = window.new(input, events_instance)
 
-  events.on(v, events.event.microscope_closed, on_close)
-  events.on(v, events.event.new_opts, on_new_opts)
+  v.prompt = "% "
+  v.events:on(v, events.event.microscope_closed, on_close)
+  v.events:on(v, events.event.new_opts, on_new_opts)
 
   vim.api.nvim_buf_attach(v.buf, false, {
     on_lines = function()
@@ -57,7 +57,7 @@ function input.new()
       if v:text() == v.old_text then
         return
       end
-      events.fire(events.event.input_changed, v:text())
+      v.events:fire(events.event.input_changed, v:text())
       v.old_text = v:text()
     end,
   })

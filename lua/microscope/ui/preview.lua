@@ -59,16 +59,16 @@ function preview:write_term(lines)
   self:set_buf_opt("modifiable", false)
 end
 
-function preview.new()
-  local v = window.new(preview)
+function preview.new(events_instance)
+  local v = window.new(preview, events_instance)
 
   v.preview_fun = function() end
   v:set_buf_opt("modifiable", false)
 
-  events.on(v, events.event.result_focused, on_result_focused)
-  events.on(v, events.event.empty_results_retrieved, on_empty_results_retrieved)
-  events.on(v, events.event.microscope_closed, on_close)
-  events.on(v, events.event.new_opts, on_new_opts)
+  v.events:on(v, events.event.result_focused, on_result_focused)
+  v.events:on(v, events.event.empty_results_retrieved, on_empty_results_retrieved)
+  v.events:on(v, events.event.microscope_closed, on_close)
+  v.events:on(v, events.event.new_opts, on_new_opts)
 
   return v
 end

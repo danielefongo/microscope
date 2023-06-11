@@ -6,7 +6,7 @@ describe("error", function()
   helpers.setup()
 
   it("generic error", function()
-    local spy = helpers.spy_event_handler(events.event.error)
+    local spy = helpers.spy_event_handler(events.global, "any", events.event.error)
 
     error.generic("error message")
 
@@ -19,7 +19,7 @@ describe("error", function()
   end)
 
   it("critical error", function()
-    local spy = helpers.spy_event_handler(events.event.error)
+    local spy = helpers.spy_event_handler(events.global, "any", events.event.error)
 
     error.critical("error message")
 

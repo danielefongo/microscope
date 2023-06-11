@@ -1,10 +1,13 @@
 local stub = require("luassert.stub")
 local spy = require("luassert.spy")
-local events = require("microscope.events")
 
 -- local functions
 
 local function setup_defer_fn(defer_fn)
+  if defer_fn == false then
+    return
+  end
+
   local time = defer_fn or 0
 
   before_each(function()
@@ -92,16 +95,22 @@ function helpers.dummy_layout()
   }
 end
 
-function helpers.spy_event_handler(evt)
+function helpers.spy_event_handler(my_events, module, evt)
   local my_spy = helpers.spy_function()
-  events.on(my_spy, evt, function(_, ...)
+  my_events:on(module, evt, function(self, ...)
+    assert.are.same(self, module)
     my_spy(...)
   end)
   return my_spy
 end
 
-function helpers.remove_spy_event_handler(my_spy)
-  events.clear_module(my_spy)
+function helpers.spy_native_event_handler(my_events, module, evt)
+  local my_spy = helpers.spy_function()
+  my_events:native(module, evt, function(self, ...)
+    assert.are.same(self, module)
+    my_spy(...)
+  end)
+  return my_spy
 end
 
 function helpers.spy_function()

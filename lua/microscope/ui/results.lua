@@ -132,7 +132,7 @@ function results:open(metadata)
   local selected = self:selected()
 
   if #selected > 0 then
-    events.fire(events.event.results_opened, { selected = selected, metadata = metadata })
+    events:fire(events.event.results_opened, { selected = selected, metadata = metadata })
   end
 
   self.selected_data = {}
@@ -143,7 +143,7 @@ function results:set_cursor(cursor)
   self:parse()
   local focused = get_focused(self)
   if focused then
-    events.fire(events.event.result_focused, focused, 100)
+    events:fire(events.event.result_focused, focused, 100)
   end
 end
 
@@ -151,8 +151,8 @@ function results:raw_results()
   return self.results
 end
 
-function results.new()
-  local v = window.new(results)
+function results.new(events_instance)
+  local v = window.new(results, events_instance)
 
   v.data = {}
   v.selected_data = {}
@@ -160,12 +160,12 @@ function results.new()
   v.parser = build_parser({})
   v:set_buf_opt("modifiable", false)
 
-  events.on(v, events.event.empty_results_retrieved, on_empty_results_retrieved)
-  events.on(v, events.event.results_retrieved, on_results_retrieved)
-  events.on(v, events.event.new_request, on_new_request)
-  events.on(v, events.event.microscope_closed, on_close)
-  events.on(v, events.event.new_opts, on_new_opts)
-  events.native(v, events.event.cursor_moved, function()
+  v.events:on(v, events.event.empty_results_retrieved, on_empty_results_retrieved)
+  v.events:on(v, events.event.results_retrieved, on_results_retrieved)
+  v.events:on(v, events.event.new_request, on_new_request)
+  v.events:on(v, events.event.microscope_closed, on_close)
+  v.events:on(v, events.event.new_opts, on_new_opts)
+  v.events:native(v, events.event.cursor_moved, function()
     if v.win then
       local cursor = vim.api.nvim_win_get_cursor(v.win)
       local win_cursor = v:get_cursor()

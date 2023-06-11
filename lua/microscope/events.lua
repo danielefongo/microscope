@@ -1,8 +1,5 @@
 local uv = vim.loop
 local events = {}
-events.handlers = {}
-events.timers = {}
-events.group = vim.api.nvim_create_augroup("Microscope", { clear = false })
 events.event = {
   resize = "VimResized",
   buf_leave = "BufLeave",
@@ -19,84 +16,96 @@ events.event = {
   error = "Error",
 }
 
-local function alive_handler(module, evt)
-  return events.handlers[module] and events.handlers[module][evt]
+local function alive_handler(self, module, evt)
+  return self.handlers[module] and self.handlers[module][evt]
 end
 
-local function make_callback(module, evt, callback)
+local function make_callback(self, module, evt, callback)
   return function(payload)
     vim.schedule(function()
-      if alive_handler(module, evt) then
+      if alive_handler(self, module, evt) then
         callback(module, payload.data)
       end
     end)
   end
 end
 
-local function set_handler(module, main_evt, evt, opts)
-  if not events.handlers[module] then
-    events.handlers[module] = {}
+local function set_handler(self, module, main_evt, evt, opts)
+  if not self.handlers[module] then
+    self.handlers[module] = {}
   end
 
-  events.handlers[module][evt] = vim.api.nvim_create_autocmd(main_evt, opts)
+  self.handlers[module][evt] = vim.api.nvim_create_autocmd(main_evt, opts)
 end
 
-function events.on(module, evt, callback)
+function events:on(module, evt, callback)
   local opts = {
-    group = events.group,
-    callback = make_callback(module, evt, callback),
+    group = self.group,
+    callback = make_callback(self, module, evt, callback),
     pattern = evt,
   }
 
-  set_handler(module, "User", evt, opts)
+  set_handler(self, module, "User", evt, opts)
 end
 
-function events.native(module, evt, callback, opts)
+function events:native(module, evt, callback, opts)
   opts = vim.tbl_deep_extend("force", {
-    group = events.group,
-    callback = make_callback(module, evt, callback),
+    group = self.group,
+    callback = make_callback(self, module, evt, callback),
   }, opts or {})
 
-  set_handler(module, evt, evt, opts)
+  set_handler(self, module, evt, evt, opts)
 end
 
-function events.clear(module, evt)
-  if not alive_handler(module, evt) then
+function events:clear(module, evt)
+  if not alive_handler(self, module, evt) then
     return
   end
 
-  vim.api.nvim_del_autocmd(events.handlers[module][evt])
-  events.handlers[module][evt] = nil
+  vim.api.nvim_del_autocmd(self.handlers[module][evt])
+  self.handlers[module][evt] = nil
 end
 
-function events.clear_module(module)
-  for evt, _ in pairs(events.handlers[module] or {}) do
-    events.clear(module, evt)
+function events:clear_module(module)
+  for evt, _ in pairs(self.handlers[module] or {}) do
+    self:clear(module, evt)
   end
-  events.handlers[module] = nil
+  self.handlers[module] = nil
 end
 
-function events.fire(evt, data, delay)
-  events.cancel(evt)
-  events.timers[evt] = vim.defer_fn(function()
-    vim.api.nvim_exec_autocmds("User", { group = events.group, pattern = evt, data = data })
-  end, (events.delay_enabled and delay or 0) or 0)
+function events:fire(evt, data, delay)
+  self:cancel(evt)
+  self.timers[evt] = vim.defer_fn(function()
+    vim.api.nvim_exec_autocmds("User", { group = self.group, pattern = evt, data = data })
+  end, delay or 0)
 end
 
-function events.fire_native(evt, delay)
-  events.cancel(evt)
-  events.timers[evt] = vim.defer_fn(function()
-    vim.api.nvim_exec_autocmds(evt, { group = events.group })
-  end, (events.delay_enabled and delay or 0) or 0)
+function events:fire_native(evt, delay)
+  self:cancel(evt)
+  self.timers[evt] = vim.defer_fn(function()
+    vim.api.nvim_exec_autocmds(evt, { group = self.group })
+  end, delay or 0)
 end
 
-function events.cancel(evt)
-  local timer = events.timers[evt]
+function events:cancel(evt)
+  local timer = self.timers[evt]
   if timer and uv.is_active(timer) then
     uv.timer_stop(timer)
     uv.close(timer)
-    events.timers[evt] = nil
+    self.timers[evt] = nil
   end
 end
+
+function events.new()
+  local self = setmetatable(events, { __index = events })
+
+  self.group = vim.api.nvim_create_augroup("Microscope", { clear = false })
+  self.timers = {}
+  self.handlers = {}
+
+  return self
+end
+
+events.global = events.new()
 
 return events

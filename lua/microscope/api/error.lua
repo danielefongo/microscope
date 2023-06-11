@@ -2,11 +2,11 @@ local events = require("microscope.events")
 local error = {}
 
 function error.generic(message)
-  events.fire(events.event.error, { message = message, critical = false })
+  events.fire(events.global, events.event.error, { message = message, critical = false })
 end
 
 function error.critical(message)
-  events.fire(events.event.error, { message = message, critical = true })
+  events.fire(events.global, events.event.error, { message = message, critical = true })
 end
 
 function error.show(data)

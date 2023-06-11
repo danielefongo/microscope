@@ -16,14 +16,15 @@ function finder:bind_action(fun)
 end
 
 function finder:close()
-  events.clear_module(self)
+  events:clear_module(self)
+  events.clear_module(events.global, self)
 
   local cursor = vim.api.nvim_win_get_cursor(self.old_win)
   vim.api.nvim_set_current_win(self.old_win)
   vim.api.nvim_set_current_buf(self.old_buf)
   vim.api.nvim_win_set_cursor(self.old_win, { cursor[1], cursor[2] + 1 })
 
-  events.fire(events.event.microscope_closed)
+  events:fire(events.event.microscope_closed)
   self:stop_search()
   finder.instance = nil
 end
@@ -53,7 +54,7 @@ function finder:search(text)
     buf = self.old_buf,
     win = self.old_win,
   }
-  events.fire(events.event.new_request, self.request)
+  events:fire(events.event.new_request, self.request)
   self.find:search(self.request)
 end
 
@@ -65,11 +66,11 @@ function finder:update()
     full_screen = self.opts.full_screen,
   })
 
-  events.clear(self, events.event.win_leave)
+  events:clear(self, events.event.win_leave)
   self.preview:show(layout.preview, layout.input == nil)
   self.results:show(layout.results, layout.input == nil)
   self.input:show(layout.input, true)
-  events.native(self, events.event.win_leave, finder.close)
+  events:native(self, events.event.win_leave, finder.close)
 end
 
 function finder:alter(lambda)
@@ -98,7 +99,7 @@ function finder:set_opts(opts)
   self.opts = opts
   self.request = nil
 
-  events.fire(events.event.new_opts, self.opts)
+  events:fire(events.event.new_opts, self.opts)
 
   for lhs, action in pairs(self.opts.bindings) do
     vim.keymap.set("i", lhs, self:bind_action(action), { buffer = self.input.buf })
@@ -110,9 +111,9 @@ function finder:set_opts(opts)
     lens = opts.lens,
     callback = function(list)
       if #list > 0 then
-        events.fire(events.event.results_retrieved, list)
+        events:fire(events.event.results_retrieved, list)
       else
-        events.fire(events.event.empty_results_retrieved)
+        events:fire(events.event.empty_results_retrieved)
       end
     end,
   })
@@ -133,16 +134,17 @@ function finder.new(opts)
   self.old_win = vim.api.nvim_get_current_win()
   self.old_buf = vim.api.nvim_get_current_buf()
 
-  self.preview = preview.new()
-  self.results = results.new()
-  self.input = input.new()
+  self.events = events.new()
+  self.preview = preview.new(self.events)
+  self.results = results.new(self.events)
+  self.input = input.new(self.events)
   self.full_screen = false
 
-  events.on(self, events.event.results_opened, finder.open)
-  events.on(self, events.event.input_changed, finder.search)
-  events.on(self, events.event.error, finder.close_with_err)
-  events.native(self, events.event.resize, finder.update)
-  events.on(self, events.event.win_leave, finder.close)
+  self.events:on(self, events.event.results_opened, finder.open)
+  self.events:on(self, events.event.input_changed, finder.search)
+  self.events.on(events.global, self, events.event.error, finder.close_with_err)
+  self.events:native(self, events.event.resize, finder.update)
+  self.events:on(self, events.event.win_leave, finder.close)
 
   self:set_opts(opts)
   self.input:reset()

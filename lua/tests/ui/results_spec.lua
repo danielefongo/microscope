@@ -16,9 +16,11 @@ end
 
 describe("results", function()
   local results_window
+  local my_events
 
   before_each(function()
-    results_window = results.new()
+    my_events = events.new()
+    results_window = results.new(my_events)
   end)
 
   after_each(function()
@@ -30,26 +32,26 @@ describe("results", function()
   describe("event", function()
     describe("results_retrieved", function()
       it("writes to buffer", function()
-        events.fire(events.event.results_retrieved, { "result1", "result2" })
+        my_events:fire(events.event.results_retrieved, { "result1", "result2" })
         helpers.wait(10)
 
         assert.are.same(results_window:read(), { "result1", "result2" })
       end)
 
       it("overwrites buffer on new results", function()
-        events.fire(events.event.results_retrieved, { "result1", "result2" })
+        my_events:fire(events.event.results_retrieved, { "result1", "result2" })
         helpers.wait(10)
 
-        events.fire(events.event.results_retrieved, { "result3" })
+        my_events:fire(events.event.results_retrieved, { "result3" })
         helpers.wait(10)
 
         assert.are.same(results_window:read(), { "result3" })
       end)
 
       it("triggers result focused on first result", function()
-        local focus = helpers.spy_event_handler(events.event.result_focused)
+        local focus = helpers.spy_event_handler(my_events, results_window, events.event.result_focused)
 
-        events.fire(events.event.results_retrieved, { "result1", "result2" })
+        my_events:fire(events.event.results_retrieved, { "result1", "result2" })
         helpers.wait(10)
 
         assert.spy(focus).was.called_with({ text = "result1" })
@@ -58,10 +60,10 @@ describe("results", function()
 
     describe("empty_results_retrieved", function()
       it("resets buffer", function()
-        events.fire(events.event.results_retrieved, { "result1", "result2" })
+        my_events:fire(events.event.results_retrieved, { "result1", "result2" })
         helpers.wait(10)
 
-        events.fire(events.event.empty_results_retrieved)
+        my_events:fire(events.event.empty_results_retrieved)
         helpers.wait(10)
 
         assert.are.same(results_window:read(), { "" })
@@ -70,10 +72,10 @@ describe("results", function()
 
     describe("new_request", function()
       it("resets everything, except the buffer", function()
-        events.fire(events.event.results_retrieved, { "result1", "result2" })
+        my_events:fire(events.event.results_retrieved, { "result1", "result2" })
         helpers.wait(10)
 
-        events.fire(events.event.new_request, { text = "smth" })
+        my_events:fire(events.event.new_request, { text = "smth" })
         helpers.wait(10)
 
         assert.are.same(results_window:read(), { "result1", "result2" })
@@ -84,7 +86,7 @@ describe("results", function()
 
     describe("new_opts", function()
       it("stores new parser", function()
-        events.fire(events.event.new_opts, {
+        my_events:fire(events.event.new_opts, {
           parsers = {
             function(data)
               data.additional_data = true
@@ -94,7 +96,7 @@ describe("results", function()
         })
         helpers.wait(10)
 
-        events.fire(events.event.results_retrieved, { "result1", "result2" })
+        my_events:fire(events.event.results_retrieved, { "result1", "result2" })
         helpers.wait(10)
 
         assert.are.same(results_window:selected(), { { text = "result1", additional_data = true } })
@@ -103,12 +105,12 @@ describe("results", function()
 
     describe("cursor_moved", function()
       it("sets new cursor if different from previous one", function()
-        events.fire(events.event.results_retrieved, { "result1", "result2" })
+        my_events:fire(events.event.results_retrieved, { "result1", "result2" })
         helpers.wait(10)
 
         results_window:show(helpers.dummy_layout(), false)
         vim.api.nvim_win_set_cursor(results_window.win, { 2, 0 })
-        events.fire_native(events.event.cursor_moved)
+        my_events:fire_native(events.event.cursor_moved)
         helpers.wait(20)
 
         assert.are.same(results_window:get_cursor(), { 2, 0 })
@@ -118,7 +120,7 @@ describe("results", function()
 
   describe("parsing", function()
     it("shows modified text", function()
-      events.fire(events.event.new_opts, {
+      my_events:fire(events.event.new_opts, {
         parsers = {
           function(data)
             data.text = data.text .. " changed"
@@ -128,7 +130,7 @@ describe("results", function()
       })
       helpers.wait(10)
 
-      events.fire(events.event.results_retrieved, { "result1", "result2" })
+      my_events:fire(events.event.results_retrieved, { "result1", "result2" })
       helpers.wait(10)
 
       assert.are.same(results_window:read(), {
@@ -138,7 +140,7 @@ describe("results", function()
     end)
 
     it("shows highlights", function()
-      events.fire(events.event.new_opts, {
+      my_events:fire(events.event.new_opts, {
         parsers = {
           function(data)
             data.highlights = highlight.new({}, data.text):hl(highlight.color.color1, 1, 1):get_highlights()
@@ -148,7 +150,7 @@ describe("results", function()
       })
       helpers.wait(10)
 
-      events.fire(events.event.results_retrieved, { "result1", "result2" })
+      my_events:fire(events.event.results_retrieved, { "result1", "result2" })
       helpers.wait(10)
 
       assert.are.same(get_highlight_details(results_window.buf, 1), {
@@ -169,29 +171,25 @@ describe("results", function()
 
   describe("moving cursor", function()
     it("triggers result_focused event if there is a result", function()
-      local focus = helpers.spy_event_handler(events.event.result_focused)
+      local focus = helpers.spy_event_handler(my_events, results_window, events.event.result_focused)
 
-      events.fire(events.event.results_retrieved, { "result1", "result2" })
+      my_events:fire(events.event.results_retrieved, { "result1", "result2" })
       helpers.wait(10)
 
       results_window:set_cursor({ 2, 0 })
       helpers.wait(10)
-
-      helpers.remove_spy_event_handler(focus)
 
       assert.spy(focus).was.called_with({ text = "result2" })
     end)
 
     it("does not trigger result_focused event if there isn't any result", function()
-      local focus = helpers.spy_event_handler(events.event.result_focused)
+      local focus = helpers.spy_event_handler(my_events, results_window, events.event.result_focused)
 
-      events.fire(events.event.results_retrieved, {})
+      my_events:fire(events.event.results_retrieved, {})
       helpers.wait(10)
 
       results_window:set_cursor({ 2, 0 })
       helpers.wait(10)
-
-      helpers.remove_spy_event_handler(focus)
 
       assert.spy(focus).was.not_called()
     end)
@@ -202,7 +200,7 @@ describe("results", function()
         table.insert(retrieved_results, "result" .. tostring(i))
       end
 
-      events.fire(events.event.results_retrieved, retrieved_results)
+      my_events:fire(events.event.results_retrieved, retrieved_results)
       helpers.wait(10)
 
       results_window:set_cursor({ 200, 0 })
@@ -214,7 +212,7 @@ describe("results", function()
 
   describe("selection", function()
     it("highlights result on buffer", function()
-      events.fire(events.event.results_retrieved, { "result1", "result2" })
+      my_events:fire(events.event.results_retrieved, { "result1", "result2" })
       helpers.wait(10)
 
       results_window:select()
@@ -227,7 +225,7 @@ describe("results", function()
     end)
 
     it("contains selected results", function()
-      events.fire(events.event.results_retrieved, { "result1", "result2" })
+      my_events:fire(events.event.results_retrieved, { "result1", "result2" })
       helpers.wait(10)
 
       results_window:select()
@@ -236,7 +234,7 @@ describe("results", function()
     end)
 
     it("is empty on no results", function()
-      events.fire(events.event.empty_results_retrieved)
+      my_events:fire(events.event.empty_results_retrieved)
 
       results_window:select()
 
@@ -246,15 +244,13 @@ describe("results", function()
 
   describe("opening", function()
     it("focused result", function()
-      local open = helpers.spy_event_handler(events.event.results_opened)
+      local open = helpers.spy_event_handler(my_events, results_window, events.event.results_opened)
 
-      events.fire(events.event.results_retrieved, { "result1", "result2" })
+      my_events:fire(events.event.results_retrieved, { "result1", "result2" })
       helpers.wait(10)
 
       results_window:open("metadata")
       helpers.wait(10)
-
-      helpers.remove_spy_event_handler(open)
 
       assert.spy(open).was.called_with({
         selected = { { text = "result1" } },
@@ -263,9 +259,9 @@ describe("results", function()
     end)
 
     it("selected results", function()
-      local open = helpers.spy_event_handler(events.event.results_opened)
+      local open = helpers.spy_event_handler(my_events, results_window, events.event.results_opened)
 
-      events.fire(events.event.results_retrieved, { "result1", "result2", "result3" })
+      my_events:fire(events.event.results_retrieved, { "result1", "result2", "result3" })
       helpers.wait(10)
 
       results_window:select()
@@ -275,8 +271,6 @@ describe("results", function()
       results_window:open("metadata")
       helpers.wait(10)
 
-      helpers.remove_spy_event_handler(open)
-
       assert.spy(open).was.called_with({
         selected = { { text = "result1" }, { text = "result3" } },
         metadata = "metadata",
@@ -284,12 +278,10 @@ describe("results", function()
     end)
 
     it("nothing if no results", function()
-      local open = helpers.spy_event_handler(events.event.results_opened)
+      local open = helpers.spy_event_handler(my_events, results_window, events.event.results_opened)
 
       results_window:open("metadata")
       helpers.wait(10)
-
-      helpers.remove_spy_event_handler(open)
 
       assert.spy(open).was.not_called()
     end)
