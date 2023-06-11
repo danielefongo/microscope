@@ -2,11 +2,6 @@ local window = require("microscope.ui.window")
 local events = require("microscope.events")
 local input = {}
 
-local function on_close(self)
-  self:close()
-  self.old_text = nil
-end
-
 local function on_new_opts(self, opts)
   local old_text = self:text()
 
@@ -39,11 +34,15 @@ function input:reset()
   self:clear()
 end
 
+function input:close()
+  window.close(self)
+  self.old_text = nil
+end
+
 function input.new(events_instance)
   local v = window.new(input, events_instance)
 
   v.prompt = "% "
-  v.events:on(v, events.event.microscope_closed, on_close)
   v.events:on(v, events.event.new_opts, on_new_opts)
 
   vim.api.nvim_buf_attach(v.buf, false, {

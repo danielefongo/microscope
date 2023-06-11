@@ -3,11 +3,6 @@ local window = require("microscope.ui.window")
 local events = require("microscope.events")
 local preview = {}
 
-local function on_close(self)
-  self.data = nil
-  self:close()
-end
-
 local function on_result_focused(self, data)
   self.term_lines = nil
   self.data = data
@@ -59,6 +54,11 @@ function preview:write_term(lines)
   self:set_buf_opt("modifiable", false)
 end
 
+function preview:close()
+  self.data = nil
+  window.close(self)
+end
+
 function preview.new(events_instance)
   local v = window.new(preview, events_instance)
 
@@ -67,7 +67,6 @@ function preview.new(events_instance)
 
   v.events:on(v, events.event.result_focused, on_result_focused)
   v.events:on(v, events.event.empty_results_retrieved, on_empty_results_retrieved)
-  v.events:on(v, events.event.microscope_closed, on_close)
   v.events:on(v, events.event.new_opts, on_new_opts)
 
   return v

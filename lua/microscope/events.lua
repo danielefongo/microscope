@@ -5,7 +5,6 @@ events.event = {
   buf_leave = "BufLeave",
   cursor_moved = "CursorMoved",
   win_leave = "WinLeave",
-  microscope_closed = "MicroscopeClosed",
   results_retrieved = "ResultsRetrieved",
   empty_results_retrieved = "EmptyResultsRetrieved",
   result_focused = "ResultFocused",

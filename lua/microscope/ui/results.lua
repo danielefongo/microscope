@@ -50,14 +50,6 @@ local function on_new_opts(self, opts)
   self.parser = build_parser(opts.parsers or {})
 end
 
-local function on_close(self)
-  self.data = {}
-  self.selected_data = {}
-  self.results = {}
-  self.request = nil
-  self:close()
-end
-
 function results:show(layout, focus)
   window.show(self, layout, focus)
 
@@ -128,6 +120,14 @@ function results:selected()
   end
 end
 
+function results:close()
+  self.data = {}
+  self.selected_data = {}
+  self.results = {}
+  self.request = nil
+  window.close(self)
+end
+
 function results:open(metadata)
   local selected = self:selected()
 
@@ -163,7 +163,6 @@ function results.new(events_instance)
   v.events:on(v, events.event.empty_results_retrieved, on_empty_results_retrieved)
   v.events:on(v, events.event.results_retrieved, on_results_retrieved)
   v.events:on(v, events.event.new_request, on_new_request)
-  v.events:on(v, events.event.microscope_closed, on_close)
   v.events:on(v, events.event.new_opts, on_new_opts)
   v.events:native(v, events.event.cursor_moved, function()
     if v.win then

@@ -24,7 +24,10 @@ function finder:close()
   vim.api.nvim_set_current_buf(self.old_buf)
   vim.api.nvim_win_set_cursor(self.old_win, { cursor[1], cursor[2] + 1 })
 
-  events:fire(events.event.microscope_closed)
+  self.input:close()
+  self.results:close()
+  self.preview:close()
+
   self:stop_search()
   finder.instance = nil
 end
