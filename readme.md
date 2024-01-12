@@ -23,6 +23,7 @@ On [lazy.nvim](https://github.com/folke/lazy.nvim)
   config = function()
     local microscope = require("microscope")
     local actions = require("microscope.builtin.actions")
+    local layouts = require("microscope.builtin.layouts")
 
     local files = require("microscope-files")
     local buffers = require("microscope-buffers")
@@ -33,6 +34,7 @@ On [lazy.nvim](https://github.com/folke/lazy.nvim)
         width = 80,
         height = 30,
       },
+      layout = layouts.default,
       bindings = {
         ["<c-j>"] = actions.next,
         ["<c-k>"] = actions.previous,
