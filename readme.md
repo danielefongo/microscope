@@ -96,7 +96,7 @@ local finder = microscope.finder(opts)
 
 -- Second way (registers the finder as microscope.finders.name)
 local finder = microscope.register({
-  name = opts
+  name = opts,
 })
 ```
 
@@ -399,7 +399,6 @@ The **flow** is a bag of functions:
   ```lua
   -- Synthetic way
   local filename = flow.fn(vim.api.nvim_buf_get_name, request.buf)
-
   -- Verbose way
   local filename = flow.fn(function()
      return vim.api.nvim_buf_get_name(request.buf)
@@ -664,11 +663,9 @@ You can also explore the already published plugins:
 
   ```bash
   # without coverage
-  make test [test=<path-to-file>]
-
+  make test [test=path-to-file]
   # with coverage
   make testcov
-
   # with coverage + html report
   make testcov-html
   ```
