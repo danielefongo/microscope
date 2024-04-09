@@ -41,6 +41,13 @@ describe("new_command", function()
     assert.are.same(output, "hello\nworld\n")
   end)
 
+  it("const", function()
+    local mycmd = cmd.const("hello\n")
+
+    local output = consume_command(mycmd:get_iter())
+    assert.are.same(output, "hello\n")
+  end)
+
   it("fn", function()
     local mycmd = cmd.fn(function(x)
       return x
@@ -57,6 +64,17 @@ describe("new_command", function()
 
     local output = consume_command(mycmd:get_iter())
     assert.are.same(output, "hello\n")
+  end)
+
+  it("filter", function()
+    local filter = function(data)
+      return string.gsub(data, "hello", "hallo")
+    end
+
+    local mycmd = cmd.shell("echo", "hello"):filter(filter)
+
+    local output = consume_command(mycmd:get_iter())
+    assert.are.same(output, "hallo\n")
   end)
 
   describe("pipe", function()

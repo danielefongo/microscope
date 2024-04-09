@@ -40,10 +40,15 @@ function command:spawn()
       self:close()
     end)
   else
+    local previous_output = function() end
+    if self.input then
+      previous_output = self.input:get_consumer()
+    end
+
     self.handle = uv.new_idle()
     self.handle:start(function()
       local co = coroutine.create(self.iterator)
-      local success, out = coroutine.resume(co)
+      local success, out = coroutine.resume(co, previous_output())
       if success and out then
         if type(out) == "table" then
           out = table.concat(out, "\n") .. "\n"
@@ -62,23 +67,19 @@ function command:spawn()
   end
 end
 
-function command:read_start(last)
+function command:read_start()
   if self.input then
-    self.input:read_start(false)
+    self.input:read_start()
   end
 
-  if not last then
-    return function() end
-  end
+  uv.read_start(self.output_stream, function(_, data)
+    if data then
+      self.output = self.output .. data
+    end
+  end)
+end
 
-  if self.command then
-    uv.read_start(self.output_stream, function(_, data)
-      if data then
-        self.output = self.output .. data
-      end
-    end)
-  end
-
+function command:get_consumer()
   return function()
     if self.handle and self.handle:is_active() and not self.output:find("\n") then
       return ""
@@ -94,7 +95,9 @@ end
 
 function command:get_iter()
   self:spawn()
-  return self:read_start(true)
+  self:read_start()
+
+  return self:get_consumer()
 end
 
 function command:into(flow)
@@ -128,9 +131,6 @@ local function command_new(opts, instance)
   self.command = opts.cmd
   self.args = opts.args or {}
   self.iterator = opts.iterator
-  if opts.iterator then
-    self.co = coroutine.create(self.iterator)
-  end
 
   return self
 end
@@ -140,8 +140,18 @@ function command:pipe(cmd, ...)
   return command_new({ cmd = cmd, args = args }, self)
 end
 
+function command:filter(iterator)
+  return command_new({ iterator = iterator }, self)
+end
+
 function command.iter(iterator)
   return command_new({ iterator = iterator })
+end
+
+function command.const(data)
+  return command.fn(function()
+    return data
+  end)
 end
 
 function command.fn(fun, ...)
