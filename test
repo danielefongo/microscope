@@ -6,7 +6,7 @@ TESTS_DIR="$REPO_DIR/lua/tests"
 INIT_FILE="$TESTS_DIR/init.vim"
 MINIMAL_INIT_FILE="$TESTS_DIR/minimal_init.lua"
 
-if [ $TEST_COV == 1 ]; then
+if [ "$TEST_COV" == 1 ]; then
 	SEQUENTIAL="sequential = true,"
 fi
 
