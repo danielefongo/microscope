@@ -1,5 +1,12 @@
 local helpers = require("tests.helpers")
 local lens = require("microscope.api.lens")
+local new_command = require("microscope.api.new_command")
+
+local hello_world_spec = {
+  fun = function(flow)
+    new_command.shell("echo", "hello\nworld"):into(flow)
+  end,
+}
 
 local function write(data)
   return {
@@ -173,6 +180,35 @@ describe("lens", function()
       my_lens:feed("")
 
       assert.are.same(helpers.consume_lens(my_lens, 100), "hello\nworld\n")
+    end)
+
+    describe("new command", function()
+      it("with into", function()
+        local my_lens = lens.new({
+          fun = function(flow)
+            new_command.iter(flow.read_iter()):pipe("grep", "hel"):into(flow)
+          end,
+          inputs = { hello_world_spec },
+        })
+
+        my_lens:feed("")
+
+        assert.are.same(helpers.consume_lens(my_lens), "hello\n")
+      end)
+
+      it("with collect", function()
+        local my_lens = lens.new({
+          fun = function(flow)
+            local result = new_command.iter(flow.read_iter()):pipe("grep", "hel"):collect()
+            flow.write(result)
+          end,
+          inputs = { hello_world_spec },
+        })
+
+        my_lens:feed("")
+
+        assert.are.same(helpers.consume_lens(my_lens), "hello\n")
+      end)
     end)
 
     describe("stop", function()
