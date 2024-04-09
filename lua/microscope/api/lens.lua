@@ -1,6 +1,7 @@
 local error = require("microscope.api.error")
 local scheduled = require("microscope.api.scheduled")
 local command = require("microscope.api.command")
+local new_command = require("microscope.api.new_command")
 local lens = {}
 lens.__index = lens
 
@@ -112,6 +113,7 @@ function lens:create_flow()
     spawn = function(opts)
       return command.spawn(self.flow, opts)
     end,
+    cmd = new_command,
   }
 end
 
