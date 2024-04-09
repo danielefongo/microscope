@@ -1,5 +1,5 @@
 local helpers = require("tests.helpers")
-local cmd = require("microscope.api.new_command")
+local cmd = require("microscope.api.command")
 
 local function consume_command(iter, time)
   local final_out
@@ -19,7 +19,7 @@ local function consume_command(iter, time)
   return final_out
 end
 
-describe("new_command", function()
+describe("command", function()
   helpers.setup()
 
   it("shell", function()

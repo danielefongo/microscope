@@ -1,10 +1,9 @@
 local lenses = {}
-local new_command = require("microscope.api.new_command")
 
 function lenses.fzf(...)
   return {
     fun = function(flow, request)
-      new_command.iter(flow.read_iter()):pipe("fzf", { "-f", request.text }):into(flow)
+      flow.cmd.iter(flow.read_iter()):pipe("fzf", { "-f", request.text }):into(flow)
     end,
     inputs = { ... },
   }

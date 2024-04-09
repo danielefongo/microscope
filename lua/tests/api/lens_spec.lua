@@ -1,10 +1,10 @@
 local helpers = require("tests.helpers")
 local lens = require("microscope.api.lens")
-local new_command = require("microscope.api.new_command")
+local command = require("microscope.api.command")
 
 local hello_world_spec = {
   fun = function(flow)
-    new_command.shell("echo", { "hello\nworld" }):into(flow)
+    command.shell("echo", { "hello\nworld" }):into(flow)
   end,
 }
 
@@ -186,7 +186,7 @@ describe("lens", function()
       it("with into", function()
         local my_lens = lens.new({
           fun = function(flow)
-            new_command.iter(flow.read_iter()):pipe("grep", { "hel" }):into(flow)
+            command.iter(flow.read_iter()):pipe("grep", { "hel" }):into(flow)
           end,
           inputs = { hello_world_spec },
         })
@@ -199,7 +199,7 @@ describe("lens", function()
       it("with collect", function()
         local my_lens = lens.new({
           fun = function(flow)
-            local result = new_command.iter(flow.read_iter()):pipe("grep", { "hel" }):collect()
+            local result = command.iter(flow.read_iter()):pipe("grep", { "hel" }):collect()
             flow.write(result)
           end,
           inputs = { hello_world_spec },

@@ -1,6 +1,6 @@
-local uv = vim.loop
-
 local command = {}
+local uv = vim.loop
+command.__index = command
 
 local function split_last_newline(text)
   local idx = text:reverse():find("\n")
@@ -10,103 +10,190 @@ local function split_last_newline(text)
   return text:sub(1, -idx), text:sub(1 - idx)
 end
 
-local function shell(opts, input_stream)
-  local cmd = opts.cmd
-  local args = opts.args or {}
-  local cwd = opts.cwd
-
-  local output = ""
-  local output_stream = uv.new_pipe(false)
-  local handle
-
-  local function close()
-    output_stream:read_stop()
-    output_stream:close()
-    handle:close()
-    handle:kill(vim.loop.constants.SIGTERM)
-    if input_stream then
-      input_stream:read_stop()
-      input_stream:close()
-    end
+function command:close()
+  if self.input then
+    self.input:close()
   end
 
-  handle = uv.spawn(cmd, { args = args, stdio = { input_stream, output_stream, nil }, cwd = cwd }, close)
-  uv.read_start(output_stream, function(_, data)
+  self.output_stream:read_stop()
+  self.output_stream:shutdown()
+
+  if not self.handle or not self.handle:is_active() then
+    return
+  end
+
+  if self.command then
+    self.handle:close()
+    self.handle:kill(vim.loop.constants.SIGTERM)
+  else
+    self.handle:stop()
+  end
+end
+
+function command:spawn()
+  if self.command then
+    self.handle = uv.spawn(self.command, {
+      args = self.args,
+      cwd = self.cwd,
+      stdio = { self.input_stream, self.output_stream, nil },
+    }, function()
+      self:close()
+    end)
+  else
+    local previous_output = function() end
+    if self.input then
+      previous_output = self.input:get_consumer()
+    end
+
+    self.handle = uv.new_idle()
+    self.handle:start(function()
+      local co = coroutine.create(self.iterator)
+      local success, out = coroutine.resume(co, previous_output())
+      if success and out then
+        if type(out) == "table" then
+          out = table.concat(out, "\n") .. "\n"
+        end
+
+        self.output = self.output .. out
+        self.output_stream:write(out)
+      else
+        self:close()
+      end
+    end)
+  end
+
+  if self.input then
+    self.input:spawn()
+  end
+end
+
+function command:read_start()
+  if self.input then
+    self.input:read_start()
+  end
+
+  uv.read_start(self.output_stream, function(_, data)
     if data then
-      output = output .. data
+      self.output = self.output .. data
     end
   end)
+end
 
-  local function iterator()
-    if handle and handle:is_active() and not output:find("\n") then
+function command:get_consumer()
+  return function()
+    if self.handle and self.handle:is_active() and not self.output:find("\n") then
       return ""
     end
 
     local result
-    if handle and handle:is_active() or output ~= "" then
-      result, output = split_last_newline(output)
+    if self.handle and self.handle:is_active() or self.output ~= "" then
+      result, self.output = split_last_newline(self.output)
       return result
     end
   end
-
-  return iterator, close
 end
 
-local function consume_shell(flow, opts)
-  local stdin = nil
-  if flow.can_read() then
-    stdin = uv.new_pipe(false)
-  end
+function command:get_iter()
+  self:spawn()
+  self:read_start()
 
-  local iterator, close = shell(opts, stdin)
+  return self:get_consumer()
+end
 
-  local finished = false
-
-  local function read_shell_output()
+function command:into(flow)
+  for shell_out in self:get_iter() do
     if flow.stopped() then
-      pcall(close)
+      self:close()
     end
-    if flow.can_read() and not finished then
-      local data = flow.read()
-      if data == nil then
-        stdin:read_stop()
-        stdin:shutdown()
-        finished = true
-      elseif type(data) == "string" then
-        stdin:write(data)
-      end
-    end
-
-    return iterator()
-  end
-
-  return function()
-    local output = read_shell_output()
-    while output == "" and not flow.stopped() do
-      flow.write(output)
-      output = read_shell_output()
-    end
-    return output
+    flow.write(shell_out)
   end
 end
 
-function command.spawn(flow, opts)
-  for output in consume_shell(flow, opts) do
-    flow.write(output)
-  end
-end
-
-function command.command(flow, opts)
-  local outputs = {}
-  for output in consume_shell(flow, opts) do
-    for value in vim.gsplit(output, "\n") do
-      table.insert(outputs, value)
-    end
-  end
-  if outputs[#outputs] == "" then
-    table.remove(outputs)
+function command:collect()
+  local outputs = ""
+  for shell_out in self:get_iter() do
+    outputs = outputs .. shell_out
+    coroutine.yield("")
   end
   return outputs
+end
+
+local function command_new(opts, instance)
+  local self = setmetatable({ keys = {} }, command)
+
+  if instance then
+    self.input = instance
+    self.input_stream = self.input.output_stream
+  end
+  self.output_stream = uv.new_pipe(false)
+  self.output = ""
+
+  self.command = opts.cmd
+  self.args = opts.args or {}
+  self.cwd = opts.cwd
+  self.iterator = opts.iterator
+
+  return self
+end
+
+function command:pipe(cmd, args, cwd)
+  return command_new({ cmd = cmd, args = args, cwd = cwd }, self)
+end
+
+function command:filter(iterator)
+  return command_new({ iterator = iterator }, self)
+end
+
+function command.iter(iterator)
+  return command_new({ iterator = iterator })
+end
+
+function command.const(data)
+  return command.fn(function()
+    return data
+  end)
+end
+
+function command.fn(fun, ...)
+  return command.await(function(cb, ...)
+    cb(fun(...))
+  end, ...)
+end
+
+function command.await(fun, ...)
+  local params = { ... }
+
+  local output
+  local finished
+
+  local cb = function(out)
+    output = out
+    finished = true
+  end
+
+  local co = coroutine.create(function()
+    vim.schedule(function()
+      fun(cb, unpack(params))
+    end)
+  end)
+
+  coroutine.resume(co)
+
+  local iterator = function()
+    if not finished then
+      return ""
+    end
+
+    local new_out = output
+    output = nil
+    return new_out
+  end
+
+  return command_new({ iterator = iterator })
+end
+
+function command.shell(cmd, args)
+  return command.pipe(nil, cmd, args)
 end
 
 return command

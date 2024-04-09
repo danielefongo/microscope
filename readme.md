@@ -153,11 +153,7 @@ local lenses = {}
 function lenses.rg(cwd)
   return {
     fun = function(flow)
-      flow.spawn({
-        cmd = "rg",
-        args = { "--files" },
-        cwd = cwd,
-      })
+      flow.cmd.shell("rg", { "--files" }, cwd):into(flow)
     end,
   }
 end
@@ -165,10 +161,7 @@ end
 function lenses.fzf(...)
   return {
     fun = function(flow, request)
-      flow.spawn({
-        cmd = "fzf",
-        args = { "-f", request.text },
-      })
+      flow.cmd.iter(flow.read_iter()):pipe("fzf", { "-f", request.text }):into(flow)
     end,
     inputs = { ... },
   }
@@ -350,11 +343,7 @@ local lens = require("microscope.api.lens")
 local function rg(cwd)
   return {
     fun = function(flow)
-      flow.spawn({
-        cmd = "rg",
-        args = { "--files" },
-        cwd = cwd,
-      })
+      flow.cmd.shell("rg", { "--files" }, cwd):into(flow)
     end,
   }
 end
@@ -362,10 +351,7 @@ end
 local function fzf(...)
   return {
     fun = function(flow, request)
-      flow.spawn({
-        cmd = "fzf",
-        args = { "-f", request.text },
-      })
+      flow.cmd.shell("fzf", { "-f", request.text }):into(flow)
     end,
     inputs = { ... },
   }
@@ -392,7 +378,8 @@ The **flow** is a bag of functions:
   > `array_string` is a string representing a list of lines separated by a newline and terminating with a newline (e.g., "hello\nworld\n").
 - `stop`: stops the flow.
 - `stopped`: returns true if the flow is stopped (e.g., you close the finder before reaching the end of the lens function).
-- `fn`: executes a Vim function passing varargs and returns its result.
+- `cmd`: accessor for [command](#command)
+- `fn` (*deprecated*): executes a Vim function passing varargs and returns its result.
 
   > This is required because one cannot execute Vim functions like `vim.api.nvim_buf_get_name` inside coroutines.
 
@@ -405,7 +392,7 @@ The **flow** is a bag of functions:
   end)
   ```
 
-- `await`: executes a function passing varargs and awaits its callback resolution.
+- `await` (*deprecated*): executes a function passing varargs and awaits its callback resolution.
 
   > This is required because one cannot execute Vim functions like `vim.api.nvim_buf_get_name` inside coroutines.
 
@@ -417,7 +404,7 @@ The **flow** is a bag of functions:
   end)
   ```
 
-- `command`: executes a shell command and returns a list of lines.
+- `command` (*deprecated*): executes a shell command and returns a list of lines.
 
   ```lua
   local hello_world = flow.command({
@@ -427,7 +414,7 @@ The **flow** is a bag of functions:
   })
   ```
 
-- `spawn`: executes a shell command and writes its output into the flow.
+- `spawn` (*deprecated*): executes a shell command and writes its output into the flow.
 
   ```lua
   flow.spawn({
@@ -448,6 +435,106 @@ The **request** is an object containing:
 ##### Context
 
 The **context** is a table that is shared across multiple requests. It can be used to cache results or to perform logic based on the previous request.
+
+#### Command
+
+The `microscope.api.command` module provides a utility for running commands inside flows.
+
+#### Instantiation
+
+It can be lazy-instantiated with different constructors:
+
+- `shell`: runs a shell command. Args and cwd are optional.
+
+  ```lua
+  local mycmd = cmd.shell("echo", { "-n", "hello\nworld" }, cwd)
+  ```
+
+- `iter`: consumes an iterator function.
+
+  ```lua
+  local elements = { "hello\n", "world\n" }
+  local iterator = function()
+    return table.remove(elements, 1)
+  end
+
+  local mycmd = cmd.iter(iterator)
+  ```
+
+- `const`: stores a constant.
+
+  ```lua
+  local mycmd = cmd.const("hello\nworld\n")
+  -- array version
+  local mycmd = cmd.const({ "hello", "world" })
+  ```
+
+- `fn`: executes a Vim function passing varargs.
+
+  > This is required because one cannot execute Vim functions like `vim.api.nvim_buf_get_name` inside coroutines.
+
+  ```lua
+  -- Synthetic way
+  local mycmd = cmd.fn(vim.api.nvim_buf_get_name, request.buf)
+  -- Verbose way
+  local mycmd = cmd.fn(function()
+     return vim.api.nvim_buf_get_name(request.buf)
+  end)
+  ```
+
+- `await`: executes a function passing varargs, awaiting for the callback resolution.
+
+  > This is required because one cannot execute Vim functions like `vim.api.nvim_buf_get_name` inside coroutines.
+
+  ```lua
+  local mycmd = cmd.await(function(resolve, ...)
+    an_async_function(function(data)
+      resolve(data)
+    end)
+  end)
+  ```
+
+#### Chaining
+
+Once instantiated, it can be chained with other commands:
+
+- `pipe`: pipe to another shell command.
+
+  ```lua
+  local mycmd = cmd
+    .shell("echo", { "-n", "hello\nworld" }, cwd)
+    :pipe("grep", { "hello" })
+  ```
+
+- `filter`: filters using a lua function. The input is a string.
+
+  ```lua
+  local mycmd = cmd
+    .shell("echo", { "-n", "hello\nworld" }, cwd)
+    :filter(function(lines)
+      return string.gsub(data, "hello", "hallo")
+    end)
+  ```
+
+#### Consuming
+
+To consume the command, you can run:
+
+- `collect`: collect the output into an `array_string`.
+
+  ```lua
+  local my_echo_result = cmd
+    .shell("echo", { "-n", "hello\nworld" }, cwd)
+    :collect()
+  ```
+
+- `into`: push results into the flow.
+
+  ```lua
+  cmd
+    .shell("echo", { "-n", "hello\nworld" }, cwd)
+    :into(flow)
+  ```
 
 ### Scope
 
@@ -624,7 +711,7 @@ local files = require("microscope-files")
 local function ls()
   return {
     fun = function(flow)
-      flow.command({ cmd = "ls" })
+      flow.cmd.shell("ls")
     end,
   }
 end
