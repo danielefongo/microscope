@@ -20,6 +20,8 @@ local function consume_command(iter, time)
 end
 
 describe("new_command", function()
+  helpers.setup()
+
   it("shell", function()
     local mycmd = cmd.shell("echo", "hello\nworld")
 
@@ -88,5 +90,14 @@ describe("new_command", function()
       local output = consume_command(mycmd:get_iter())
       assert.are.same(output, "hello\n")
     end)
+  end)
+
+  it("array", function()
+    local mycmd = cmd.fn(function(x)
+      return x
+    end, { "hello" })
+
+    local output = consume_command(mycmd:get_iter())
+    assert.are.same(output, "hello\n")
   end)
 end)
