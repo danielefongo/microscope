@@ -130,14 +130,14 @@ local function command_new(opts, instance)
 
   self.command = opts.cmd
   self.args = opts.args or {}
+  self.cwd = opts.cwd
   self.iterator = opts.iterator
 
   return self
 end
 
-function command:pipe(cmd, ...)
-  local args = { ... }
-  return command_new({ cmd = cmd, args = args }, self)
+function command:pipe(cmd, args, cwd)
+  return command_new({ cmd = cmd, args = args, cwd = cwd }, self)
 end
 
 function command:filter(iterator)
@@ -192,8 +192,8 @@ function command.await(fun, ...)
   return command_new({ iterator = iterator })
 end
 
-function command.shell(cmd, ...)
-  return command.pipe(nil, cmd, ...)
+function command.shell(cmd, args)
+  return command.pipe(nil, cmd, args)
 end
 
 return command

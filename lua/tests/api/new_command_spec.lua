@@ -23,7 +23,7 @@ describe("new_command", function()
   helpers.setup()
 
   it("shell", function()
-    local mycmd = cmd.shell("echo", "hello\nworld")
+    local mycmd = cmd.shell("echo", { "hello\nworld" })
 
     local output = consume_command(mycmd:get_iter())
     assert.are.same(output, "hello\nworld\n")
@@ -71,7 +71,7 @@ describe("new_command", function()
       return string.gsub(data, "hello", "hallo")
     end
 
-    local mycmd = cmd.shell("echo", "hello"):filter(filter)
+    local mycmd = cmd.shell("echo", { "hello" }):filter(filter)
 
     local output = consume_command(mycmd:get_iter())
     assert.are.same(output, "hallo\n")
@@ -79,7 +79,7 @@ describe("new_command", function()
 
   describe("pipe", function()
     it("from shell", function()
-      local mycmd = cmd.shell("echo", "hello\nworld"):pipe("grep", "he")
+      local mycmd = cmd.shell("echo", { "hello\nworld" }):pipe("grep", { "he" })
 
       local output = consume_command(mycmd:get_iter())
       assert.are.same(output, "hello\n")
@@ -91,7 +91,7 @@ describe("new_command", function()
         return table.remove(elements, 1)
       end
 
-      local mycmd = cmd.iter(iterator):pipe("grep", "he")
+      local mycmd = cmd.iter(iterator):pipe("grep", { "he" })
 
       local output = consume_command(mycmd:get_iter())
       assert.are.same(output, "hello\n")
@@ -103,7 +103,7 @@ describe("new_command", function()
         return table.remove(elements, 1)
       end
 
-      local mycmd = cmd.iter(iterator):pipe("grep", "he"):pipe("head", "--lines", 1)
+      local mycmd = cmd.iter(iterator):pipe("grep", { "he" }):pipe("head", { "--lines", 1 })
 
       local output = consume_command(mycmd:get_iter())
       assert.are.same(output, "hello\n")
