@@ -2,6 +2,7 @@ local helpers = require("tests.helpers")
 local user = require("tests.user")
 
 local lenses = require("microscope.builtin.lenses")
+local default_spinner = require("microscope.ui.input").default_spinner
 
 describe("microscope", function()
   helpers.setup()
@@ -24,6 +25,7 @@ describe("microscope", function()
       prompt = "> ",
       size = { height = 10, width = 10 },
       bindings = {},
+      spinner = default_spinner,
     })
   end)
 
@@ -34,6 +36,18 @@ describe("microscope", function()
       prompt = "~> ",
       size = { height = 10, width = 10 },
       bindings = {},
+      spinner = default_spinner,
+    })
+  end)
+
+  it("basic setup with spinner override", function()
+    microscope.setup({ size = { height = 10, width = 10 }, spinner = { foo = true } })
+
+    assert.are.same(microscope.opts, {
+      prompt = "> ",
+      size = { height = 10, width = 10 },
+      bindings = {},
+      spinner = { foo = true },
     })
   end)
 
@@ -53,6 +67,7 @@ describe("microscope", function()
       bindings = {},
       lens = my_lens,
       parsers = {},
+      spinner = default_spinner,
     })
   end)
 
@@ -79,6 +94,7 @@ describe("microscope", function()
       bindings = {},
       lens = my_lens,
       parsers = { my_parser },
+      spinner = default_spinner,
     })
   end)
 

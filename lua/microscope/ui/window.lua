@@ -103,6 +103,23 @@ function window:show(layout, focus)
   end
 end
 
+function window:set_title(title, pos)
+  if self.win then
+    self.layout.title = title
+    self.layout.title_pos = pos
+    vim.api.nvim_win_set_config(self.win, self.layout)
+  end
+end
+
+function window:get_title()
+  if self.win then
+    return {
+      title = self.layout.title,
+      title_pos = self.layout.title_pos,
+    }
+  end
+end
+
 function window:hide()
   if self.win then
     vim.api.nvim_win_hide(self.win)

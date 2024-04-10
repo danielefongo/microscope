@@ -28,7 +28,8 @@ end
 function microscope.setup(opts)
   microscope.opts.size = opts.size
   microscope.opts.bindings = opts.bindings or {}
-  microscope.opts.prompt = opts.prompt or "> "
+  microscope.opts.prompt = opts.prompt or require("microscope.ui.input").default_prompt
+  microscope.opts.spinner = opts.spinner or require("microscope.ui.input").default_spinner
   microscope.opts.layout = opts.layout
 
   return microscope

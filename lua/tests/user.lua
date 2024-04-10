@@ -1,5 +1,6 @@
 local helpers = require("tests.helpers")
 local finder = require("microscope.finder")
+local input = require("microscope.ui.input")
 
 local user = {}
 user.__index = user
@@ -74,7 +75,8 @@ function user.open_finder(finder_spec)
   local self = setmetatable({}, user)
 
   local default_opts = {
-    prompt = "> ",
+    prompt = input.default_prompt,
+    spinner = input.default_spinner,
     size = { width = 50, height = 50 },
     bindings = {},
   }

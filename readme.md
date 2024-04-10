@@ -79,6 +79,7 @@ local opts = {
   size = custom_size, -- optional (overrides/extends the microscope size option)
   bindings = custom_bindings, -- optional (overrides/extends the microscope bindings option)
   prompt = prompt, -- optional (overrides/extends the microscope prompt option)
+  spinner = spinner, -- optional (overrides/extends the microscope spinner option)
 }
 ```
 
@@ -288,6 +289,25 @@ end
 ### Prompt
 
 The `prompt` is a string prefixed to the search query, defaults to "> ".
+
+### Spinner
+
+The `spinner` table represents the specification for the loading spinner, which replaces the input title while retrieving the results. Its structure is as follows:
+
+```lua
+local spinner = {
+  interval = 500,
+  delay = 300,
+  symbols = {
+    ".   ",
+    " .  ",
+    "  . ",
+    "   .",
+    "  . ",
+    " .  ",
+  },
+}
+```
 
 ## Builtins
 

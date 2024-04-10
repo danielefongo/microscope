@@ -20,15 +20,35 @@ describe("input", function()
 
   describe("event", function()
     describe("new_opts", function()
-      it("stores new prompt", function()
-        assert.are.same(input_window.prompt, "% ")
+      it("stores new opts", function()
+        assert.are.same(input_window.prompt, input.default_prompt)
 
         my_events:fire(events.event.new_opts, {
           prompt = "newprompt >",
+          spinner = { foo = true },
         })
         helpers.wait(10)
 
         assert.are.same(input_window.prompt, "newprompt >")
+        assert.are.same(input_window.spinner, { foo = true })
+      end)
+    end)
+
+    describe("new_request + results_retrieved", function()
+      it("stores new opts", function()
+        my_events:fire(events.event.new_request)
+        helpers.wait(input.default_spinner.delay + 10)
+
+        assert.are.same(input_window:get_title(), { title = input.default_spinner.symbols[1] })
+
+        helpers.wait(input.default_spinner.interval)
+
+        assert.are.same(input_window:get_title(), { title = input.default_spinner.symbols[2] })
+
+        my_events:fire(events.event.results_retrieved, {})
+        helpers.wait(10)
+
+        assert.are.same(input_window:get_title(), { title = nil })
       end)
     end)
   end)
