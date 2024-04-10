@@ -39,6 +39,14 @@ function command:spawn(last)
     }, function()
       self:close()
     end)
+
+    if last then
+      uv.read_start(self.output_stream, function(_, data)
+        if data then
+          self.output = self.output .. data
+        end
+      end)
+    end
   else
     local previous_output = function() end
     if self.input then
@@ -69,18 +77,6 @@ function command:spawn(last)
   end
 end
 
-function command:read_start()
-  if self.input then
-    self.input:read_start()
-  end
-
-  uv.read_start(self.output_stream, function(_, data)
-    if data then
-      self.output = self.output .. data
-    end
-  end)
-end
-
 function command:get_consumer()
   return function()
     if self.handle and self.handle:is_active() and not self.output:find("\n") then
@@ -97,7 +93,6 @@ end
 
 function command:get_iter()
   self:spawn(true)
-  self:read_start()
 
   return self:get_consumer()
 end
