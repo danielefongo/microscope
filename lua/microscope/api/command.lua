@@ -30,7 +30,7 @@ function command:close()
   end
 end
 
-function command:spawn()
+function command:spawn(last)
   if self.command then
     self.handle = uv.spawn(self.command, {
       args = self.args,
@@ -54,7 +54,9 @@ function command:spawn()
           out = table.concat(out, "\n") .. "\n"
         end
 
-        self.output = self.output .. out
+        if last then
+          self.output = self.output .. out
+        end
         self.output_stream:write(out)
       else
         self:close()
@@ -63,7 +65,7 @@ function command:spawn()
   end
 
   if self.input then
-    self.input:spawn()
+    self.input:spawn(false)
   end
 end
 
@@ -94,7 +96,7 @@ function command:get_consumer()
 end
 
 function command:get_iter()
-  self:spawn()
+  self:spawn(true)
   self:read_start()
 
   return self:get_consumer()
