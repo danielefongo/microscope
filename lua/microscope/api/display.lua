@@ -23,7 +23,7 @@ local function generate_rectangle(width, height)
   }
 end
 
-local function relative_rectangle(rectangle, opts)
+local function relative_rectangle(rectangle, spec, opts)
   return {
     relative = "editor",
     width = opts.width or rectangle.width,
@@ -31,7 +31,9 @@ local function relative_rectangle(rectangle, opts)
     col = rectangle.col + (opts.x or 0),
     row = rectangle.row + (opts.y or 0),
     style = "minimal",
-    border = "rounded",
+    border = spec.border or "rounded",
+    title = spec.title,
+    title_pos = spec.title_pos,
   }
 end
 
@@ -67,7 +69,8 @@ local function build_box(rectangle, layout, spec, axis, axis_dimension)
 
   for _, element in pairs(spec.box.elements) do
     local element_size = calculate_size(element.size, rectangle[axis_dimension], fill_size)
-    local element_rectangle = relative_rectangle(rectangle, { [axis] = previous_size, [axis_dimension] = element_size })
+    local element_rectangle =
+      relative_rectangle(rectangle, element, { [axis] = previous_size, [axis_dimension] = element_size })
 
     element:gen(element_rectangle, layout)
 
@@ -105,6 +108,27 @@ function display:build(finder_size)
   end
 
   return layout
+end
+
+function display:with_title(title, pos)
+  if self.type == "box" then
+    error.generic("microscope: cannot set a title on a box")
+    return self
+  end
+
+  self.title = title
+  self.title_pos = pos
+  return self
+end
+
+function display:with_border(border)
+  if self.type == "box" then
+    error.generic("microscope: cannot set a title on a box")
+    return self
+  end
+
+  self.border = border
+  return self
 end
 
 function display.vertical(elements, size)
