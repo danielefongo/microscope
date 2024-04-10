@@ -54,7 +54,7 @@ describe("input", function()
         my_events:fire(events.event.results_retrieved, {})
         helpers.wait(10)
 
-        assert.are.same(input_window:get_title(), { title = nil })
+        assert.are.same(input_window:get_title(), { title = "" })
       end)
     end)
   end)

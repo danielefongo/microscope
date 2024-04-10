@@ -65,7 +65,7 @@ local function on_new_opts(self, opts)
 end
 
 function input:show(layout, focus)
-  self.current_title = layout.title
+  self.current_title = layout.title or ""
   self.current_title_pos = layout.title_pos
   window.show(self, layout, focus)
 
