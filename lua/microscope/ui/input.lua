@@ -6,6 +6,7 @@ input.default_prompt = "> "
 input.default_spinner = {
   interval = 80,
   delay = 300,
+  position = "center",
   symbols = {
     "[    ]",
     "[=   ]",
@@ -39,7 +40,7 @@ local function on_new_request(self)
     end
 
     vim.schedule(function()
-      window.set_title(self, symbol, self.current_title_pos)
+      window.set_title(self, symbol, self.spinner.position)
     end)
   end)
 end

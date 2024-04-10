@@ -39,11 +39,17 @@ describe("input", function()
         my_events:fire(events.event.new_request)
         helpers.wait(input.default_spinner.delay + 10)
 
-        assert.are.same(input_window:get_title(), { title = input.default_spinner.symbols[1] })
+        assert.are.same(input_window:get_title(), {
+          title = input.default_spinner.symbols[1],
+          title_pos = input.default_spinner.position,
+        })
 
         helpers.wait(input.default_spinner.interval)
 
-        assert.are.same(input_window:get_title(), { title = input.default_spinner.symbols[2] })
+        assert.are.same(input_window:get_title(), {
+          title = input.default_spinner.symbols[2],
+          title_pos = input.default_spinner.position,
+        })
 
         my_events:fire(events.event.results_retrieved, {})
         helpers.wait(10)

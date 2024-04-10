@@ -298,6 +298,7 @@ The `spinner` table represents the specification for the loading spinner, which 
 local spinner = {
   interval = 500,
   delay = 300,
+  position = "center",
   symbols = {
     ".   ",
     " .  ",
