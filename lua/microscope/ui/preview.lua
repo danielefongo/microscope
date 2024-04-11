@@ -37,6 +37,9 @@ function preview:show(layout, focus)
   self:set_win_opt("cursorline", true)
   self:set_win_opt("wrap", true)
   self:set_win_opt("scrolloff", 10000)
+  if self.data and layout then
+    self.preview_fun(self.data, self)
+  end
 end
 
 function preview:write_term(lines)
