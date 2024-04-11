@@ -519,7 +519,7 @@ It can be lazy-instantiated with different constructors:
 
 Once instantiated, it can be chained with other commands:
 
-- `pipe`: pipe to another shell command.
+- `pipe`: pipe to another shell command. Args and cwd are optional.
 
   ```lua
   local mycmd = cmd
