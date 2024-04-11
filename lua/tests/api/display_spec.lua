@@ -103,29 +103,4 @@ describe("display", function()
       end)
     end)
   end)
-
-  describe("window properties", function()
-    it("title", function()
-      local size = { width = 10, height = 10 }
-
-      local expected_layout = helpers.layout(10, 10, 46, 46)
-      expected_layout.title = "search"
-      expected_layout.title_pos = "center"
-
-      local layout = display.input():with_title("search", "center"):build(size)
-
-      assert.are.same(layout.input, expected_layout)
-    end)
-
-    it("border", function()
-      local size = { width = 10, height = 10 }
-
-      local expected_layout = helpers.layout(10, 10, 46, 46)
-      expected_layout.border = "single"
-
-      local layout = display.input():with_border("single"):build(size)
-
-      assert.are.same(layout.input, expected_layout)
-    end)
-  end)
 end)

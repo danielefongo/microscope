@@ -628,23 +628,6 @@ display
   :build(finder_size)
 ```
 
-#### Window overrides
-
-Title and border can be set for input, result and preview:
-
-- `with_title(title, pos)`
-- `with_border(border)`
-
-Example:
-
-```lua
-display.vertical({
-  display.input(1):with_title("search", "center"),
-  display.results():with_border("single"),
-  display.preview(),
-})
-```
-
 ### Microscope Finder
 
 The Microscope Finder instance exposes three components:

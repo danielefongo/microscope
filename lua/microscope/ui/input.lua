@@ -52,7 +52,7 @@ local function on_stop_search(self)
   self.spinner_step = 0
 
   vim.schedule(function()
-    window.set_title(self, self.current_title, self.current_title_pos)
+    window.set_title(self, "", nil)
   end)
 end
 
@@ -65,8 +65,6 @@ local function on_new_opts(self, opts)
 end
 
 function input:show(layout, focus)
-  self.current_title = layout.title or ""
-  self.current_title_pos = layout.title_pos
   window.show(self, layout, focus)
 
   if layout == nil then
