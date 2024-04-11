@@ -199,6 +199,25 @@ describe("window", function()
     end)
   end)
 
+  it("set_title", function()
+    custom_window:show(helpers.dummy_layout())
+
+    custom_window:set_title("search", "center")
+    assert.are.same(vim.api.nvim_win_get_config(custom_window:get_win()).title, {
+      { "search", "FloatTitle" },
+    })
+  end)
+
+  it("get_title", function()
+    custom_window:show(helpers.dummy_layout())
+
+    custom_window:set_title("search", "center")
+    assert.are.same(custom_window:get_title(), {
+      title = "search",
+      title_pos = "center",
+    })
+  end)
+
   describe("show", function()
     it("displays new window with layout", function()
       assert.are.same(custom_window:get_win(), nil)

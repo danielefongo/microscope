@@ -40,7 +40,7 @@ local function on_new_request(self)
     end
 
     vim.schedule(function()
-      window.set_title(self, symbol, self.spinner.position)
+      self:set_title(symbol, self.spinner.position)
     end)
   end)
 end
@@ -52,7 +52,7 @@ local function on_stop_search(self)
   self.spinner_step = 0
 
   vim.schedule(function()
-    window.set_title(self, "", nil)
+    self:set_title("", nil)
   end)
 end
 

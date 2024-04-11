@@ -84,14 +84,17 @@ end
 
 function window:show(layout, focus)
   self.layout = layout or self.layout
+  self.focus = focus
   if not layout then
     return self:hide()
   end
 
+  layout = vim.tbl_deep_extend("force", layout, self.title or {})
+
   if not self.win then
-    self.win = vim.api.nvim_open_win(self.buf, false, self.layout)
+    self.win = vim.api.nvim_open_win(self.buf, false, layout)
   else
-    vim.api.nvim_win_set_config(self.win, self.layout)
+    vim.api.nvim_win_set_config(self.win, layout)
     vim.api.nvim_win_set_buf(self.win, self.buf)
   end
 
@@ -104,20 +107,17 @@ function window:show(layout, focus)
 end
 
 function window:set_title(title, pos)
+  self.title = {
+    title = title,
+    title_pos = pos,
+  }
   if self.win then
-    self.layout.title = title
-    self.layout.title_pos = pos
-    vim.api.nvim_win_set_config(self.win, self.layout)
+    self:show(self.layout, self.focus)
   end
 end
 
 function window:get_title()
-  if self.win then
-    return {
-      title = self.layout.title,
-      title_pos = self.layout.title_pos,
-    }
-  end
+  return self.title
 end
 
 function window:hide()
