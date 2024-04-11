@@ -194,8 +194,8 @@ function command.await(fun, ...)
   return command_new({ iterator = iterator })
 end
 
-function command.shell(cmd, args)
-  return command.pipe(nil, cmd, args)
+function command.shell(cmd, args, cwd)
+  return command.pipe(nil, cmd, args, cwd)
 end
 
 return command
