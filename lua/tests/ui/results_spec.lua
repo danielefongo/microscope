@@ -38,6 +38,13 @@ describe("results", function()
         assert.are.same(results_window:read(), { "result1", "result2" })
       end)
 
+      it("updates title", function()
+        my_events:fire(events.event.results_retrieved, { "result1", "result2" })
+        helpers.wait(10)
+
+        assert.are.same(results_window:get_title(), { title = "1 / 2", title_pos = "center" })
+      end)
+
       it("overwrites buffer on new results", function()
         my_events:fire(events.event.results_retrieved, { "result1", "result2" })
         helpers.wait(10)
@@ -68,6 +75,13 @@ describe("results", function()
 
         assert.are.same(results_window:read(), { "" })
       end)
+
+      it("updates title", function()
+        my_events:fire(events.event.empty_results_retrieved)
+        helpers.wait(10)
+
+        assert.are.same(results_window:get_title(), { title = "", title_pos = "center" })
+      end)
     end)
 
     describe("new_request", function()
@@ -81,6 +95,14 @@ describe("results", function()
         assert.are.same(results_window:read(), { "result1", "result2" })
         assert.are.same(results_window:raw_results(), {})
         assert.are.same(results_window:selected(), {})
+      end)
+
+      it("updates title", function()
+        results_window:set_title("any", "center")
+        my_events:fire(events.event.new_request)
+        helpers.wait(10)
+
+        assert.are.same(results_window:get_title(), { title = "", title_pos = "center" })
       end)
     end)
 
@@ -114,6 +136,18 @@ describe("results", function()
         helpers.wait(20)
 
         assert.are.same(results_window:get_cursor(), { 2, 0 })
+      end)
+
+      it("updates title", function()
+        my_events:fire(events.event.results_retrieved, { "result1", "result2" })
+        helpers.wait(10)
+
+        results_window:show(helpers.dummy_layout(), false)
+        vim.api.nvim_win_set_cursor(results_window.win, { 2, 0 })
+        my_events:fire_native(events.event.cursor_moved)
+        helpers.wait(20)
+
+        assert.are.same(results_window:get_title(), { title = "2 / 2", title_pos = "center" })
       end)
     end)
   end)

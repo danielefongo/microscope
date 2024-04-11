@@ -24,11 +24,12 @@ local function get_focused(self)
 
   local cursor = self:get_cursor()[1]
   if self.data and self.data[cursor] then
-    return self.data[cursor]
+    return cursor, self.data[cursor]
   end
 end
 
 local function on_empty_results_retrieved(self)
+  self:set_title("", "center")
   self:clear()
 end
 
@@ -37,6 +38,8 @@ local function on_new_request(self, request)
   self.selected_data = {}
   self.results = {}
   self.request = request
+
+  self:set_title("", "center")
 end
 
 local function on_results_retrieved(self, list)
@@ -109,7 +112,7 @@ end
 
 function results:selected()
   local selected = vim.tbl_values(self.selected_data)
-  local focused = get_focused(self)
+  local _, focused = get_focused(self)
 
   if #selected == 0 and focused then
     return { focused }
@@ -141,8 +144,9 @@ end
 function results:set_cursor(cursor)
   window.set_cursor(self, cursor)
   self:parse()
-  local focused = get_focused(self)
+  local idx, focused = get_focused(self)
   if focused then
+    self:set_title(idx .. " / " .. #self.results, "center")
     events:fire(events.event.result_focused, focused, 100)
   end
 end
