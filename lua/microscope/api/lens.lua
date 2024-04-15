@@ -33,6 +33,11 @@ function lens:input_read_iter(to_array)
 end
 
 function lens:read()
+  if self.stopped then
+    while self:input_read(false) do
+    end
+  end
+
   if not is_alive(self.coroutine) then
     self.coroutine = nil
     return
