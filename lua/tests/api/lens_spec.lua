@@ -127,62 +127,7 @@ describe("lens", function()
       end)
     end)
 
-    it("fn", function()
-      local my_lens = lens.new({
-        fun = function(flow)
-          local data = flow.fn(function(x)
-            return x
-          end, "hello\n")
-          flow.write(data)
-        end,
-      })
-
-      my_lens:feed("")
-
-      assert.are.same(helpers.consume_lens(my_lens), "hello\n")
-    end)
-
-    it("await", function()
-      local my_lens = lens.new({
-        fun = function(flow)
-          local data = flow.await(function(callback, x)
-            callback(x)
-          end, "hello\n")
-          flow.write(data)
-        end,
-      })
-
-      my_lens:feed("")
-
-      assert.are.same(helpers.consume_lens(my_lens), "hello\n")
-    end)
-
-    it("spawn", function()
-      local my_lens = lens.new({
-        fun = function(flow)
-          flow.spawn({ cmd = "echo", args = { "hello\nworld" } })
-        end,
-      })
-
-      my_lens:feed("")
-
-      assert.are.same(helpers.consume_lens(my_lens, 100), "hello\nworld\n")
-    end)
-
-    it("command", function()
-      local my_lens = lens.new({
-        fun = function(flow)
-          local out = flow.command({ cmd = "echo", args = { "hello\nworld" } })
-          flow.write(out)
-        end,
-      })
-
-      my_lens:feed("")
-
-      assert.are.same(helpers.consume_lens(my_lens, 100), "hello\nworld\n")
-    end)
-
-    describe("new command", function()
+    describe("command", function()
       it("with into", function()
         local my_lens = lens.new({
           fun = function(flow)
