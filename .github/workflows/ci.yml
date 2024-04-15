@@ -9,40 +9,41 @@ jobs:
 
     steps:
       - name: checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+
+      - name: update
+        run: |
+          sudo apt-get update
 
       - name: install fzf
         run: |
-          sudo apt-get update -y
-          sudo apt install fzf
-
-      - name: install lua
-        uses: leafo/gh-actions-lua@v10
-
-      - name: install luarocks
-        uses: leafo/gh-actions-luarocks@v4
+          sudo apt-get install -y fzf
 
       - name: install plenary.nvim
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: nvim-lua/plenary.nvim
           path: plenary.nvim
 
       - name: install luacov
         run: |
-          luarocks install luacov
-          luarocks install luacov-console
+          sudo apt-get install -y luarocks
+          sudo luarocks install luacov
+          sudo luarocks install luacov-console
 
-      - name: install neovim
+      - name: use neovim
         uses: rhysd/action-setup-vim@v1
         with:
           neovim: true
+          version: v0.9.0
 
       - name: run tests
-        run: NOCLEAN=1 make testcov
+        run: |
+          nvim --version
+          NOCLEAN=1 make testcov
 
       - name: upload coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           files: luacov.report.out, luacov.stats.out
           token: ${{ secrets.CODECOV_TOKEN }}
