@@ -69,13 +69,13 @@ function command:spawn(generate_output)
   end
 end
 
-function command:read_start()
+function command:read_start(generate_output)
   if self.input then
-    self.input:read_start()
+    self.input:read_start(self.iterator ~= nil)
   end
 
   uv.read_start(self.output_stream, function(_, data)
-    if data then
+    if data and generate_output then
       self.output = self.output .. data
     end
   end)
@@ -97,7 +97,7 @@ end
 
 function command:get_iter()
   self:spawn(true)
-  self:read_start()
+  self:read_start(true)
 
   return self:get_consumer()
 end
