@@ -5,10 +5,6 @@
 
 A micro and highly composable finder for Neovim with no dependencies.
 
-## Disclaimer
-
-Please note that this project is still under development, so the API may change.
-
 ## Base setup
 
 On [lazy.nvim](https://github.com/folke/lazy.nvim)
