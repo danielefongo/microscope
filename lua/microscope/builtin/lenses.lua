@@ -37,13 +37,16 @@ function lenses.cache(...)
         return flow.write(context.cache)
       end
 
-      local full_output = ""
-      for output in flow.read_iter() do
-        full_output = full_output .. output
-        flow.write(output)
-      end
+      local cache = ""
+      flow.cmd
+        .iter(flow.read_iter())
+        :filter(function(lines)
+          cache = cache .. lines
+          return lines
+        end)
+        :into(flow)
 
-      context.cache = full_output
+      context.cache = cache
     end,
     inputs = { ... },
   }
