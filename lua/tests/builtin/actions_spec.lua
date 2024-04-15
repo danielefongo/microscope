@@ -255,7 +255,7 @@ describe("actions", function()
     local new_lens = function(...)
       return {
         fun = function(flow, request)
-          flow.spawn({ cmd = "grep", args = { request.text } })
+          flow.cmd.iter(flow.read_iter()):pipe("grep", { request.text }):into(flow)
         end,
         inputs = { ... },
       }
