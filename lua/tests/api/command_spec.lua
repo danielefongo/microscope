@@ -66,15 +66,33 @@ describe("command", function()
     assert.are.same(output, "hello\n")
   end)
 
-  it("filter", function()
-    local filter = function(data)
-      return string.gsub(data, "hello", "hallo")
-    end
+  describe("filter", function()
+    it("from shell", function()
+      local filter = function(data)
+        return string.gsub(data, "hello", "hallo")
+      end
 
-    local mycmd = cmd.shell("echo", { "hello" }):filter(filter)
+      local mycmd = cmd.shell("echo", { "hello" }):filter(filter)
 
-    local output = consume_command(mycmd:get_iter())
-    assert.are.same(output, "hallo\n")
+      local output = consume_command(mycmd:get_iter())
+      assert.are.same(output, "hallo\n")
+    end)
+
+    it("from iterator", function()
+      local elements = { "hello\n" }
+      local iterator = function()
+        return table.remove(elements, 1)
+      end
+
+      local filter = function(data)
+        return string.gsub(data, "hello", "hallo")
+      end
+
+      local mycmd = cmd.iter(iterator):filter(filter)
+
+      local output = consume_command(mycmd:get_iter())
+      assert.are.same(output, "hallo\n")
+    end)
   end)
 
   describe("pipe", function()
