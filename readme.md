@@ -379,7 +379,11 @@ local my_lens = lens.new(fzf(rg()))
 
 #### Lens function
 
-The lens function has two parameters: the [flow](#flow), the [request](#request), and the [context](#context).
+The lens function has these parameters:
+
+- [flow](#flow)
+- [request](#request)
+- [context](#context)
 
 ##### Flow
 
@@ -399,7 +403,7 @@ The **flow** is a bag of functions:
 
 ##### Request
 
-The **request** is an object containing:
+The **request** is what the user provides using the `feed` function. In the context of a finder, it is represented by a table containing the following fields:
 
 - `text`: the searched text
 - `buf`: the original bufnr
@@ -413,7 +417,7 @@ The **context** is a table that is shared across multiple requests. It can be us
 
 The `microscope.api.command` module provides a utility for running commands inside flows.
 
-#### Instantiation
+##### Instantiation
 
 It can be lazy-instantiated with different constructors:
 
@@ -467,7 +471,7 @@ It can be lazy-instantiated with different constructors:
   end)
   ```
 
-#### Chaining
+##### Chaining
 
 Once instantiated, it can be chained with other commands:
 
@@ -489,7 +493,7 @@ Once instantiated, it can be chained with other commands:
     end)
   ```
 
-#### Consuming
+##### Consuming
 
 To consume the command, you can run:
 
@@ -524,10 +528,7 @@ local scope = require("microscope.api.scope")
 local cat_scope = scope.new({
   lens = {
     fun = function(flow, any_request)
-      flow.spawn({
-        cmd = "cat",
-        args = { any_request.text },
-      })
+      flow.cmd.shell("cat", { any_request.text })
     end,
     callback = function(lines, any_request)
       do_something(lines)
