@@ -46,7 +46,9 @@ function lenses.cache(...)
         end)
         :into(flow)
 
-      context.cache = cache
+      if not flow.stopped() then
+        context.cache = cache
+      end
     end,
     inputs = { ... },
   }
