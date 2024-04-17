@@ -10,13 +10,19 @@ local function split_last_newline(text)
   return text:sub(1, -idx), text:sub(1 - idx)
 end
 
-function command:close()
+function command:close(flushed)
+  self.stopped = true
   if self.input then
-    self.input:close()
+    self.input:close(flushed)
   end
 
   self.output_stream:read_stop()
   self.output_stream:shutdown()
+  if flushed then
+    pcall(function()
+      self.output_stream:close()
+    end)
+  end
 
   if not self.handle or not self.handle:is_active() then
     return
@@ -109,6 +115,7 @@ function command:into(flow)
     end
     flow.write(shell_out)
   end
+  self:close(true)
 end
 
 function command:collect()
@@ -117,6 +124,8 @@ function command:collect()
     outputs = outputs .. shell_out
     coroutine.yield("")
   end
+  self:close(true)
+
   return outputs
 end
 

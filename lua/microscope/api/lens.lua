@@ -34,8 +34,7 @@ end
 
 function lens:read()
   if self.stopped then
-    while self:input_read(false) do
-    end
+    self:input_read(false)
   end
 
   if not is_alive(self.coroutine) then
