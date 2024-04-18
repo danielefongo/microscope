@@ -1,4 +1,5 @@
 local finder = require("microscope.finder")
+local instance = require("microscope.instance")
 local microscope = {}
 microscope.opts = {}
 microscope.finders = {}
@@ -17,6 +18,12 @@ end
 function microscope:override(opts)
   self.opts = vim.tbl_deep_extend("force", self.opts, opts)
   return self
+end
+
+function microscope.resume()
+  if instance.current then
+    instance.current:resume()
+  end
 end
 
 function microscope.finder(opts)

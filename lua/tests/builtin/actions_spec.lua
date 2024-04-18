@@ -169,6 +169,27 @@ describe("actions", function()
     my_user:does_not_see_window("results")
   end)
 
+  it("hide + resume", function()
+    my_user = user.open_finder({
+      lens = lenses.write({}),
+      bindings = { ["<esc>"] = actions.hide },
+    })
+
+    my_user:sees_window("input")
+    my_user:sees_window("results")
+
+    my_user:focus("input")
+    my_user:keystroke("<esc>", "i")
+
+    my_user:does_not_see_window("input")
+    my_user:does_not_see_window("results")
+
+    my_user:resumes_finder()
+
+    my_user:sees_window("input")
+    my_user:sees_window("results")
+  end)
+
   it("alter", function()
     my_user = user.open_finder({
       lens = lenses.write({}),

@@ -37,15 +37,19 @@ local function load_opts(finder_args_raw)
   return opts
 end
 
+local microscope = require("microscope")
+
 vim.api.nvim_create_user_command("Microscope", function(opts)
   local finder_name, finder_args_raw = opts.args:match("(%S+)%s*(.*)")
 
-  require("microscope").finders[finder_name](load_opts(finder_args_raw))
+  microscope.finders[finder_name](load_opts(finder_args_raw))
 end, {
   nargs = "?",
   complete = function(_, line)
     return vim.tbl_filter(function(val)
       return vim.startswith(val, line:gsub("Microscope ", ""))
-    end, vim.tbl_keys(require("microscope").finders))
+    end, vim.tbl_keys(microscope.finders))
   end,
 })
+
+vim.api.nvim_create_user_command("MicroscopeResume", microscope.resume, { nargs = 0 })

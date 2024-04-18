@@ -42,6 +42,8 @@ On [lazy.nvim](https://github.com/folke/lazy.nvim)
         ["<c-f>"] = actions.toggle_full_screen,
         ["<a-s>"] = actions.refine,
       },
+      spinner = { ... } -- optional
+      args = { ... } -- optional
     })
 
     microscope.register(files.finders)
@@ -116,6 +118,20 @@ vim.keymap.set("n", "<leader>of", ":Microscope name override_opts<cr>")
 ```
 
 Note: `override_opts` is optional and may be a partial of [finder opts](#finder-opts) (see next section). These are evaluated at invocation time, so they are the last to be evaluated.
+
+#### Resuming
+
+After using the `hide` builtin [action](#actions), it is possible to resume the finder. There are different ways to achieve this:
+
+```lua
+-- First way
+vim.keymap.set("n", "<leader>h", microscope.resume)
+
+-- Second way
+vim.keymap.set("n", "<leader>h", ":Microscope resume")
+```
+
+Note: If the finder is resumed from a different buffer or window, the data corresponding to the [request](#request) will be replaced, and no new search will be triggered until the input is changed. In such cases, the updated request will be used for the subsequent search.
 
 #### Opts override
 
@@ -285,6 +301,7 @@ local bindings = {
   ["<esc>"] = actions.close,
   ["<tab>"] = actions.select,
   ["<c-f>"] = actions.toggle_full_screen,
+  ["<c-h>"] = actions.hide,
 }
 ```
 
@@ -351,7 +368,8 @@ Microscope exposes a list of actions in `microscope.builtin.actions`:
 - `alter(override_opts)`: accepts a table of options to override in the finder's instance
 - `refine`: starts a new search on retrieved results using a fuzzy lens
 - `refine_with(lens, parser, prompt)`: starts a new search on retrieved results using a specific lens, parser and optional prompt
-- `close`: closes finder
+- `hide`: hides the finder
+- `close`: closes the finder
 
 ### Parsers
 

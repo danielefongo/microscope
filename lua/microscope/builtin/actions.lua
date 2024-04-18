@@ -46,6 +46,13 @@ function actions.close(microscope)
   microscope:close()
 end
 
+function actions.hide(microscope)
+  microscope:alter(function(opts)
+    opts.hidden = true
+    return opts
+  end)
+end
+
 function actions.alter(opts)
   return function(microscope)
     microscope:alter(function(old_opts)

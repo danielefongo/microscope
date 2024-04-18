@@ -32,6 +32,10 @@ function user:close_finder()
   helpers.wait(50)
 end
 
+function user:resumes_finder()
+  self.finder:resume()
+end
+
 -- assertions
 
 function user:does_not_see_window(window)

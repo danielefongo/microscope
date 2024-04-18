@@ -171,4 +171,67 @@ describe("microscope", function()
 
     my_user:close_finder()
   end)
+
+  it("resume a finder", function()
+    microscope.setup({ size = { height = 10, width = 10 } })
+
+    local finder = microscope.finder({
+      lens = lenses.write({}),
+      parsers = {},
+      bindings = {
+        ["<esc>"] = function(instance)
+          instance:alter(function(opts)
+            opts.hidden = true
+            return opts
+          end)
+        end,
+      },
+    })
+    local finder_instance = finder()
+
+    local my_user = user.set_finder(finder_instance)
+
+    my_user:sees_window("input")
+
+    my_user:keystroke("<esc>", "i")
+
+    my_user:does_not_see_window("input")
+
+    microscope.resume()
+
+    my_user:sees_window("input")
+
+    my_user:close_finder()
+  end)
+
+  it("resuming a dead finder", function()
+    microscope.setup({ size = { height = 10, width = 10 } })
+
+    local finder = microscope.finder({
+      lens = lenses.write({}),
+      parsers = {},
+      bindings = {
+        ["<esc>"] = function(instance)
+          instance:alter(function(opts)
+            opts.hidden = true
+            return opts
+          end)
+        end,
+      },
+    })
+    local finder_instance = finder()
+
+    local my_user = user.set_finder(finder_instance)
+
+    my_user:sees_window("input")
+
+    my_user:keystroke("<esc>", "i")
+    my_user:close_finder()
+
+    my_user:does_not_see_window("input")
+
+    microscope.resume()
+
+    my_user:does_not_see_window("input")
+  end)
 end)

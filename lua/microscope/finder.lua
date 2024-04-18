@@ -1,4 +1,5 @@
 local default_layout = require("microscope.builtin.layouts").default
+local instance = require("microscope.instance")
 local events = require("microscope.events")
 local error = require("microscope.api.error")
 local scope = require("microscope.api.scope")
@@ -8,6 +9,13 @@ local input = require("microscope.ui.input")
 
 local finder = {}
 finder.__index = finder
+
+local function resume_old_position(self)
+  local cursor = vim.api.nvim_win_get_cursor(self.old_win)
+  vim.api.nvim_set_current_win(self.old_win)
+  vim.api.nvim_set_current_buf(self.old_buf)
+  vim.api.nvim_win_set_cursor(self.old_win, { cursor[1], cursor[2] + 1 })
+end
 
 function finder:bind_action(fun)
   return function()
@@ -19,17 +27,14 @@ function finder:close()
   events:clear_module(self)
   events.clear_module(events.global, self)
 
-  local cursor = vim.api.nvim_win_get_cursor(self.old_win)
-  vim.api.nvim_set_current_win(self.old_win)
-  vim.api.nvim_set_current_buf(self.old_buf)
-  vim.api.nvim_win_set_cursor(self.old_win, { cursor[1], cursor[2] + 1 })
+  resume_old_position(self)
 
   self.input:close()
   self.results:close()
   self.preview:close()
 
   self:stop_search()
-  finder.instance = nil
+  instance.current = nil
 end
 
 function finder:close_with_err(error_data)
@@ -62,18 +67,41 @@ function finder:search(text)
 end
 
 function finder:update()
-  local layout = self.opts.layout({
-    finder_size = self.opts.size,
-    ui_size = vim.api.nvim_list_uis()[1],
-    preview = self.opts.preview ~= nil,
-    full_screen = self.opts.full_screen,
-  })
-
   events:clear(self, events.event.win_leave)
-  self.preview:show(layout.preview, layout.input == nil)
-  self.results:show(layout.results, layout.input == nil)
-  self.input:show(layout.input, true)
-  events:native(self, events.event.win_leave, finder.close)
+
+  if not self.opts.hidden then
+    local layout = self.opts.layout({
+      finder_size = self.opts.size,
+      ui_size = vim.api.nvim_list_uis()[1],
+      preview = self.opts.preview ~= nil,
+      full_screen = self.opts.full_screen,
+    })
+
+    self.preview:show(layout.preview, layout.input == nil)
+    self.results:show(layout.results, layout.input == nil)
+    self.input:show(layout.input, true)
+
+    events:native(self, events.event.win_leave, finder.close)
+  else
+    self.preview:show()
+    self.results:show()
+    self.input:show()
+
+    resume_old_position(self)
+  end
+end
+
+function finder:resume()
+  self.old_win = vim.api.nvim_get_current_win()
+  self.old_buf = vim.api.nvim_get_current_buf()
+
+  self.request.buf = self.old_buf
+  self.request.win = self.old_win
+
+  self:alter(function(opts)
+    opts.hidden = false
+    return opts
+  end)
 end
 
 function finder:alter(lambda)
@@ -90,6 +118,7 @@ function finder:set_opts(opts)
   opts.bindings = opts.bindings or {}
   opts.full_screen = opts.full_screen or false
   opts.args = opts.args or {}
+  opts.hidden = opts.hidden or false
   opts.preview = opts.preview or function(_, win)
     win:write({ "No preview function provided" })
   end
@@ -130,10 +159,11 @@ end
 function finder.new(opts)
   local self = setmetatable({}, finder)
 
-  if finder.instance then
+  if instance.current then
+    vim.api.nvim_err_write("microscope: close the hidden finder before opening a new one\n")
     return
   end
-  finder.instance = self
+  instance.current = self
 
   self.old_win = vim.api.nvim_get_current_win()
   self.old_buf = vim.api.nvim_get_current_buf()
