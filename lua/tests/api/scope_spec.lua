@@ -1,4 +1,5 @@
 local helpers = require("tests.helpers")
+local events = require("microscope.events")
 local lenses = require("microscope.builtin.lenses")
 local scope = require("microscope.api.scope")
 
@@ -151,5 +152,36 @@ describe("scope", function()
     vim.wait(150)
 
     assert.are.same(calls, 1)
+  end)
+
+  it("fails if args are invalid", function()
+    local spy = helpers.spy_event_handler(events.global, "any", events.event.error)
+
+    scope
+      .new({
+        lens = {
+          fun = function() end,
+          args = {
+            arg = true,
+          },
+        },
+        callback = function() end,
+      })
+      :search("", {
+        arg = "not valid type",
+      })
+
+    vim.wait(10)
+
+    assert.spy(spy).was.called_with({
+      critical = true,
+      message = [[microscope: invalid arguments types
+provided: {
+  arg = "not valid type"
+}
+defaults: {
+  arg = true
+}]],
+    })
   end)
 end)

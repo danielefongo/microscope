@@ -21,16 +21,21 @@ describe("input", function()
   describe("event", function()
     describe("new_opts", function()
       it("stores new opts", function()
+        local input_changed = helpers.spy_event_handler(my_events, input_window, events.event.input_changed)
+
         assert.are.same(input_window.prompt, input.default_prompt)
+        assert.are.same(input_window.spinner, input.default_spinner)
 
         my_events:fire(events.event.new_opts, {
           prompt = "newprompt >",
           spinner = { foo = true },
+          args = { new = true },
         })
         helpers.wait(10)
 
         assert.are.same(input_window.prompt, "newprompt >")
         assert.are.same(input_window.spinner, { foo = true })
+        assert.spy(input_changed).was.called(2)
       end)
     end)
 

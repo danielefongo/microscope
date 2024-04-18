@@ -9,14 +9,14 @@ function lenses.fzf(...)
   }
 end
 
-function lenses.head(lines, ...)
+function lenses.head(...)
   return {
-    fun = function(flow, _)
+    fun = function(flow, _, args)
       local results = {}
       for array in flow.read_array_iter() do
         for _, element in pairs(array) do
           table.insert(results, element)
-          if #results == lines then
+          if #results == args.limit then
             flow.write(results)
             flow.stop()
           end
@@ -27,12 +27,15 @@ function lenses.head(lines, ...)
       end
     end,
     inputs = { ... },
+    args = {
+      limit = 5000,
+    },
   }
 end
 
 function lenses.cache(...)
   return {
-    fun = function(flow, _, context)
+    fun = function(flow, _, _, context)
       if context and context.cache then
         return flow.write(context.cache)
       end

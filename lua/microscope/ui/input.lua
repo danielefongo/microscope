@@ -59,6 +59,11 @@ end
 local function on_new_opts(self, opts)
   local old_text = self:text()
 
+  local updated = not vim.deep_equal(self.args, opts.args)
+  if updated then
+    self.events:fire(events.event.input_changed, self:text())
+  end
+  self.args = opts.args
   self.prompt = opts.prompt
   self.spinner = opts.spinner
   self:set_text(old_text)
@@ -101,6 +106,7 @@ function input.new(events_instance)
   v.spinner_step = 0
   v.spinner = input.default_spinner
   v.prompt = input.default_prompt
+  v.args = {}
   v.events:on(v, events.event.new_opts, on_new_opts)
   v.events:on(v, events.event.new_request, on_new_request)
   v.events:on(v, events.event.empty_results_retrieved, on_stop_search)

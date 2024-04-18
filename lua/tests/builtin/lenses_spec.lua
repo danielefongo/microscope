@@ -33,11 +33,14 @@ describe("lens", function()
 
   describe("head", function()
     it("when results are more than the provided size", function()
-      local my_lens = lens.new(lenses.head(1, {
+      local head_lens_spec = lenses.head({
         fun = function(flow)
           flow.write({ "hello", "world" })
         end,
-      }))
+      })
+      head_lens_spec.args.limit = 1
+
+      local my_lens = lens.new(head_lens_spec)
 
       my_lens:feed({ text = "" })
 
@@ -45,11 +48,14 @@ describe("lens", function()
     end)
 
     it("when results are less than the provided size", function()
-      local my_lens = lens.new(lenses.head(3, {
+      local head_lens_spec = lenses.head({
         fun = function(flow)
           flow.write({ "hello", "world" })
         end,
-      }))
+      })
+      head_lens_spec.args.limit = 3
+
+      local my_lens = lens.new(head_lens_spec)
 
       my_lens:feed({ text = "" })
 

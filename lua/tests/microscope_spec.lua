@@ -26,10 +26,11 @@ describe("microscope", function()
       size = { height = 10, width = 10 },
       bindings = {},
       spinner = default_spinner,
+      args = {},
     })
   end)
 
-  it("basic setup with prompt override", function()
+  it("basic setup plus prompt", function()
     microscope.setup({ size = { height = 10, width = 10 }, prompt = "~> " })
 
     assert.are.same(microscope.opts, {
@@ -37,10 +38,11 @@ describe("microscope", function()
       size = { height = 10, width = 10 },
       bindings = {},
       spinner = default_spinner,
+      args = {},
     })
   end)
 
-  it("basic setup with spinner override", function()
+  it("basic setup plus spinner", function()
     microscope.setup({ size = { height = 10, width = 10 }, spinner = { foo = true } })
 
     assert.are.same(microscope.opts, {
@@ -48,6 +50,19 @@ describe("microscope", function()
       size = { height = 10, width = 10 },
       bindings = {},
       spinner = { foo = true },
+      args = {},
+    })
+  end)
+
+  it("basic setup plus args", function()
+    microscope.setup({ size = { height = 10, width = 10 }, args = { new_arg = true } })
+
+    assert.are.same(microscope.opts, {
+      prompt = "> ",
+      size = { height = 10, width = 10 },
+      bindings = {},
+      spinner = default_spinner,
+      args = { new_arg = true },
     })
   end)
 
@@ -68,6 +83,7 @@ describe("microscope", function()
       lens = my_lens,
       parsers = {},
       spinner = default_spinner,
+      args = {},
     })
   end)
 
@@ -95,6 +111,7 @@ describe("microscope", function()
       lens = my_lens,
       parsers = { my_parser },
       spinner = default_spinner,
+      args = {},
     })
   end)
 

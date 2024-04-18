@@ -62,6 +62,8 @@ You can create your own [finder](#finder).
 
 ## Finder
 
+#### Finder opts
+
 Each finder can be defined using the following options:
 
 ```lua
@@ -73,6 +75,7 @@ local opts = {
   layout = layout_fn, -- optional
   full_screen = full_screen, -- optional
   size = custom_size, -- optional (overrides/extends the microscope size option)
+  args = override_args, -- optional (overrides the lens args)
   bindings = custom_bindings, -- optional (overrides/extends the microscope bindings option)
   prompt = prompt, -- optional (overrides/extends the microscope prompt option)
   spinner = spinner, -- optional (overrides/extends the microscope spinner option)
@@ -103,14 +106,16 @@ After creating the finder, you can use it by binding it to a shortcut. There are
 
 ```lua
 -- First way
-vim.keymap.set("n", "<leader>of", finder:bind())
+vim.keymap.set("n", "<leader>of", finder:bind(override_opts))
 
 -- Second way
-vim.keymap.set("n", "<leader>of", microscope.finders.name:bind())
+vim.keymap.set("n", "<leader>of", microscope.finders.name:bind(override_opts))
 
 -- Third way
-vim.keymap.set("n", "<leader>of", ":Microscope name<cr>")
+vim.keymap.set("n", "<leader>of", ":Microscope name override_opts<cr>")
 ```
+
+Note: `override_opts` is optional and may be a partial of [finder opts](#finder-opts) (see next section). These are evaluated at invocation time, so they are the last to be evaluated.
 
 #### Opts override
 
@@ -131,14 +136,19 @@ finder:override({
 
 ### Lens spec
 
-This element represents a specification for a [lens](#lens), which is used to retrieve or filter data (e.g. list of files or buffers), based on the [request](#request). It is a table that consists of a [lens function](#lens-function) and an optional list of input lens specifications.
+This element represents a specification for a [lens](#lens), which is used to retrieve or filter data (e.g. list of files or buffers), based on the [request](#request). It is a table that contains:
+
+- a [lens function](#lens-function)
+- an optional list of input lens specification
+- an optional table or [default args](#default-args)
 
 ```lua
 local lens = {
-  fun = function(flow, request, context)
+  fun = function(flow, request, args, context)
     -- logic
   end,
   inputs = { ... }, -- optional list of other lens specs
+  args = { ... }, -- optional table of args
 }
 ```
 
@@ -166,6 +176,10 @@ end
 
 local my_lens = lenses.fzf(lenses.rg())
 ```
+
+#### Default args
+
+Each lens may have default arguments, which either extend or replace the ones received from the input lenses. Therefore, the final arguments consist of the combination of all the lenses args.
 
 ### Parsers
 
@@ -249,6 +263,10 @@ The `full_screen` is represented as a boolean, defaults to `false`.
 
 The `size` is represented as a table containing `width` and `height` fields.
 
+### Override args
+
+The `args` is a table used to override the [default lens args](#default-args). Attempting to set arguments with types different from those of the defaults will trigger a critical microscope error.
+
 ### Bindings
 
 The `bindings` table is used to define shortcut bindings for microscope [actions](#action).
@@ -314,7 +332,7 @@ Microscope exposes a list of lens specs in `microscope.builtin.lenses`:
 
 - `cache(...)`: caches results
 - `fzf(...)`: filters results using fzf
-- `head(limit, ...)`: limits results
+- `head(...)`: limits results. Default args are: `{ limit = 5000 }`
 - `write(data)`: writes data directly into the flow
 
 ### Actions
@@ -329,6 +347,7 @@ Microscope exposes a list of actions in `microscope.builtin.actions`:
 - `open`: opens selected results
 - `select`: selects result
 - `set_layout(layout_fun)`: accepts a [layout function](#layout-function) and returns the corresponding action
+- `set_args(arguments)`: accepts an [args](#args) table and returns the corresponding action
 - `alter(override_opts)`: accepts a table of options to override in the finder's instance
 - `refine`: starts a new search on retrieved results using a fuzzy lens
 - `refine_with(lens, parser, prompt)`: starts a new search on retrieved results using a specific lens, parser and optional prompt
@@ -340,7 +359,7 @@ Microscope exposes a list of parsers in `microscope.builtin.parsers`:
 
 - `fuzzy`: highlights result
 
-### Lenses
+### Layouts
 
 Microscope exposes a list of layouts in `microscope.builtin.layouts`:
 
@@ -383,6 +402,7 @@ The lens function has these parameters:
 
 - [flow](#flow)
 - [request](#request)
+- [arguments](#arguments)
 - [context](#context)
 
 ##### Flow
@@ -403,11 +423,15 @@ The **flow** is a bag of functions:
 
 ##### Request
 
-The **request** is what the user provides using the `feed` function. In the context of a finder, it is represented by a table containing the following fields:
+The **request** is what the user provides using the `search` function of [scope](#scope). In the context of a finder, it is represented by a table containing the following fields:
 
 - `text`: the searched text
 - `buf`: the original bufnr
 - `win`: the original winnr
+
+##### Arguments
+
+The **arguments** table represents the merged combination of [default args](#default-args) and [override_args](#override-args).
 
 ##### Context
 
@@ -515,7 +539,11 @@ To consume the command, you can run:
 
 ### Scope
 
-The `microscope.api.scope` module provides a utility for working with lenses. The `new` function accepts an object with two fields:
+The `microscope.api.scope` module provides a utility for working with lenses.
+
+This module can be particularly useful when working with the [preview function](#preview-function). You can use it to directly write the obtained lines into the preview window, providing a convenient way to display and interact with the data retrieved by the lens.
+
+The `new` function accepts an object with two fields:
 
 - `lens`: a [lens specification](#lens-spec)
 - `callback`: an optional callback function that is called at the end
@@ -530,21 +558,25 @@ local cat_scope = scope.new({
     fun = function(flow, any_request)
       flow.cmd.shell("cat", { any_request.text })
     end,
-    callback = function(lines, any_request)
-      do_something(lines)
-    end,
   },
+  callback = function(lines, any_request)
+    do_something(lines)
+  end,
 })
+```
+
+The `search` function accepts a request, which will be passed through the lens flow, and optionally, [override_args](#override-args). If these arguments have different types than the defaults, it will raise a critical microscope error.
+
+```lua
+local override_args = { ... }
 
 cat_scope:search({
   text = "my_file",
-})
+}, override_args)
 
 -- To stop before completion
 cat_scope:stop()
 ```
-
-This module can be particularly useful when working with the [preview function](#preview-function). You can use it to directly write the obtained lines into the preview window, providing a convenient way to display and interact with the data retrieved by the lens.
 
 ### Display
 
@@ -685,7 +717,7 @@ local files = require("microscope-files")
 local function ls()
   return {
     fun = function(flow)
-      flow.cmd.shell("ls")
+      flow.cmd.shell("ls"):into(flow)
     end,
   }
 end

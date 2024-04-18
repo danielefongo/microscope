@@ -209,6 +209,32 @@ describe("actions", function()
     my_user:does_not_see_window("preview")
   end)
 
+  it("set_args", function()
+    my_user = user.open_finder({
+      lens = {
+        fun = function(flow, _, args)
+          flow.write({ args.value })
+        end,
+        args = {
+          value = "hello",
+        },
+      },
+      bindings = {
+        ["<a-h>"] = actions.set_args({
+          value = "world",
+        }),
+      },
+    })
+
+    my_user:focus("input")
+
+    my_user:sees_text_in("results", { "hello" })
+
+    my_user:keystroke("<a-h>", "i")
+
+    my_user:sees_text_in("results", { "world" })
+  end)
+
   it("refine without any input", function()
     my_user = user.open_finder({
       lens = lenses.fzf(lenses.write({ "hello", "world" })),

@@ -47,7 +47,7 @@ function finder:open(data)
 end
 
 function finder:stop_search()
-  self.find:stop()
+  self.scope:stop()
 end
 
 function finder:search(text)
@@ -58,7 +58,7 @@ function finder:search(text)
     win = self.old_win,
   }
   events:fire(events.event.new_request, self.request)
-  self.find:search(self.request)
+  self.scope:search(self.request, self.opts.args)
 end
 
 function finder:update()
@@ -89,6 +89,7 @@ function finder:set_opts(opts)
   opts.layout = opts.layout or default_layout
   opts.bindings = opts.bindings or {}
   opts.full_screen = opts.full_screen or false
+  opts.args = opts.args or {}
   opts.preview = opts.preview or function(_, win)
     win:write({ "No preview function provided" })
   end
@@ -110,7 +111,7 @@ function finder:set_opts(opts)
     vim.keymap.set("n", lhs, self:bind_action(action), { buffer = self.preview.buf })
   end
 
-  self.find = scope.new({
+  self.scope = scope.new({
     lens = opts.lens,
     callback = function(list)
       if #list > 0 then

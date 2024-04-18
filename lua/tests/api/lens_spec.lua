@@ -100,6 +100,125 @@ describe("lens", function()
     end)
   end)
 
+  describe("args", function()
+    it("defaults", function()
+      local my_lens = lens.new({
+        fun = function(flow, _, args, _)
+          flow.write(args.text1)
+          flow.write(args.text2)
+        end,
+        args = {
+          text1 = "hello\n",
+          text2 = "world\n",
+        },
+      })
+
+      my_lens:feed("")
+      local out = helpers.consume_lens(my_lens)
+
+      assert.are.same(out, "hello\nworld\n")
+    end)
+
+    it("override", function()
+      local my_lens = lens.new({
+        fun = function(flow, _, args, _)
+          flow.write(args.text1)
+          flow.write(args.text2)
+        end,
+        args = {
+          text1 = "hello\n",
+          text2 = "world\n",
+        },
+      })
+
+      my_lens:set_args({
+        text2 = "madworld\n",
+      })
+      my_lens:feed("")
+      local out = helpers.consume_lens(my_lens)
+
+      assert.are.same(out, "hello\nmadworld\n")
+    end)
+
+    it("override nested", function()
+      local my_lens = lens.new({
+        fun = function(flow, _, args, _)
+          flow.write(args.text1)
+          flow.write(args.inner.text2)
+        end,
+        args = {
+          text1 = "hello\n",
+          inner = {
+            text2 = "world\n",
+          },
+        },
+      })
+
+      my_lens:set_args({
+        inner = {
+          text2 = "madworld\n",
+        },
+      })
+      my_lens:feed("")
+      local out = helpers.consume_lens(my_lens)
+
+      assert.are.same(out, "hello\nmadworld\n")
+    end)
+
+    it("validate", function()
+      local my_lens = lens.new({
+        fun = function() end,
+        args = {
+          text1 = "hello\n",
+          text2 = "world\n",
+        },
+      })
+
+      local new_args = my_lens:set_args({
+        text2 = "madworld\n",
+      })
+      local nil_new_args, defaults = my_lens:set_args({
+        text2 = 42,
+      })
+
+      assert.are.same(new_args, {
+        text1 = "hello\n",
+        text2 = "madworld\n",
+      })
+
+      assert.are.same(nil_new_args, nil)
+      assert.are.same(defaults, {
+        text1 = "hello\n",
+        text2 = "world\n",
+      })
+    end)
+
+    it("validate nested", function()
+      local my_lens = lens.new({
+        fun = function() end,
+        args = {
+          nested = { text1 = "hello\n" },
+        },
+      })
+
+      local new_args = my_lens:set_args({
+        nested = { text1 = "xxx\n" },
+      })
+      local nil_new_args, defaults = my_lens:set_args({
+        nested = { text1 = 42 },
+      })
+
+      assert.are.same(new_args, {
+        nested = { text1 = "xxx\n" },
+      })
+
+      assert.are.same(nil_new_args, nil)
+      assert.are.same(defaults, {
+        nested = { text1 = "hello\n" },
+      })
+    end)
+  end)
+
   describe("flow", function()
     describe("write", function()
       it("returns data using a string", function()

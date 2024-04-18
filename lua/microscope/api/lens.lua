@@ -42,7 +42,7 @@ function lens:read()
     return
   end
 
-  local ok, value = coroutine.resume(self.coroutine, self.flow, self.request, self.context)
+  local ok, value = coroutine.resume(self.coroutine, self.flow, self.request, self.args, self.context)
   if not ok then
     error.critical(debug.traceback(self.coroutine, value))
   end
@@ -111,16 +111,53 @@ function lens.new(opts)
   local l = setmetatable({}, lens)
 
   l.inputs = {}
+  l.defaults = {}
   local inputs_specs = opts.inputs
   for _, input_spec in pairs(inputs_specs or {}) do
-    table.insert(l.inputs, lens.new(input_spec))
+    local input_lens = lens.new(input_spec)
+    table.insert(l.inputs, input_lens)
+    l.defaults = vim.tbl_deep_extend("force", l.defaults, input_lens.defaults)
   end
+  l.defaults = vim.tbl_deep_extend("force", l.defaults, opts.args or {})
+  l.args = l.defaults
   l.fn = opts.fun
   l.context = {}
   l.stopped = false
   l:create_flow()
 
   return l
+end
+
+function lens:set_args(args)
+  args = args or {}
+  local function check_deep(new_args, allowed_args)
+    for key, value in pairs(new_args) do
+      if allowed_args[key] == nil then
+        return true
+      end
+      if type(value) ~= type(allowed_args[key]) then
+        return false
+      end
+      if type(value) == "table" then
+        return check_deep(value, allowed_args[key])
+      end
+    end
+    return true
+  end
+
+  local is_valid = check_deep(args, self.defaults)
+
+  if not is_valid then
+    return nil, self.defaults
+  end
+
+  self.args = vim.tbl_deep_extend("force", self.defaults, args or {})
+
+  for _, input_lens in pairs(self.inputs) do
+    input_lens:set_args(args)
+  end
+
+  return self.args, self.defaults
 end
 
 return lens

@@ -58,6 +58,10 @@ function actions.set_layout(layout)
   return actions.alter({ layout = layout })
 end
 
+function actions.set_args(args)
+  return actions.alter({ args = args })
+end
+
 function actions.refine_with(lens, lens_parser, prompt)
   return function(microscope)
     local current_search = microscope.input:text()

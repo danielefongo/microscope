@@ -4,13 +4,13 @@ microscope.opts = {}
 microscope.finders = {}
 microscope.__index = microscope
 
-function microscope:__call()
-  return finder.new(vim.tbl_deep_extend("force", microscope.opts, self.opts))
+function microscope:__call(opts)
+  return finder.new(vim.tbl_deep_extend("force", microscope.opts, self.opts, opts or {}))
 end
 
-function microscope:bind()
+function microscope:bind(opts)
   return function()
-    self()
+    self(opts)
   end
 end
 
@@ -31,6 +31,7 @@ function microscope.setup(opts)
   microscope.opts.prompt = opts.prompt or require("microscope.ui.input").default_prompt
   microscope.opts.spinner = opts.spinner or require("microscope.ui.input").default_spinner
   microscope.opts.layout = opts.layout
+  microscope.opts.args = opts.args or {}
 
   return microscope
 end

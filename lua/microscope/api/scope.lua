@@ -1,5 +1,6 @@
 local uv = vim.loop
 local lens = require("microscope.api.lens")
+local error = require("microscope.api.error")
 local scope = {}
 scope.__index = scope
 
@@ -15,13 +16,24 @@ function scope:stop()
   end
 end
 
-function scope:search(request)
+function scope:search(request, args)
   self:stop()
   self.request = request
 
   local output = ""
 
   self.lens:feed(request)
+
+  local new_args, defaults = self.lens:set_args(args)
+  if not new_args then
+    error.critical(
+      string.format(
+        "microscope: invalid arguments types\nprovided: %s\ndefaults: %s",
+        vim.inspect(args),
+        vim.inspect(defaults)
+      )
+    )
+  end
 
   self.idle = uv.new_idle()
   self.idle:start(function()
