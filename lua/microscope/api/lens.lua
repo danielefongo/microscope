@@ -1,5 +1,6 @@
 local error = require("microscope.api.error")
 local command = require("microscope.api.command")
+local table_util = require("microscope.utils.table")
 local lens = {}
 lens.__index = lens
 
@@ -130,22 +131,8 @@ end
 
 function lens:set_args(args)
   args = args or {}
-  local function check_deep(new_args, allowed_args)
-    for key, value in pairs(new_args) do
-      if allowed_args[key] == nil then
-        return true
-      end
-      if type(value) ~= type(allowed_args[key]) then
-        return false
-      end
-      if type(value) == "table" then
-        return check_deep(value, allowed_args[key])
-      end
-    end
-    return true
-  end
 
-  local is_valid = check_deep(args, self.defaults)
+  local is_valid = table_util.same_types(args, self.defaults)
 
   if not is_valid then
     return nil, self.defaults
