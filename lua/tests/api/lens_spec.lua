@@ -263,7 +263,7 @@ describe("lens", function()
       it("with collect", function()
         local my_lens = lens.new({
           fun = function(flow)
-            local result = command.iter(flow.read_iter()):pipe("grep", { "hel" }):collect()
+            local result = command.iter(flow.read_iter()):pipe("grep", { "hel" }):collect(flow)
             flow.write(result)
           end,
           inputs = { hello_world_spec },
