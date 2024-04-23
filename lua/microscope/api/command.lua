@@ -98,6 +98,8 @@ function command:get_consumer()
       result, self.output = split_last_newline(self.output)
       return result
     end
+
+    self:close(true)
   end
 end
 
@@ -115,7 +117,6 @@ function command:into(flow)
     end
     flow.write(shell_out)
   end
-  self:close(true)
 end
 
 function command:collect(flow)
@@ -127,7 +128,6 @@ function command:collect(flow)
     outputs = outputs .. shell_out
     flow.write("")
   end
-  self:close(true)
 
   return outputs
 end
