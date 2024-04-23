@@ -35,6 +35,24 @@ describe("input", function()
 
         assert.are.same(input_window.prompt, "newprompt >")
         assert.are.same(input_window.spinner, { foo = true })
+        assert.spy(input_changed).was.called(1)
+      end)
+
+      it("emits input changed if args are different", function()
+        local input_changed = helpers.spy_event_handler(my_events, input_window, events.event.input_changed)
+
+        my_events:fire(events.event.new_opts, {
+          prompt = input.default_prompt,
+          spinner = input.default_spinner,
+          args = { new = true },
+        })
+        my_events:fire(events.event.new_opts, {
+          prompt = input.default_prompt,
+          spinner = input.default_spinner,
+          args = { new2 = true },
+        })
+        helpers.wait(10)
+
         assert.spy(input_changed).was.called(2)
       end)
     end)
