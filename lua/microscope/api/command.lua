@@ -37,6 +37,11 @@ function command:close(flushed)
 end
 
 function command:spawn(generate_output)
+  if self.spawend then
+    return
+  end
+  self.spawend = true
+
   if self.command then
     self.handle = uv.spawn(self.command, {
       args = self.args,
@@ -48,7 +53,7 @@ function command:spawn(generate_output)
   else
     local previous_output = function() end
     if self.input then
-      previous_output = self.input:get_consumer()
+      previous_output = self.input:get_iter()
     end
 
     self.handle = uv.new_idle()
@@ -76,6 +81,11 @@ function command:spawn(generate_output)
 end
 
 function command:read_start(generate_output)
+  if self.started then
+    return
+  end
+  self.started = true
+
   if self.input then
     self.input:read_start(self.iterator ~= nil)
   end
