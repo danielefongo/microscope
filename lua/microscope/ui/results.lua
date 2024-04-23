@@ -29,6 +29,7 @@ local function get_focused(self)
 end
 
 local function on_empty_results_retrieved(self)
+  events:cancel(events.event.result_focused)
   self:set_title("", "center")
   self:clear()
 end
