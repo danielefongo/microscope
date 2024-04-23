@@ -118,11 +118,14 @@ function command:into(flow)
   self:close(true)
 end
 
-function command:collect()
+function command:collect(flow)
   local outputs = ""
   for shell_out in self:get_iter() do
+    if flow.stopped() then
+      self:close()
+    end
     outputs = outputs .. shell_out
-    coroutine.yield("")
+    flow.write("")
   end
   self:close(true)
 

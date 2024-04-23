@@ -544,7 +544,7 @@ To consume the command, you can run:
   ```lua
   local my_echo_result = cmd
     .shell("echo", { "-n", "hello\nworld" }, cwd)
-    :collect()
+    :collect(flow)
   ```
 
 - `into`: push results into the flow.
