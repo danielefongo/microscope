@@ -540,28 +540,6 @@ Once instantiated, it can be chained with other commands:
     end)
   ```
 
-##### Consuming
-
-**NOTE**: this behaviour is deprecated.
-
-To consume the command, you can run:
-
-- `collect`: collect the output into an `array_string`.
-
-  ```lua
-  local my_echo_result = cmd
-    .shell("echo", { "-n", "hello\nworld" }, cwd)
-    :collect(flow)
-  ```
-
-- `into`: push results into the flow.
-
-  ```lua
-  cmd
-    .shell("echo", { "-n", "hello\nworld" }, cwd)
-    :into(flow)
-  ```
-
 ### Scope
 
 The `microscope.api.scope` module provides a utility for working with lenses.

@@ -120,30 +120,6 @@ function command:get_iter()
   return self:get_consumer()
 end
 
----@deprecated
-function command:into(flow)
-  for shell_out in self:get_iter() do
-    if flow.stopped() then
-      self:close()
-    end
-    flow.write(shell_out)
-  end
-end
-
----@deprecated
-function command:collect(flow)
-  local outputs = ""
-  for shell_out in self:get_iter() do
-    if flow.stopped() then
-      self:close()
-    end
-    outputs = outputs .. shell_out
-    flow.write("")
-  end
-
-  return outputs
-end
-
 local function command_new(opts, instance)
   local self = setmetatable({ keys = {} }, command)
 
