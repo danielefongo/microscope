@@ -1,12 +1,10 @@
----@diagnostic disable: cast-local-type
-
 return function(input, truncate_len)
   local valid_chars = 0
   local skipped_chars = 0
   local idx = 1
 
-  local ansi_start = 1
-  local ansi_end = 1
+  local ansi_start
+  local ansi_end
   local new_ansi_end
 
   while true do
@@ -17,7 +15,7 @@ return function(input, truncate_len)
     elseif ansi_start == 1 then
       skipped_chars = skipped_chars + new_ansi_end - ansi_start + 1
     else
-      valid_chars = valid_chars + ansi_start - ansi_end - 1
+      valid_chars = valid_chars + ansi_start - (ansi_end or 1) - 1
       if valid_chars > truncate_len then
         break
       end
