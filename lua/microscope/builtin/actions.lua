@@ -79,7 +79,15 @@ function actions.refine_with(lens, lens_parser, prompt)
     end
 
     microscope:alter(function(opts)
-      opts.parsers[#opts.parsers + 1] = lens_parser
+      local new_parsers = {}
+      for _, parser in ipairs(opts.parsers or {}) do
+        if not vim.deep_equal(parser, lens_parser) then
+          table.insert(new_parsers, parser)
+        end
+      end
+      table.insert(new_parsers, lens_parser)
+
+      opts.parsers = vim.tbl_values(new_parsers)
       opts.lens = lens(lenses.write(current_results))
 
       opts.searches = opts.searches or {}
