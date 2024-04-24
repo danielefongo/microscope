@@ -4,6 +4,18 @@
 test:
 	bash ./test $(test)
 
+.PHONY: lint
+lint:
+	luacheck lua/microscope
+
+.PHONY: stylua
+stylua:
+	stylua --color always --check lua
+
+.PHONY: stylua-fix
+stylua-fix:
+	stylua lua
+
 .PHONY: testcov
 testcov:
 	TEST_COV=1 $(MAKE) --no-print-directory test

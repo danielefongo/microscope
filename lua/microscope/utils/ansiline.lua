@@ -3,8 +3,8 @@ return function(input, truncate_len)
   local skipped_chars = 0
   local idx = 1
 
-  local ansi_start = 1
-  local ansi_end = 1
+  local ansi_start
+  local ansi_end
   local new_ansi_end
 
   while true do

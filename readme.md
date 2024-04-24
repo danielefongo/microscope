@@ -768,6 +768,8 @@ You can also explore the already published plugins:
   luarocks install luacov
   luarocks install luacov-console
   luarocks install luacov-html
+  luarocks install luacheck
+  cargo install stylua
   ```
 
 - Run tests
@@ -779,4 +781,6 @@ You can also explore the already published plugins:
   make testcov
   # with coverage + html report
   make testcov-html
+  # lint + stylua checks
+  make stylua lint
   ```

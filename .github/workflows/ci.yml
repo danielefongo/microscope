@@ -48,3 +48,32 @@ jobs:
           files: luacov.report.out, luacov.stats.out
           token: ${{ secrets.CODECOV_TOKEN }}
           verbose: true
+
+  linting:
+    runs-on: ubuntu-latest
+    name: linting
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: update
+        run: |
+          sudo apt-get update
+
+      - name: install luacheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y luarocks
+          sudo luarocks install luacheck
+
+      - name: run luacheck
+        run: |
+          sudo make lint
+
+      - name: run stylua
+        uses: JohnnyMorganz/stylua-action@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          version: latest
+          args: --color always --check lua
