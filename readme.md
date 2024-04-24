@@ -351,6 +351,7 @@ Microscope exposes a list of lens specs in `microscope.builtin.lenses`:
 - `fzf(...)`: filters results using fzf
 - `head(...)`: limits results. Default args are: `{ limit = 5000 }`
 - `write(data)`: writes data directly into the flow
+- `shell(command)`: executes a command (raw string). The command can contain pipes (e.g. `echo x | grep "x"`)
 
 ### Actions
 

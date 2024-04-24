@@ -1,5 +1,13 @@
 local lenses = {}
 
+function lenses.shell(command)
+  return {
+    fun = function(flow)
+      flow.consume(flow.cmd.shell("sh", { "-c", command }))
+    end,
+  }
+end
+
 function lenses.fzf(...)
   return {
     fun = function(flow, request)

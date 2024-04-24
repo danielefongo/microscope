@@ -91,4 +91,22 @@ describe("lens", function()
       assert.are.same(helpers.consume_lens(my_lens), "text\n")
     end)
   end)
+
+  describe("shell", function()
+    it("simple command", function()
+      local my_lens = lens.new(lenses.shell('echo -n "hello\nworld\n"'))
+
+      my_lens:feed({ text = "" })
+
+      assert.are.same(helpers.consume_lens(my_lens), "hello\nworld\n")
+    end)
+
+    it("complex command", function()
+      local my_lens = lens.new(lenses.shell('echo -n "hello\nworld\n" | grep -E "^he"'))
+
+      my_lens:feed({ text = "" })
+
+      assert.are.same(helpers.consume_lens(my_lens), "hello\n")
+    end)
+  end)
 end)
