@@ -1,6 +1,5 @@
 local uv = vim.loop
 local events = {}
-events.__index = events
 events.event = {
   resize = "VimResized",
   buf_leave = "BufLeave",
@@ -73,17 +72,9 @@ function events:clear_module(module)
   self.handlers[module] = nil
 end
 
-function events:clear_all()
-  for module, _ in pairs(self.handlers or {}) do
-    self:clear_module(module)
-  end
-  self.handlers = {}
-end
-
 function events:fire(evt, data, delay)
   self:cancel(evt)
   self.timers[evt] = vim.defer_fn(function()
-    self.timers[evt] = nil
     vim.api.nvim_exec_autocmds("User", { group = self.group, pattern = evt, data = data })
   end, delay or 0)
 end
@@ -91,7 +82,6 @@ end
 function events:fire_native(evt, delay)
   self:cancel(evt)
   self.timers[evt] = vim.defer_fn(function()
-    self.timers[evt] = nil
     vim.api.nvim_exec_autocmds(evt, { group = self.group })
   end, delay or 0)
 end
@@ -106,7 +96,7 @@ function events:cancel(evt)
 end
 
 function events.new()
-  local self = setmetatable({}, events)
+  local self = setmetatable(events, { __index = events })
 
   self.group = vim.api.nvim_create_augroup("Microscope", { clear = false })
   self.timers = {}
