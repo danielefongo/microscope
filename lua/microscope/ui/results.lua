@@ -29,7 +29,7 @@ local function get_focused(self)
 end
 
 local function on_empty_results_retrieved(self)
-  events:cancel(events.event.result_focused)
+  self.events:cancel(events.event.result_focused)
   self:set_title("", "center")
   self:clear()
 end
@@ -136,7 +136,7 @@ function results:open(metadata)
   local selected = self:selected()
 
   if #selected > 0 then
-    events:fire(events.event.results_opened, { selected = selected, metadata = metadata })
+    self.events:fire(events.event.results_opened, { selected = selected, metadata = metadata })
   end
 
   self.selected_data = {}
@@ -148,7 +148,7 @@ function results:set_cursor(cursor)
   local idx, focused = get_focused(self)
   if focused then
     self:set_title(idx .. " / " .. #self.results, "center")
-    events:fire(events.event.result_focused, focused, 100)
+    self.events:fire(events.event.result_focused, focused, 100)
   end
 end
 
