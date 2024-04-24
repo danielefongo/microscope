@@ -23,12 +23,12 @@ describe("preview", function()
       it("calls the preview function", function()
         local preview_fn = helpers.spy_function()
 
-        events:fire(events.event.new_opts, {
+        my_events:fire(events.event.new_opts, {
           preview = function(data, _)
             preview_fn(data)
           end,
         })
-        events:fire(events.event.result_focused, { text = "smth" })
+        my_events:fire(events.event.result_focused, { text = "smth" })
         helpers.wait(10)
 
         assert.spy(preview_fn).was.called_with({ text = "smth" })
@@ -41,7 +41,7 @@ describe("preview", function()
 
         assert.are.same(preview_window:read(), { "some", "text" })
 
-        events:fire(events.event.empty_results_retrieved)
+        my_events:fire(events.event.empty_results_retrieved)
         helpers.wait(10)
 
         assert.are.same(preview_window:read(), { "" })
@@ -52,10 +52,10 @@ describe("preview", function()
       it("refresh window if the function is changed", function()
         local preview_fn = helpers.spy_function()
 
-        events:fire(events.event.result_focused, { text = "smth" })
+        my_events:fire(events.event.result_focused, { text = "smth" })
         helpers.wait(10)
 
-        events:fire(events.event.new_opts, {
+        my_events:fire(events.event.new_opts, {
           preview = function(data, _)
             preview_fn(data)
           end,
@@ -71,13 +71,13 @@ describe("preview", function()
           preview_fn(data)
         end
 
-        events:fire(events.event.result_focused, { text = "smth" })
+        my_events:fire(events.event.result_focused, { text = "smth" })
         helpers.wait(10)
 
-        events:fire(events.event.new_opts, { preview = fun })
+        my_events:fire(events.event.new_opts, { preview = fun })
         helpers.wait(10)
 
-        events:fire(events.event.new_opts, { preview = fun })
+        my_events:fire(events.event.new_opts, { preview = fun })
         helpers.wait(10)
 
         assert.spy(preview_fn).was.called(1)

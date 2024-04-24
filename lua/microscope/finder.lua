@@ -24,8 +24,8 @@ function finder:bind_action(fun)
 end
 
 function finder:close()
-  events:clear_module(self)
-  events.clear_module(events.global, self)
+  self.events:clear_all()
+  events.global:clear_all()
 
   resume_old_position(self)
 
@@ -62,12 +62,12 @@ function finder:search(text)
     buf = self.old_buf,
     win = self.old_win,
   }
-  events:fire(events.event.new_request, self.request)
+  self.events:fire(events.event.new_request, self.request)
   self.scope:search(self.request, self.opts.args)
 end
 
 function finder:update()
-  events:clear(self, events.event.win_leave)
+  self.events:clear(self, events.event.win_leave)
 
   if not self.opts.hidden then
     local layout = self.opts.layout({
@@ -81,7 +81,7 @@ function finder:update()
     self.results:show(layout.results, layout.input == nil)
     self.input:show(layout.input, true)
 
-    events:native(self, events.event.win_leave, finder.close)
+    self.events:native(self, events.event.win_leave, finder.close)
   else
     self.preview:show()
     self.results:show()
@@ -132,7 +132,7 @@ function finder:set_opts(opts)
   self.opts = opts
   self.request = self.request or nil
 
-  events:fire(events.event.new_opts, self.opts)
+  self.events:fire(events.event.new_opts, self.opts)
 
   for lhs, action in pairs(self.opts.bindings) do
     vim.keymap.set("i", lhs, self:bind_action(action), { buffer = self.input.buf })
@@ -144,9 +144,9 @@ function finder:set_opts(opts)
     lens = opts.lens,
     callback = function(list)
       if #list > 0 then
-        events:fire(events.event.results_retrieved, list)
+        self.events:fire(events.event.results_retrieved, list)
       else
-        events:fire(events.event.empty_results_retrieved)
+        self.events:fire(events.event.empty_results_retrieved)
       end
     end,
   })
@@ -176,7 +176,7 @@ function finder.new(opts)
 
   self.events:on(self, events.event.results_opened, finder.open)
   self.events:on(self, events.event.input_changed, finder.search)
-  self.events.on(events.global, self, events.event.error, finder.close_with_err)
+  events.global:on(self, events.event.error, finder.close_with_err)
   self.events:native(self, events.event.resize, finder.update)
   self.events:on(self, events.event.win_leave, finder.close)
 
