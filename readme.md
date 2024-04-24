@@ -176,7 +176,7 @@ local lenses = {}
 function lenses.rg(cwd)
   return {
     fun = function(flow)
-      flow.cmd.shell("rg", { "--files" }, cwd):into(flow)
+      flow.consume(flow.cmd.shell("rg", { "--files" }, cwd))
     end,
   }
 end
@@ -184,7 +184,7 @@ end
 function lenses.fzf(...)
   return {
     fun = function(flow, request)
-      flow.cmd.iter(flow.read_iter()):pipe("fzf", { "-f", request.text }):into(flow)
+      flow.consume(flow.cmd.iter(flow.read_iter()):pipe("fzf", { "-f", request.text }))
     end,
     inputs = { ... },
   }
@@ -397,7 +397,7 @@ local lens = require("microscope.api.lens")
 local function rg(cwd)
   return {
     fun = function(flow)
-      flow.cmd.shell("rg", { "--files" }, cwd):into(flow)
+      flow.consume(flow.cmd.shell("rg", { "--files" }, cwd))
     end,
   }
 end
@@ -405,7 +405,7 @@ end
 local function fzf(...)
   return {
     fun = function(flow, request)
-      flow.cmd.shell("fzf", { "-f", request.text }):into(flow)
+      flow.consume(flow.cmd.shell("fzf", { "-f", request.text }))
     end,
     inputs = { ... },
   }
@@ -438,6 +438,9 @@ The **flow** is a bag of functions:
 - `stop`: stops the flow.
 - `stopped`: returns true if the flow is stopped (e.g., you close the finder before reaching the end of the lens function).
 - `cmd`: accessor for [command](#command)
+- `collect`: accepts a [command](#command) and an optional `to_array` parameter, returning the output. If the second parameter is not provided, it will return an `array_string`.
+  > `array_string` is a string representing a list of lines separated by a newline and terminating with a newline (e.g., "hello\nworld\n").
+- `consume`: accepts a [command](#command) and writes its output into the flow in a "streaming" manner.
 
 ##### Request
 
@@ -536,6 +539,8 @@ Once instantiated, it can be chained with other commands:
   ```
 
 ##### Consuming
+
+**NOTE**: this behaviour is deprecated.
 
 To consume the command, you can run:
 
@@ -735,7 +740,7 @@ local files = require("microscope-files")
 local function ls()
   return {
     fun = function(flow)
-      flow.cmd.shell("ls"):into(flow)
+      flow.consume(flow.cmd.shell("ls"))
     end,
   }
 end

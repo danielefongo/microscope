@@ -120,6 +120,7 @@ function command:get_iter()
   return self:get_consumer()
 end
 
+---@deprecated
 function command:into(flow)
   for shell_out in self:get_iter() do
     if flow.stopped() then
@@ -129,6 +130,7 @@ function command:into(flow)
   end
 end
 
+---@deprecated
 function command:collect(flow)
   local outputs = ""
   for shell_out in self:get_iter() do

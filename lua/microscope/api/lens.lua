@@ -78,6 +78,34 @@ function lens:feed(request)
   end
 end
 
+function lens:consume(cmd)
+  for shell_out in cmd:get_iter() do
+    if self.stopped then
+      cmd:close()
+    end
+    self:write(shell_out)
+  end
+  cmd:close(true)
+end
+
+function lens:collect(cmd, to_array)
+  local outputs = ""
+
+  for shell_out in cmd:get_iter() do
+    if self.stopped then
+      cmd:close()
+    end
+    outputs = outputs .. shell_out
+    self:write("")
+  end
+
+  if to_array then
+    return vim.split(outputs, "\n")
+  else
+    return outputs
+  end
+end
+
 function lens:create_flow()
   self.flow = {
     can_read = function()
@@ -105,6 +133,12 @@ function lens:create_flow()
       self:write(data)
     end,
     cmd = command,
+    consume = function(cmd)
+      self:consume(cmd)
+    end,
+    collect = function(cmd, to_array)
+      return self:collect(cmd, to_array)
+    end,
   }
 end
 

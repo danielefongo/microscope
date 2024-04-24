@@ -3,7 +3,16 @@ local lenses = {}
 function lenses.fzf(...)
   return {
     fun = function(flow, request)
-      flow.cmd.iter(flow.read_iter()):pipe("fzf", { "-f", request.text }):into(flow)
+      flow.consume(flow.cmd.iter(flow.read_iter()):pipe("fzf", { "-f", request.text }))
+    end,
+    inputs = { ... },
+  }
+end
+
+function lenses.grep(...)
+  return {
+    fun = function(flow, request)
+      flow.consume(flow.cmd.iter(flow.read_iter()):pipe("grep", { request.text }))
     end,
     inputs = { ... },
   }
@@ -41,13 +50,10 @@ function lenses.cache(...)
       end
 
       local cache = ""
-      flow.cmd
-        .iter(flow.read_iter())
-        :filter(function(lines)
-          cache = cache .. lines
-          return lines
-        end)
-        :into(flow)
+      flow.consume(flow.cmd.iter(flow.read_iter()):filter(function(lines)
+        cache = cache .. lines
+        return lines
+      end))
 
       if not flow.stopped() then
         context.cache = cache

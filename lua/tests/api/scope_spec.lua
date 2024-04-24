@@ -13,7 +13,7 @@ local function slow(seconds, ...)
         end
       end
 
-      flow.cmd.shell("sleep", { seconds }):into(flow)
+      flow.consume(flow.cmd.shell("sleep", { seconds }))
 
       for _, result in pairs(results) do
         flow.write(result)

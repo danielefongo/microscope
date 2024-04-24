@@ -302,7 +302,7 @@ describe("actions", function()
     local new_lens = function(...)
       return {
         fun = function(flow, request)
-          flow.cmd.iter(flow.read_iter()):pipe("grep", { request.text }):into(flow)
+          flow.consume(flow.cmd.iter(flow.read_iter()):pipe("grep", { request.text }))
         end,
         inputs = { ... },
       }
