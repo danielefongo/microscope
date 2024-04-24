@@ -8,6 +8,14 @@ function lenses.shell(command)
   }
 end
 
+function lenses.fn(fn)
+  return {
+    fun = function(flow)
+      flow.consume(flow.cmd.fn(fn))
+    end,
+  }
+end
+
 function lenses.fzf(...)
   return {
     fun = function(flow, request)

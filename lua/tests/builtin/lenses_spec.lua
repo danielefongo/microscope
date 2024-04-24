@@ -109,4 +109,14 @@ describe("lens", function()
       assert.are.same(helpers.consume_lens(my_lens), "hello\n")
     end)
   end)
+
+  it("fn", function()
+    local my_lens = lens.new(lenses.fn(function()
+      return { "hello", "world" }
+    end))
+
+    my_lens:feed({ text = "" })
+
+    assert.are.same(helpers.consume_lens(my_lens), "hello\nworld\n")
+  end)
 end)
