@@ -63,6 +63,17 @@ describe("results", function()
 
         assert.spy(focus).was.called_with({ text = "result1" })
       end)
+
+      it("resets the spinner", function()
+        results_window:set_title("any", "center")
+        my_events:fire(events.event.new_request)
+        helpers.wait(results.default_spinner.delay + 10)
+
+        my_events:fire(events.event.results_retrieved, { "result1", "result2" })
+        helpers.wait(10)
+
+        assert.are.same(results_window:get_title(), { title = "1 / 2", title_pos = "center" })
+      end)
     end)
 
     describe("empty_results_retrieved", function()
@@ -77,6 +88,17 @@ describe("results", function()
       end)
 
       it("updates title", function()
+        my_events:fire(events.event.empty_results_retrieved)
+        helpers.wait(10)
+
+        assert.are.same(results_window:get_title(), { title = "", title_pos = "center" })
+      end)
+
+      it("resets the spinner", function()
+        results_window:set_title("any", "center")
+        my_events:fire(events.event.new_request)
+        helpers.wait(results.default_spinner.delay + 10)
+
         my_events:fire(events.event.empty_results_retrieved)
         helpers.wait(10)
 
@@ -104,11 +126,30 @@ describe("results", function()
 
         assert.are.same(results_window:get_title(), { title = "", title_pos = "center" })
       end)
+
+      it("set spinner on title before empty results", function()
+        results_window:set_title("any", "center")
+        my_events:fire(events.event.new_request)
+        helpers.wait(results.default_spinner.delay + 10)
+
+        assert.are.same(results_window:get_title(), {
+          title = results.default_spinner.symbols[1],
+          title_pos = "center",
+        })
+
+        helpers.wait(results.default_spinner.interval)
+
+        assert.are.same(results_window:get_title(), {
+          title = results.default_spinner.symbols[2],
+          title_pos = results.default_spinner.position,
+        })
+      end)
     end)
 
     describe("new_opts", function()
-      it("stores new parser", function()
+      it("stores new opts", function()
         my_events:fire(events.event.new_opts, {
+          spinner = { foo = true },
           parsers = {
             function(data)
               data.additional_data = true
@@ -121,6 +162,7 @@ describe("results", function()
         my_events:fire(events.event.results_retrieved, { "result1", "result2" })
         helpers.wait(10)
 
+        assert.are.same(results_window.spinner, { foo = true })
         assert.are.same(results_window:selected(), { { text = "result1", additional_data = true } })
       end)
     end)

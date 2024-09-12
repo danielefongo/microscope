@@ -1,6 +1,7 @@
 local helpers = require("tests.helpers")
 local finder = require("microscope.finder")
 local input = require("microscope.ui.input")
+local results = require("microscope.ui.results")
 
 local user = {}
 user.__index = user
@@ -80,7 +81,7 @@ function user.open_finder(finder_spec)
 
   local default_opts = {
     prompt = input.default_prompt,
-    spinner = input.default_spinner,
+    spinner = results.default_spinner,
     size = { width = 50, height = 50 },
     bindings = {},
   }

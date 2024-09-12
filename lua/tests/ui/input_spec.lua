@@ -24,17 +24,14 @@ describe("input", function()
         local input_changed = helpers.spy_event_handler(my_events, input_window, events.event.input_changed)
 
         assert.are.same(input_window.prompt, input.default_prompt)
-        assert.are.same(input_window.spinner, input.default_spinner)
 
         my_events:fire(events.event.new_opts, {
           prompt = "newprompt >",
-          spinner = { foo = true },
           args = { new = true },
         })
         helpers.wait(10)
 
         assert.are.same(input_window.prompt, "newprompt >")
-        assert.are.same(input_window.spinner, { foo = true })
         assert.spy(input_changed).was.called(1)
       end)
 
@@ -43,41 +40,15 @@ describe("input", function()
 
         my_events:fire(events.event.new_opts, {
           prompt = input.default_prompt,
-          spinner = input.default_spinner,
           args = { new = true },
         })
         my_events:fire(events.event.new_opts, {
           prompt = input.default_prompt,
-          spinner = input.default_spinner,
           args = { new2 = true },
         })
         helpers.wait(10)
 
         assert.spy(input_changed).was.called(2)
-      end)
-    end)
-
-    describe("new_request + results_retrieved", function()
-      it("stores new opts", function()
-        my_events:fire(events.event.new_request)
-        helpers.wait(input.default_spinner.delay + 10)
-
-        assert.are.same(input_window:get_title(), {
-          title = input.default_spinner.symbols[1],
-          title_pos = input.default_spinner.position,
-        })
-
-        helpers.wait(input.default_spinner.interval)
-
-        assert.are.same(input_window:get_title(), {
-          title = input.default_spinner.symbols[2],
-          title_pos = input.default_spinner.position,
-        })
-
-        my_events:fire(events.event.results_retrieved, {})
-        helpers.wait(10)
-
-        assert.are.same(input_window:get_title(), { title = "" })
       end)
     end)
   end)

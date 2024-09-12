@@ -2,7 +2,7 @@ local helpers = require("tests.helpers")
 local user = require("tests.user")
 
 local lenses = require("microscope.builtin.lenses")
-local default_spinner = require("microscope.ui.input").default_spinner
+local default_spinner = require("microscope.ui.results").default_spinner
 
 describe("microscope", function()
   helpers.setup()

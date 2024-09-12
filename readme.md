@@ -323,7 +323,7 @@ The `prompt` is a string prefixed to the search query, defaults to "> ".
 
 ### Spinner
 
-The `spinner` table represents the specification for the loading spinner, which replaces the input title while retrieving the results. Its structure is as follows:
+The `spinner` table represents the specification for the loading spinner, which replaces the results title while retrieving the results. Its structure is as follows:
 
 ```lua
 local spinner = {

@@ -1,6 +1,31 @@
 local window = require("microscope.ui.window")
+local timer = require("microscope.utils.timer")
 local events = require("microscope.events")
 local results = {}
+results.default_prompt = "> "
+results.default_spinner = {
+  interval = 80,
+  delay = 300,
+  position = "center",
+  symbols = {
+    "[    ]",
+    "[=   ]",
+    "[==  ]",
+    "[=== ]",
+    "[====]",
+    "[ ===]",
+    "[  ==]",
+    "[   =]",
+    "[    ]",
+    "[   =]",
+    "[  ==]",
+    "[ ===]",
+    "[====]",
+    "[=== ]",
+    "[==  ]",
+    "[=   ]",
+  },
+}
 
 local function build_parser(parsers, idx)
   idx = idx or #parsers
@@ -28,9 +53,19 @@ local function get_focused(self)
   end
 end
 
+local function stop_spinner(self)
+  timer.clear_timeout(self.spinner_timer)
+  self.spinner_timer = nil
+
+  self.spinner_step = 0
+end
+
 local function on_empty_results_retrieved(self)
+  stop_spinner(self)
   self.events:cancel(events.event.result_focused)
-  self:set_title("", "center")
+  vim.schedule(function()
+    self:set_title("", "center")
+  end)
   self:clear()
 end
 
@@ -41,9 +76,26 @@ local function on_new_request(self, request)
   self.request = request
 
   self:set_title("", "center")
+
+  if self.spinner_timer then
+    return
+  end
+
+  self.spinner_timer = timer.set_interval(self.spinner.delay, self.spinner.interval, function()
+    local symbol = self.spinner.symbols[self.spinner_step + 1]
+    self.spinner_step = self.spinner_step + 1
+    if self.spinner_step >= #self.spinner.symbols then
+      self.spinner_step = 0
+    end
+
+    vim.schedule(function()
+      self:set_title(symbol, self.spinner.position)
+    end)
+  end)
 end
 
 local function on_results_retrieved(self, list)
+  stop_spinner(self)
   self.results = list
 
   self:write(list)
@@ -51,6 +103,7 @@ local function on_results_retrieved(self, list)
 end
 
 local function on_new_opts(self, opts)
+  self.spinner = opts.spinner
   self.parser = build_parser(opts.parsers or {})
 end
 
@@ -162,6 +215,8 @@ function results.new(events_instance)
   v.data = {}
   v.selected_data = {}
   v.results = {}
+  v.spinner_step = 0
+  v.spinner = results.default_spinner
   v.parser = build_parser({})
   v:set_buf_opt("modifiable", false)
 
