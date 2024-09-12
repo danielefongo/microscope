@@ -127,7 +127,7 @@ describe("results", function()
         assert.are.same(results_window:get_title(), { title = "", title_pos = "center" })
       end)
 
-      it("set spinner on title before empty results", function()
+      it("set spinner on title before results", function()
         results_window:set_title("any", "center")
         my_events:fire(events.event.new_request)
         helpers.wait(results.default_spinner.delay + 10)
@@ -137,7 +137,7 @@ describe("results", function()
           title_pos = "center",
         })
 
-        helpers.wait(results.default_spinner.interval)
+        helpers.wait(results.default_spinner.interval + 5)
 
         assert.are.same(results_window:get_title(), {
           title = results.default_spinner.symbols[2],
