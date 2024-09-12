@@ -178,6 +178,7 @@ function results:selected()
 end
 
 function results:close()
+  stop_spinner(self)
   self.data = {}
   self.selected_data = {}
   self.results = {}
