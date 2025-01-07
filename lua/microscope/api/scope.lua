@@ -20,8 +20,6 @@ function scope:search(request, args)
   self:stop()
   self.request = request
 
-  local output = ""
-
   self.lens:feed(request)
 
   local new_args, defaults = self.lens:set_args(args)
@@ -35,30 +33,23 @@ function scope:search(request, args)
     )
   end
 
+  local lines = {}
+
   self.idle = uv.new_idle()
   self.idle:start(function()
     local text = self.lens:read()
 
     if type(text) == "string" and text ~= "" then
-      output = output .. text
+      for line in vim.gsplit(text, "\n", { plain = true, trimempty = true }) do
+        table.insert(lines, line)
+      end
     end
 
     if text == nil then
       self.lens:stop()
 
       vim.schedule(function()
-        if output:sub(-1) == "\n" then
-          output = output:sub(1, -2)
-        end
-
-        if output == "" then
-          return self.callback({}, request)
-        end
-
-        local data = vim.split(output, "\n")
-        output = ""
-
-        self.callback(data, request)
+        self.callback(lines, request)
       end)
 
       self.idle:stop()
