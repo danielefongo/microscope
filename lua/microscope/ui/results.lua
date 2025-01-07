@@ -54,6 +54,7 @@ local function get_focused(self)
 end
 
 local function stop_spinner(self)
+  self.spinner_running = false
   timer.clear_timeout(self.spinner_timer)
   self.spinner_timer = nil
 
@@ -74,6 +75,7 @@ local function on_new_request(self, request)
   self.selected_data = {}
   self.results = {}
   self.request = request
+  self.spinner_running = true
 
   self:set_title("", "center")
 
@@ -89,7 +91,9 @@ local function on_new_request(self, request)
     end
 
     vim.schedule(function()
-      self:set_title(symbol, self.spinner.position)
+      if self.spinner_running == true then
+        self:set_title(symbol, self.spinner.position)
+      end
     end)
   end)
 end
