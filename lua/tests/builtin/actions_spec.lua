@@ -230,6 +230,38 @@ describe("actions", function()
     my_user:does_not_see_window("preview")
   end)
 
+  it("rotate_layouts", function()
+    local input_and_results = function(opts)
+      return display.vertical({ display.input(1), display.results() }):build(opts.finder_size)
+    end
+
+    local input_and_preview = function(opts)
+      return display.vertical({ display.input(1), display.preview() }):build(opts.finder_size)
+    end
+
+    my_user = user.open_finder({
+      lens = lenses.write({}),
+      layout = input_and_results,
+      bindings = {
+        ["<a-p>"] = actions.rotate_layouts({ input_and_results, input_and_preview }),
+      },
+    })
+
+    my_user:sees_window("results")
+    my_user:does_not_see_window("preview")
+
+    my_user:focus("input")
+    my_user:keystroke("<a-p>", "i")
+
+    my_user:sees_window("preview")
+    my_user:does_not_see_window("results")
+
+    my_user:keystroke("<a-p>", "i")
+
+    my_user:sees_window("results")
+    my_user:does_not_see_window("preview")
+  end)
+
   it("set_args", function()
     my_user = user.open_finder({
       lens = {

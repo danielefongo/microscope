@@ -65,6 +65,16 @@ function actions.set_layout(layout)
   return actions.alter({ layout = layout })
 end
 
+function actions.rotate_layouts(layouts)
+  local current = 1
+  return function(microscope)
+    current = (current % #layouts) + 1
+    microscope:alter(function(old_opts)
+      return vim.tbl_deep_extend("force", old_opts, { layout = layouts[current] })
+    end)
+  end
+end
+
 function actions.set_args(args)
   return actions.alter({ args = args })
 end
