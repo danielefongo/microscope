@@ -30,7 +30,7 @@ function command:close(flushed)
 
   if self.command then
     self.handle:close()
-    self.handle:kill(vim.loop.constants.SIGTERM)
+    self.handle:kill(vim.loop.constants.SIGKILL)
   else
     self.handle:stop()
   end
