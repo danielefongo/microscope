@@ -271,6 +271,8 @@ local layout_fn = function(opts)
 end
 ```
 
+The function can also be defined using the `finder_layout` or `ui_layout` methods of the [display](#display).
+
 ### Full screen
 
 The `full_screen` is represented as a boolean, defaults to `false`.
@@ -617,6 +619,13 @@ display
   :build(finder_size)
 ```
 
+It is also possible to define a [layout function](#layout-function) using one of the instance methods:
+
+- `finder_layout`
+  > `display.vertical(...):finder_layout()`
+- `ui_layout`
+  > `display.vertical(...):ui_layout()`
+  
 ### Microscope Finder
 
 The Microscope Finder instance exposes three components:

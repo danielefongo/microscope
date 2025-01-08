@@ -103,4 +103,17 @@ describe("display", function()
       end)
     end)
   end)
+
+  it("as layout", function()
+    local opts = { ui_size = ui_size, finder_size = { width = 10, height = 10 } }
+
+    local layout_spec = display.vertical({
+      display.horizontal({
+        display.input(),
+      }),
+    })
+
+    assert.are.same(layout_spec:ui_layout()(opts).input, helpers.layout(100, 100, 1, 1))
+    assert.are.same(layout_spec:finder_layout()(opts).input, helpers.layout(10, 10, 46, 46))
+  end)
 end)
