@@ -345,6 +345,11 @@ local spinner = {
 
 ## Builtins
 
+All the builtin modules can be accessed using one of the following methods:
+
+- `require("microscope.builtin.MODULE")`
+- `require("microscope').builtin.MODULE`
+
 ### Lenses
 
 Microscope exposes a list of lens specs in `microscope.builtin.lenses`:
@@ -389,6 +394,11 @@ Microscope exposes a list of layouts in `microscope.builtin.layouts`:
 - `default`
 
 ## API
+
+All the api modules can be accessed using one of the following methods:
+
+- `require("microscope.api.MODULE")`
+- `require("microscope').api.MODULE`
 
 ### Lens
 

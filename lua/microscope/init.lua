@@ -3,6 +3,8 @@ local instance = require("microscope.instance")
 local microscope = {}
 microscope.opts = {}
 microscope.finders = {}
+microscope.api = require("microscope.api")
+microscope.builtin = require("microscope.builtin")
 microscope.__index = microscope
 
 function microscope:__call(opts)
