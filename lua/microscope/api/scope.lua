@@ -9,10 +9,7 @@ function scope:stop()
     self.idle:stop()
     self.lens:stop()
 
-    local flushed = ""
-    while flushed == "" do
-      flushed = self.lens:read()
-    end
+    self.idle = nil
   end
 end
 

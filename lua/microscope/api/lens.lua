@@ -34,10 +34,6 @@ function lens:input_read_iter(to_array)
 end
 
 function lens:read()
-  if self.stopped then
-    self:input_read(false)
-  end
-
   if not is_alive(self.coroutine) then
     self.coroutine = nil
     return
@@ -52,7 +48,7 @@ end
 
 function lens:write(data)
   if self.stopped then
-    return ""
+    return
   end
   if type(data) == "string" then
     coroutine.yield(data)
@@ -62,6 +58,11 @@ function lens:write(data)
 end
 
 function lens:stop()
+  for _, cmd in pairs(self.cmds) do
+    cmd:close(true, true)
+  end
+  self.cmds = {}
+
   for _, input in pairs(self.inputs) do
     input:stop()
   end
@@ -80,10 +81,9 @@ end
 
 function lens:consume(cmd)
   for shell_out in cmd:get_iter() do
-    if self.stopped then
-      cmd:close()
+    if not self.stopped then
+      self:write(shell_out)
     end
-    self:write(shell_out)
   end
   cmd:close(true)
 end
@@ -92,11 +92,10 @@ function lens:collect(cmd, to_array)
   local outputs = ""
 
   for shell_out in cmd:get_iter() do
-    if self.stopped then
-      cmd:close()
+    if not self.stopped then
+      outputs = outputs .. shell_out
+      self:write("")
     end
-    outputs = outputs .. shell_out
-    self:write("")
   end
 
   if to_array then
@@ -134,9 +133,11 @@ function lens:create_flow()
     end,
     cmd = command,
     consume = function(cmd)
+      self.cmds[#self.cmds + 1] = cmd
       self:consume(cmd)
     end,
     collect = function(cmd, to_array)
+      self.cmds[#self.cmds + 1] = cmd
       return self:collect(cmd, to_array)
     end,
   }
@@ -145,6 +146,7 @@ end
 function lens.new(opts)
   local l = setmetatable({}, lens)
 
+  l.cmds = {}
   l.inputs = {}
   l.defaults = {}
   local inputs_specs = opts.inputs
