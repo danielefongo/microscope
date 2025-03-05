@@ -11,8 +11,19 @@ local function split_last_newline(text)
   end
 end
 
+function command:flush_output()
+  if self.chunk_buffer and #self.chunk_buffer > 0 then
+    local chunk = table.concat(self.chunk_buffer)
+    self.chunk_buffer = {}
+    table.insert(self.output, chunk)
+  end
+end
+
 function command:close(flushed)
   self.stopped = true
+
+  self:flush_output()
+
   if self.input then
     self.input:close(flushed)
   end
@@ -67,7 +78,7 @@ function command:spawn(generate_output)
         end
 
         if generate_output then
-          self.output = self.output .. out
+          table.insert(self.output, out)
         end
         self.output_stream:write(out)
       else
@@ -91,22 +102,34 @@ function command:read_start(generate_output)
     self.input:read_start(self.iterator ~= nil)
   end
 
+  self.chunk_buffer = {}
+
   uv.read_start(self.output_stream, function(_, data)
     if data and generate_output then
-      self.output = self.output .. data
+      table.insert(self.chunk_buffer, data)
+      if #self.chunk_buffer >= 10 then
+        self:flush_output()
+      end
     end
   end)
 end
 
 function command:get_consumer()
   return function()
-    if self.handle and self.handle:is_active() and not self.output:find("\n") then
+    self:flush_output()
+
+    local output_string = table.concat(self.output, "")
+    if self.handle and self.handle:is_active() and not output_string:find("\n") then
       return ""
     end
 
     local result
-    if self.handle and self.handle:is_active() or self.output ~= "" then
-      result, self.output = split_last_newline(self.output)
+    if self.handle and self.handle:is_active() or output_string ~= "" then
+      result, output_string = split_last_newline(output_string)
+      self.output = {}
+      if output_string ~= "" then
+        table.insert(self.output, output_string)
+      end
       return result
     end
 
@@ -129,7 +152,7 @@ local function command_new(opts, instance)
     self.input_stream = self.input.output_stream
   end
   self.output_stream = uv.new_pipe(false)
-  self.output = ""
+  self.output = {}
 
   self.command = opts.cmd
   self.args = opts.args or {}
