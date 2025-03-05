@@ -39,9 +39,13 @@ end
 
 function finder:close_with_err(error_data)
   if error_data.critical then
-    self:close()
+    vim.defer_fn(function()
+      self:close()
+      error.show(error_data)
+    end, 100)
+  else
+    error.show(error_data)
   end
-  error.show(error_data)
 end
 
 function finder:open(data)
