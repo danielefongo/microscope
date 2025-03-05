@@ -3,11 +3,12 @@ local uv = vim.loop
 command.__index = command
 
 local function split_last_newline(text)
-  local idx = text:reverse():find("\n")
-  if idx == nil or idx == 1 then
+  local before, after = text:match("^(.*\n)(.*)$")
+  if before then
+    return before, after
+  else
     return text, ""
   end
-  return text:sub(1, -idx), text:sub(1 - idx)
 end
 
 function command:close(flushed)
