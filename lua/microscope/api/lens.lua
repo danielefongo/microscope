@@ -61,7 +61,7 @@ function lens:stop()
   for _, cmd in pairs(self.cmds) do
     cmd:close(true, true)
   end
-  self.cmds = {}
+  self.cmds = setmetatable({}, { __mode = "v" })
 
   for _, input in pairs(self.inputs) do
     input:stop()
@@ -146,7 +146,7 @@ end
 function lens.new(opts)
   local l = setmetatable({}, lens)
 
-  l.cmds = {}
+  l.cmds = setmetatable({}, { __mode = "v" })
   l.inputs = {}
   l.defaults = {}
   local inputs_specs = opts.inputs

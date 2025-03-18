@@ -5,12 +5,23 @@ local scope = {}
 scope.__index = scope
 
 function scope:stop()
+  if self.stopped then
+    return
+  end
+  self.stopped = true
+
   if self.idle then
     self.idle:stop()
     self.lens:stop()
-
+    pcall(function()
+      vim.wait(150, function()
+        return not vim.loop.is_active(self.idle)
+      end, 5)
+    end)
     self.idle = nil
   end
+
+  self.lines = nil
 end
 
 function scope:search(request, args)
@@ -18,6 +29,7 @@ function scope:search(request, args)
   self.request = request
 
   self.lens:feed(request)
+  self.stopped = false
 
   local new_args, defaults = self.lens:set_args(args)
   if not new_args then
@@ -30,7 +42,7 @@ function scope:search(request, args)
     )
   end
 
-  local lines = {}
+  self.lines = setmetatable({}, { __mode = "v" })
 
   self.idle = uv.new_idle()
   self.idle:start(function()
@@ -38,18 +50,16 @@ function scope:search(request, args)
 
     if type(text) == "string" and text ~= "" then
       for line in vim.gsplit(text, "\n", { plain = true, trimempty = true }) do
-        table.insert(lines, line)
+        table.insert(self.lines, line)
       end
     end
 
     if text == nil then
-      self.lens:stop()
-
+      local lines = vim.deepcopy(self.lines)
+      self:stop()
       vim.schedule(function()
         self.callback(lines, request)
       end)
-
-      self.idle:stop()
     end
   end)
 end

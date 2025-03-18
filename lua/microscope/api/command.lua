@@ -14,7 +14,7 @@ end
 function command:flush_output()
   if self.chunk_buffer and #self.chunk_buffer > 0 then
     local chunk = table.concat(self.chunk_buffer)
-    self.chunk_buffer = {}
+    self.chunk_buffer = setmetatable({}, { __mode = "v" })
     table.insert(self.output, chunk)
   end
 end
@@ -46,6 +46,9 @@ function command:close(flushed)
   else
     self.handle:stop()
   end
+
+  self.chunk_buffer = setmetatable({}, { __mode = "v" })
+  self.output = setmetatable({}, { __mode = "v" })
 end
 
 function command:spawn(generate_output)
@@ -102,7 +105,8 @@ function command:read_start(generate_output)
     self.input:read_start(self.iterator ~= nil)
   end
 
-  self.chunk_buffer = {}
+  self.chunk_buffer = setmetatable({}, { __mode = "v" })
+  self.output = setmetatable({}, { __mode = "v" })
 
   uv.read_start(self.output_stream, function(_, data)
     if data and generate_output then
@@ -152,7 +156,6 @@ local function command_new(opts, instance)
     self.input_stream = self.input.output_stream
   end
   self.output_stream = uv.new_pipe(false)
-  self.output = {}
 
   self.command = opts.cmd
   self.args = opts.args or {}

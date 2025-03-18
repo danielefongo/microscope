@@ -100,9 +100,12 @@ end
 
 local function on_results_retrieved(self, list)
   stop_spinner(self)
-  self.results = list
+  self.results = setmetatable({}, { __mode = "v" })
+  for _, v in ipairs(list) do
+    table.insert(self.results, v)
+  end
 
-  self:write(list)
+  self:write(self.results)
   self:set_cursor({ 1, 0 })
 end
 
@@ -185,7 +188,7 @@ function results:close()
   stop_spinner(self)
   self.data = {}
   self.selected_data = {}
-  self.results = {}
+  self.results = setmetatable({}, { __mode = "v" })
   self.request = nil
   window.close(self)
 end
