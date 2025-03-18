@@ -19,11 +19,15 @@ function window:set_win_opt(key, value)
 end
 
 function window:get_buf_opt(key)
-  return vim.api.nvim_buf_get_option(self.buf, key)
+  if self.buf then
+    return vim.api.nvim_buf_get_option(self.buf, key)
+  end
 end
 
 function window:set_buf_opt(key, value)
-  vim.api.nvim_buf_set_option(self.buf, key, value)
+  if self.buf then
+    vim.api.nvim_buf_set_option(self.buf, key, value)
+  end
 end
 
 function window:get_win()
@@ -67,6 +71,10 @@ function window:clear()
 end
 
 function window:write(lines, from, to)
+  if not self.buf then
+    return
+  end
+
   local is_modifiable = self:get_buf_opt("modifiable")
 
   self:set_buf_opt("modifiable", true)
@@ -77,6 +85,10 @@ function window:write(lines, from, to)
 end
 
 function window:read(from, to)
+  if not self.buf then
+    return
+  end
+
   from = from or 0
   to = to or -1
   return vim.api.nvim_buf_get_lines(self.buf, from, to, true)
@@ -137,8 +149,8 @@ function window:close()
     end)
     vim.api.nvim_buf_delete(self.buf, { force = true })
     self.win = nil
-    self.buf = nil
   end
+  self.buf = nil
 end
 
 function window.new(child, events_instance)

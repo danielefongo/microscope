@@ -71,6 +71,13 @@ describe("window", function()
         "dan",
       })
     end)
+
+    it("do nothing if already closed", function()
+      custom_window:close()
+      custom_window:write({ "any" })
+
+      assert.are.same(custom_window:read(), nil)
+    end)
   end)
 
   it("clear", function()
