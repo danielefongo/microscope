@@ -109,4 +109,17 @@ describe("highlight", function()
       { color = color.color2, from = 2, to = 2 },
     })
   end)
+
+  it("hl overrides", function()
+    local hi = highlight.new({}, "abcde")
+    hi:hl_match(color.color1, "(ab)(.*)", 1)
+      :hl_match(color.color2, "(.*)(cde)", 2)
+      :hl_match(color.color3, "(.*)(bcd)(.*)", 2)
+
+    assert.are.same(hi:get_highlights(), {
+      { color = color.color1, from = 1, to = 1 },
+      { color = color.color2, from = 5, to = 5 },
+      { color = color.color3, from = 2, to = 4 },
+    })
+  end)
 end)

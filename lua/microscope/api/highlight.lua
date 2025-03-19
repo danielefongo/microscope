@@ -11,11 +11,45 @@ highlight.color = {
 
 function highlight:hl(color, from, to)
   to = to or from
-  table.insert(self.highlights, {
+
+  local segments = {}
+  local i = 1
+
+  while i <= #self.highlights do
+    local hl = self.highlights[i]
+
+    if from <= hl.to and to >= hl.from then
+      table.remove(self.highlights, i)
+
+      if hl.from < from then
+        table.insert(segments, {
+          from = hl.from,
+          to = from - 1,
+          color = hl.color,
+        })
+      end
+
+      if hl.to > to then
+        table.insert(segments, {
+          from = to + 1,
+          to = hl.to,
+          color = hl.color,
+        })
+      end
+    else
+      i = i + 1
+    end
+  end
+
+  table.insert(segments, {
     from = from,
     to = to,
     color = color,
   })
+
+  for _, segment in ipairs(segments) do
+    table.insert(self.highlights, segment)
+  end
 
   return self
 end
