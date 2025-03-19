@@ -73,6 +73,65 @@ describe("highlight", function()
     end)
   end)
 
+  describe("hl_match_with", function()
+    it("applies no highlights if no match", function()
+      local hi = highlight.new({}, "abc")
+      hi:hl_match_with(function()
+        return { [1] = { { color = color.color1, from = 1, to = 2 } } }
+      end, "(d)(.*)", 1)
+      assert.are.same(hi:get_highlights(), {})
+    end)
+
+    it("applies highlights from function", function()
+      local hi = highlight.new({}, "abc")
+      hi:hl_match_with(function()
+        return { [1] = { { color = color.color1, from = 1, to = 1 } } }
+      end, "(a)(.*)", 1)
+      assert.are.same(hi:get_highlights(), {
+        { color = color.color1, from = 1, to = 1 },
+      })
+    end)
+
+    it("adjusts highlights position based on group position", function()
+      local hi = highlight.new({}, "abc")
+      hi:hl_match_with(function()
+        return { [1] = { { color = color.color1, from = 1, to = 1 } } }
+      end, "(a)(bc)", 2)
+      assert.are.same(hi:get_highlights(), {
+        { color = color.color1, from = 2, to = 2 },
+      })
+    end)
+
+    it("applies multiple highlights from function", function()
+      local hi = highlight.new({}, "abcdef")
+      hi:hl_match_with(function()
+        return {
+          [1] = {
+            { color = color.color1, from = 1, to = 1 },
+            { color = color.color2, from = 2, to = 3 },
+          },
+        }
+      end, "(abc)(def)", 2)
+      assert.are.same(hi:get_highlights(), {
+        { color = color.color1, from = 4, to = 4 },
+        { color = color.color2, from = 5, to = 6 },
+      })
+    end)
+
+    it("combines with other highlight methods", function()
+      local hi = highlight.new({}, "abcdefg")
+      hi:hl(color.color3, 1, 2):hl_match(color.color2, "(abc)(def)(g)", 2):hl_match_with(function()
+        return { [1] = { { color = color.color1, from = 2, to = 3 } } }
+      end, "(ab)(cd)(efg)", 3)
+
+      assert.are.same(hi:get_highlights(), {
+        { color = color.color3, from = 1, to = 2 },
+        { color = color.color2, from = 4, to = 5 },
+        { color = color.color1, from = 6, to = 7 },
+      })
+    end)
+  end)
+
   describe("hl", function()
     it("find by range", function()
       assert_hl("abc", {

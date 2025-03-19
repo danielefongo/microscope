@@ -77,6 +77,34 @@ function highlight:hl_match(color, pattern, group)
   return self:hl(color, count, count + #tuple[group] - 1)
 end
 
+function highlight:hl_match_with(highlight_fun, pattern, group)
+  local tuple = { string.match(self.text, pattern) }
+
+  if type(tuple[group]) ~= "string" then
+    return self
+  end
+
+  local start_pos = 0
+  for i = 1, group - 1, 1 do
+    if tuple[i] then
+      start_pos = start_pos + #tuple[i]
+    end
+  end
+
+  local text_to_highlight = tuple[group]
+  local highlights = highlight_fun(text_to_highlight)
+  if highlights then
+    for row, row_highlights in pairs(highlights) do
+      for _, hl in ipairs(row_highlights) do
+        local from = start_pos + hl.from
+        local to = start_pos + hl.to
+        self:hl(hl.color, from, to)
+      end
+    end
+  end
+  return self
+end
+
 function highlight:get_highlights()
   return self.highlights
 end
