@@ -46,7 +46,7 @@ function input:close()
 end
 
 function input.new(events_instance)
-  local v = window.new(input, events_instance)
+  local v = window.new(input, events_instance, "Input")
 
   v.prompt = input.default_prompt
   v.events:on(v, events.event.new_opts, on_new_opts)

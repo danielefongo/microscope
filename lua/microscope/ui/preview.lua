@@ -63,7 +63,7 @@ function preview:close()
 end
 
 function preview.new(events_instance)
-  local v = window.new(preview, events_instance)
+  local v = window.new(preview, events_instance, "Preview")
 
   v.preview_fun = function() end
   v:set_buf_opt("modifiable", false)

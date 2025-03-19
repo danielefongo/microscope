@@ -1,9 +1,28 @@
 local events = require("microscope.events")
 local window = {}
-window.namespace = vim.api.nvim_create_namespace("MicroscopeHighlight")
 
+function window:clear_buf_hls()
+  if not self.buf then
+    return
+  end
+  vim.api.nvim_buf_clear_namespace(self.buf, self.namespace, 0, -1)
+end
+
+function window:set_buf_hls(highlights)
+  if not self.buf then
+    return
+  end
+  for row, row_highlights in pairs(highlights) do
+    for _, hl in ipairs(row_highlights) do
+      local line = row - 1
+      vim.api.nvim_buf_add_highlight(self.buf, self.namespace, hl.color, line, hl.from - 1, hl.to)
+    end
+  end
+end
+
+--- @deprecated
 function window:set_buf_hl(color, line, from, to)
-  vim.api.nvim_buf_add_highlight(self.buf, window.namespace, color, line - 1, from - 1, to)
+  self:set_buf_hls({ [line] = { { color = color, from = from, to = to } } })
 end
 
 function window:get_win_opt(key)
@@ -153,9 +172,10 @@ function window:close()
   self.buf = nil
 end
 
-function window.new(child, events_instance)
+function window.new(child, events_instance, name)
   local w = setmetatable(child or {}, { __index = window })
 
+  w.namespace = vim.api.nvim_create_namespace("MicroscopeHighlight" .. (name or "Window"))
   w.events = events_instance
   w:new_buf()
   w:set_buf_opt("bufhidden", "hide")

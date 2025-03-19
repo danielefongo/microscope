@@ -1,18 +1,7 @@
-local window = require("microscope.ui.window")
 local highlight = require("microscope.api.highlight")
 local results = require("microscope.ui.results")
 local events = require("microscope.events")
 local helpers = require("tests.helpers")
-
-local function get_highlight_details(buf, highlight_number)
-  local extmark = vim.api.nvim_buf_get_extmark_by_id(buf, window.namespace, highlight_number, { details = true })
-  return {
-    line = extmark[1] + 1,
-    from = extmark[2] + 1,
-    to = extmark[3].end_col,
-    color = extmark[3].hl_group,
-  }
-end
 
 describe("results", function()
   local results_window
@@ -229,14 +218,14 @@ describe("results", function()
       my_events:fire(events.event.results_retrieved, { "result1", "result2" })
       helpers.wait(10)
 
-      assert.are.same(get_highlight_details(results_window.buf, 1), {
+      assert.are.same(helpers.get_highlight_details(results_window, 1), {
         line = 1,
         from = 1,
         to = 1,
         color = highlight.color.color1,
       })
 
-      assert.are.same(get_highlight_details(results_window.buf, 2), {
+      assert.are.same(helpers.get_highlight_details(results_window, 2), {
         line = 2,
         from = 1,
         to = 1,

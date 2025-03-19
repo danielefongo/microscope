@@ -139,13 +139,13 @@ function results:select()
       self:write({ "> " .. element.text }, row - 1, row)
       self.selected_data[row] = element
       for _, hl in pairs(self.data[row].highlights or {}) do
-        self:set_buf_hl(hl.color, row, hl.from + 2, hl.to + 2)
+        self:set_buf_hls({ [row] = { { color = hl.color, from = hl.from + 2, to = hl.to + 2 } } })
       end
     else
       self:write({ element.text }, row - 1, row)
       self.selected_data[row] = nil
       for _, hl in pairs(self.data[row].highlights or {}) do
-        self:set_buf_hl(hl.color, row, hl.from, hl.to)
+        self:set_buf_hls({ [row] = { hl } })
       end
     end
   end
@@ -165,7 +165,7 @@ function results:parse()
       self.data[idx] = self.parser(self.results[idx], self.request)
       self:write({ self.data[idx].text }, idx - 1, idx)
       for _, hl in pairs(self.data[idx].highlights or {}) do
-        self:set_buf_hl(hl.color, idx, hl.from, hl.to)
+        self:set_buf_hls({ [idx] = { hl } })
       end
     end
   end
@@ -218,7 +218,7 @@ function results:raw_results()
 end
 
 function results.new(events_instance)
-  local v = window.new(results, events_instance)
+  local v = window.new(results, events_instance, "Results")
 
   v.data = {}
   v.selected_data = {}

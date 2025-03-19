@@ -328,4 +328,41 @@ describe("window", function()
       assert.is.Nil(custom_window:get_cursor())
     end)
   end)
+
+  describe("highlights", function()
+    it("sets/clears buffer highlights correctly", function()
+      custom_window:show(helpers.dummy_layout())
+
+      vim.api.nvim_buf_set_lines(custom_window:get_buf(), 0, -1, true, {
+        "hello world",
+        "test highlights",
+      })
+
+      local highlights = {
+        [1] = { { from = 1, to = 5, color = "String" } },
+        [2] = { { from = 1, to = 4, color = "Keyword" }, { from = 6, to = 15, color = "Comment" } },
+      }
+
+      custom_window:set_buf_hls(highlights)
+
+      assert.are.same(helpers.get_highlight_details(custom_window, 1), {
+        line = 1,
+        from = 1,
+        to = 5,
+        color = "String",
+      })
+      assert.are.same(helpers.get_highlight_details(custom_window, 2), {
+        line = 2,
+        from = 1,
+        to = 4,
+        color = "Keyword",
+      })
+      assert.are.same(helpers.get_highlight_details(custom_window, 3), {
+        line = 2,
+        from = 6,
+        to = 15,
+        color = "Comment",
+      })
+    end)
+  end)
 end)

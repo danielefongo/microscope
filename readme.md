@@ -664,7 +664,17 @@ The input window provides the following functions:
 
 The preview window provides the following functions:
 
-- `set_buf_hl(color, line, from, to)`: highlights the buffer.
+- `set_buf_hl(color, line, from, to)`: **DEPRECATED** highlights the buffer.
+- `set_buf_hls(highlights)`: highlights the buffer. `highlights` is a table where keys are line numbers (1-based) and values are arrays of highlight definitions.
+
+  ```lua
+  window:set_buf_hls({
+    [1] = { { from = 1, to = 5, color = "String" } },
+    [2] = { { from = 1, to = 4, color = "Keyword" } }
+  })
+  ```
+
+- `clear_buf_hls()`: resets the highlights of the buffer.
 - `set_win_opt(key, value)`: sets a window option.
 - `get_win_opt(key)`: gets a window option.
 - `set_buf_opt(key, value)`: sets a buffer option.

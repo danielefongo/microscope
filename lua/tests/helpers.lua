@@ -83,6 +83,23 @@ function helpers.wait(duration)
   vim.wait(duration, function() end)
 end
 
+function helpers.get_highlight_details(window, highlight_number)
+  local extmarks = vim.api.nvim_buf_get_extmarks(
+    window:get_buf(),
+    window.namespace,
+    { 0, 0 },
+    { -1, -1 },
+    { details = true }
+  )
+
+  return {
+    line = extmarks[highlight_number][2] + 1,
+    from = extmarks[highlight_number][3] + 1,
+    to = extmarks[highlight_number][4].end_col,
+    color = extmarks[highlight_number][4].hl_group,
+  }
+end
+
 function helpers.dummy_layout()
   return {
     relative = "editor",
