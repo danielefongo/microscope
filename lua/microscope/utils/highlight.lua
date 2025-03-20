@@ -1,3 +1,4 @@
+--- @deprecated
 return function(path, buf)
   local ft = vim.filetype.match({ filename = path })
 
