@@ -2,3 +2,4 @@
 .luarc.json
 plenary.nvim
 luacov*
+.direnv

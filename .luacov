@@ -1,6 +1,7 @@
 return {
   include = { "lua/microscope/.+$" },
   exclude = {
+    ".direnv/",
     "lua/tests/.+$",
     "lua/microscope/utils/highlight",
   },
