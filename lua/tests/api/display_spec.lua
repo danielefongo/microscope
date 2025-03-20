@@ -115,5 +115,6 @@ describe("display", function()
 
     assert.are.same(layout_spec:ui_layout()(opts).input, helpers.layout(100, 100, 1, 1))
     assert.are.same(layout_spec:finder_layout()(opts).input, helpers.layout(10, 10, 46, 46))
+    assert.are.same(layout_spec:custom_layout({ width = 6, height = 6 })(opts).input, helpers.layout(6, 6, 48, 48))
   end)
 end)

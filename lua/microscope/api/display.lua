@@ -119,6 +119,12 @@ function display:finder_layout()
   end
 end
 
+function display:custom_layout(size)
+  return function(opts)
+    return self:build(size)
+  end
+end
+
 function display.vertical(elements, size)
   return setmetatable({
     type = "box",

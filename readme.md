@@ -636,6 +636,8 @@ It is also possible to define a [layout function](#layout-function) using one of
   > `display.vertical(...):finder_layout()`
 - `ui_layout`
   > `display.vertical(...):ui_layout()`
+- `custom_layout`
+  > `display.vertical(...):custom_layout(size)`
   
 ### Microscope Finder
 
