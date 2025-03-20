@@ -94,7 +94,7 @@ function highlight:hl_match_with(highlight_fun, pattern, group)
   local text_to_highlight = tuple[group]
   local highlights = highlight_fun(text_to_highlight)
   if highlights then
-    for row, row_highlights in pairs(highlights) do
+    for _, row_highlights in pairs(highlights) do
       for _, hl in ipairs(row_highlights) do
         local from = start_pos + hl.from
         local to = start_pos + hl.to

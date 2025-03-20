@@ -120,7 +120,7 @@ function display:finder_layout()
 end
 
 function display:custom_layout(size)
-  return function(opts)
+  return function(_)
     return self:build(size)
   end
 end
