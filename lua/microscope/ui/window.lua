@@ -20,11 +20,6 @@ function window:set_buf_hls(highlights)
   end
 end
 
---- @deprecated
-function window:set_buf_hl(color, line, from, to)
-  self:set_buf_hls({ [line] = { { color = color, from = from, to = to } } })
-end
-
 function window:get_win_opt(key)
   if self.win then
     return vim.api.nvim_win_get_option(self.win, key)
