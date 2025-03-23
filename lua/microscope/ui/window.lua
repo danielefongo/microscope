@@ -50,6 +50,7 @@ end
 
 function window:new_buf()
   self.buf = vim.api.nvim_create_buf(false, true)
+  pcall(vim.api.nvim_buf_set_option, self.buf, "filetype", "Microscope" .. self.name)
   self.buf = self.buf
 end
 
@@ -170,7 +171,8 @@ end
 function window.new(child, events_instance, name)
   local w = setmetatable(child or {}, { __index = window })
 
-  w.namespace = vim.api.nvim_create_namespace("MicroscopeHighlight" .. (name or "Window"))
+  w.name = name or "Window"
+  w.namespace = vim.api.nvim_create_namespace("MicroscopeHighlight" .. w.name)
   w.events = events_instance
   w:new_buf()
   w:set_buf_opt("bufhidden", "hide")
